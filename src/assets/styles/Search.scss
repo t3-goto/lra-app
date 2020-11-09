@@ -1,0 +1,31 @@
+.search {
+  // background: linear-gradient(#2d2d2d70, #1a1a1a);
+  background: #fff;
+  height: 100%;
+  text-align: center;
+  width: 100%;
+}
+
+.search-header {
+  position: fixed;
+  top: 0%;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.search-restaurant-list {
+  position: absolute;
+  top: 8%;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.search-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}

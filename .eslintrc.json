@@ -1,0 +1,120 @@
+{
+  // ________________________________________________
+  // 環境設定（静的検証の前提条件）
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  },
+  // ________________________________________________
+  // 継承設定
+  "extends": [
+    // Airbnbのルールセット
+    "airbnb",
+    // TypeScriptの型情報不要の推奨ルールセット
+    "plugin:@typescript-eslint/recommended",
+    // Prettierの推奨ルールセット
+    "plugin:prettier/recommended",
+    "prettier/@typescript-eslint",
+    "prettier/react"
+  ],
+  // ________________________________________________
+  // Pluginの設定
+  "plugins": ["prettier", "@typescript-eslint"],
+  // ________________________________________________
+  // Parserの設定
+  "parser": "@typescript-eslint/parser",
+  // ________________________________________________
+  // ParserOptionの設定
+  "parserOptions": {
+    // JSXの有効化
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "useJSXTextNode": true,
+    // ES2016の構文の有効化
+    "ecmaVersion": 2015,
+    // 型情報ファイルの有効化
+    "projext": "./tsconfig.json"
+  },
+  // ________________________________________________
+  // settingsの設定
+  "settings": {
+    "import/resolver": {
+      //  インポート時の拡張子の省略の有効化（js/jsx/json/ts/tsx）
+      "node": {
+        "paths": ["src"],
+        "extensions": [".js", ".jsx", ".json", ".ts", ".tsx"]
+      }
+      // Webpackの設定有効化（インポートの解決を可能とする）NODE_ENVを上手く設定することができず。
+      // トライする場合は、設定してyarn lintが正しく通る確認すること。
+      // "webpack": {
+      //   "config": "./config/webpack.config.js",
+      //   "production" : true
+      // }
+    }
+  },
+  // ________________________________________________
+  // ルール定義
+  "rules": {
+    //  インポート時の拡張子の省略の有効化（js/jsx/json/ts/tsx）
+    "import/extensions": [
+      "error",
+      {
+        "js": "never",
+        "jsx:": "never",
+        "json": "always",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ],
+    // JSX/TSXの拡張子の有効化
+    "react/jsx-filename-extension": [
+      "error",
+      {
+        "extensions": [".jsx", ".tsx"]
+      }
+    ],
+    // console.logを利用可能とする
+    "no-console": "off",
+    // no-unused-varsの無効化（未利用の引数を許可する）
+    "@typescript-eslint/no-unused-vars": "off",
+    // explicit-module-boundary-typesの無効化（戻り値の型指定を強制しない）
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    // react/prop-typesの無効化（TypeScript側で型チェックするため不要）
+    "react/prop-types": "off",
+    // react/jsx-props-no-spreadingの無効化（propsのスプレッドを許可する）
+    "react/jsx-props-no-spreading": "off",
+    // devDependenciesのimportを許可する
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": true,
+        "optionalDependencies": false
+      }
+    ]
+  },
+  // ________________________________________________
+  // ルールの上書き設定（webpack.*.js,script）
+  "overrides": [
+    {
+      "files": ["webpack.*.js", "./scripts/*", "./config/*"],
+      "rules": {
+        // no-unused-varsの無効化（未利用変数を定義可能とする）
+        "@typescript-eslint/no-unused-vars": "off",
+        // no-var-requiresの無効化（requireを利用可能とする）
+        "@typescript-eslint/no-var-requires": "off",
+        // no-extraneous-dependenciesの無効化（組み込みライブラリのインポートを可能とする）
+        "import/no-extraneous-dependencies": "off",
+        // no-dynamic-requireの無効か（動的インポートを可能とする）
+        "import/no-dynamic-require": "off",
+        "no-shadow": "off",
+        "global-require": "off",
+        "no-param-reassign": "off",
+        "no-nested-ternary": "off",
+        "consistent-return": "off",
+        "no-use-before-define": "off"
+      }
+    }
+  ]
+}
