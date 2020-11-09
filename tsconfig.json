@@ -1,0 +1,35 @@
+{
+  // _________________________________________________
+  // conpilerOptionsの設定
+  "compilerOptions": {
+    // target:トランスパイル後のJavaScriptのバージョンの設定（es5に変換する）
+    "target": "es5",
+    // module:トランスパイル後のJavaScriptのモジュール形式（ESModule※EXNextに変換する）
+    "module": "esnext",
+    // lib:トランスパイル時のincludeライブラリ。（TypeScirptでESNext,dom,dom.iterableの機能を利用可能とする）
+    "lib": ["esnext", "dom", "dom.iterable"],
+    // jsx:React向けのjsx有効化
+    "jsx": "react",
+    // sourceMap:ソースマップ出力の有効化
+    "sourceMap": true,
+    // dist:出力先ディレクトリの設定
+    "outDir": "./dist/",
+    // strict:型定義のチェック厳格化
+    "strict": true,
+    // moduleResolution:モジュールシステムの解決方法（node,npmを利用してモジュール解決）
+    "moduleResolution": "node",
+    // esModuleInterop:CommonJSとESModuleの相互運用性を有効化
+    "esModuleInterop": true,
+    // forceConsistentCasingInFileNames:ファイル参照時の大文字小文字区別の有効化
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": "",
+    // resolveJsonModule:JSON形式のモジュールを有効化
+    "resolveJsonModule": true
+  },
+  // _________________________________________________
+  // includeの設定
+  "include": ["src/**/*"],
+  // _________________________________________________
+  // excludeの設定
+  "exclude": ["node_modules"]
+}
