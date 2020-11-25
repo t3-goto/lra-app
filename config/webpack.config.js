@@ -22,6 +22,7 @@ const typescriptFormatter = require('react-dev-utils/typescriptFormatter');
 const getCacheIdentifier = require('react-dev-utils/getCacheIdentifier');
 const postcssNormalize = require('postcss-normalize');
 const StyleLintPlugin = require('stylelint-webpack-plugin');
+const CompressionPlugin = require('compression-webpack-plugin');
 const paths = require('./paths');
 const modules = require('./modules');
 const getClientEnvironment = require('./env');
@@ -573,6 +574,15 @@ module.exports = (webpackEnv) => {
       // _______________________________________________
       // StyleLintPluginの有効化（StyleLint連携）
       new StyleLintPlugin({}),
+      // _______________________________________________
+      // CompressionPluginの有効化（gzip圧縮）
+      isEnvProduction &&
+        new CompressionPlugin({
+          algorithm: 'gzip',
+          test: /\.js$|\.css$|\.html$/,
+          threshold: 10240,
+          minRatio: 0.8,
+        }),
     ].filter(Boolean),
 
     // _______________________________________________
