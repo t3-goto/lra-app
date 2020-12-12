@@ -24,7 +24,9 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": "",
     // resolveJsonModule:JSON形式のモジュールを有効化
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    // 型定義ファイルのチェックスキップを有効化
+    "skipLibCheck": true
   },
   // _________________________________________________
   // includeの設定

@@ -85,6 +85,7 @@
     "react/prop-types": "off",
     // react/jsx-props-no-spreadingの無効化（propsのスプレッドを許可する）
     "react/jsx-props-no-spreading": "off",
+    "func-names": "off",
     // devDependenciesのimportを許可する
     "import/no-extraneous-dependencies": [
       "error",
