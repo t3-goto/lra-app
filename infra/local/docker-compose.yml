@@ -1,17 +1,54 @@
 version: "3"
 
+volumes:
+    node_modules:
+
 services:
-  mysql:
-    image: mysql:5
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: test
-    ports:
-      - "3306:3306"
-  redis:
-    image: "redis:latest"
-    ports:
-      - "6379:6379"
-    # volumes:
-      # - "./data/redis:/data"
+    frontend-server:
+        image: node:12.16.1
+        command: bash -c "yarn install && yarn start" # yarn installは環境が変わるため必須。
+        volumes:
+            - ./../../apl/fe:/front
+            - node_modules:/front/node_modules # node_modulesはホストと共有しない（共有するとnpm install はうまくいかない）
+        working_dir: /front
+        ports:
+            - "8001:3000"
+        stdin_open: true # webpack-dev-serverの即終了回避のため
+        depends_on:
+            - bff-server
+        links:
+            - bff-server
+        environment:
+            - HTTP_PROXY=bff-http://bff-server:9001
+    bff-server:
+        image: node:12.16.1
+        command: bash -c "yarn install && yarn start:dev" # yarn installは環境が変わるため必須。
+        volumes:
+            - ./../../apl/bff:/bff
+            - node_modules:/bff/node_modules # node_modulesはホストと共有しない（共有するとnpm install はうまくいかない）
+        working_dir: /bff
+        ports:
+            - "9001:9001"
+        stdin_open: true 
+        depends_on:
+            - db-server
+            - cache-server
+        links:
+            - db-server
+            - cache-server
+        environment:
+            - NODE_ENV=development
+            - DB_HOST=db-server
+            - REDIS_HOST=cache-server
+    db-server:
+        image: mysql:5
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: test
+        ports:
+            - "3306:3306"
+    cache-server:
+        image: "redis:latest"
+        ports:
+            - "6379:6379"

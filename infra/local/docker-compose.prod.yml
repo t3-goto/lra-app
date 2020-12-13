@@ -1,0 +1,57 @@
+version: '3'
+
+services:
+    frontend-server:
+        build:
+            dockerfile: ./docker/Dockerfile
+            context: ../../apl/fe/
+        ports:
+            - "8001:8001"
+        depends_on:
+            - bff-server
+        links:
+            - bff-server
+    bff-server:
+        build:
+            dockerfile: ./docker/Dockerfile
+            context: ../../apl/bff/
+        ports:
+            - "9001:9001"
+        depends_on:
+            - db-server
+            - cache-server
+        links:
+            - db-server
+            - cache-server
+        environment:
+            - NODE_ENV=production
+            - PORT=9001
+            - MICROSERVICE_TCP_PORT=9002
+            - MICROSERVICE_TCP_RETRY_ATTEMPTS=5
+            - MICROSERVICE_TCP_DELAY=3000
+            - DB_TYPE=mysql
+            - DB_HOST=db-server
+            - DB_PORT=3306
+            - DB_USERNAME=root
+            - DB_PASSWORD=root
+            - DB_DATABASE=test
+            - REDIS_HOST=cache-server
+            - REDIS_PORT=6379
+            - REDIS_TTL=1000
+            - HTTP_TIMEOUT=5000
+            - HTTP_MAX_REDIRECTS=5
+            - HTTP_URL_TEST=https://httpbin.org/get
+            - JWT_SECRET=rxPhglGJWPlOW596
+            - JWT_EXPIRES_IN=3600
+    db-server:
+        image: mysql:5
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: test
+        ports:
+            - "3306:3306"
+    cache-server:
+        image: "redis:latest"
+        ports:
+            - "6379:6379"

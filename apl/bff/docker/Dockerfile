@@ -1,5 +1,5 @@
 # base image
-FROM node:latest
+FROM node:12.16.1
 
 # make directory
 WORKDIR /usr/src/app
@@ -10,12 +10,15 @@ COPY package*.json ./
 # install modules
 RUN npm install --only=production
 
+# copy config files
+COPY config ./config
+
 # copy dist files
-COPY dist .
+COPY dist ./dist
 
 # expose
 EXPOSE 9001
 
 # execute
-CMD ["node", "main.js"]
+CMD ["node", "./dist/main.js"]
 
