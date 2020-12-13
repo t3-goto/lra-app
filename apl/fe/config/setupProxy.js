@@ -4,7 +4,7 @@ module.exports = function (app) {
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://bff-server:9001',
+      target: process.env.HTTP_PROXY,
       changeOrigin: true,
     })
   );

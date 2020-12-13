@@ -27,19 +27,21 @@ export class ConfigService {
       options.folder,
       filePath
     );
-    this.envConfig = dotenv.parse(fs.readFileSync(envFile));
+    if (fs.existsSync(envFile)) {
+      this.envConfig = dotenv.parse(fs.readFileSync(envFile));
+    }
   }
 
   public get(key: string): string {
-    return this.envConfig[key];
+    return process.env[key] || this.envConfig[key];
   }
 
   public get isDevelopment(): boolean {
-    return this.envConfig['NODE_ENV'] === 'development';
+    return this.get('NODE_ENV') === 'development';
   }
 
   public get isProduction(): boolean {
-    return this.envConfig['NODE_ENV'] === 'production';
+    return this.get('NODE_ENV') === 'production';
   }
 
   public getNumber(key: string): number {
