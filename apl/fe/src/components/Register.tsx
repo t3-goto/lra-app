@@ -24,9 +24,27 @@ const Component: React.FC<IProps> = () => {
   return (
     <div className='register'>
       <AuthTitleLabel className='register-auth-title-label' />
-      <NameInputText className='register-name-input-text' />
-      <EmailInputText className='register-email-input-text' />
-      <PasswordInputText className='register-password-input-text' />
+      <NameInputText
+        className='register-name-input-text'
+        value=''
+        onChange={() => {
+          console.log('dd');
+        }}
+      />
+      <EmailInputText
+        className='register-email-input-text'
+        value=''
+        onChange={() => {
+          console.log('dd');
+        }}
+      />
+      <PasswordInputText
+        className='register-password-input-text'
+        value=''
+        onChange={() => {
+          console.log('dd');
+        }}
+      />
       <ConfirmPasswordInputText className='register-confirm-password-input-text' />
       <RegisterButton className='register-register-button' />
       <RegisterIconButtonGroup className='register-register-icon-button-group' />

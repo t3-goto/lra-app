@@ -32,6 +32,7 @@ dotenvFiles.forEach((dotenvFile) => {
       })
     );
   }
+  console.log(fs.existsSync(dotenvFile));
 });
 
 // ______________________________________________
@@ -45,7 +46,8 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
 
 // ______________________________________________
 // Define public method to set and get environment variables.
-const REACT_APP = /^REACT_APP_/i;
+// const REACT_APP = /^REACT_APP_/i;
+const REACT_APP = /^/i;
 const getClientEnvironment = (publicUrl) => {
   // Create raw environment variables.
   const raw = Object.keys(process.env)

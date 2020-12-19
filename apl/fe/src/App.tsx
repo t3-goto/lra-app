@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Switch, Route } from 'react-router';
 import Div100vh from 'react-div-100vh';
 import './assets/styles/App.scss';
-import Login from './components/Login';
+import Login from './containers/Login';
 import Register from './components/Register';
 import Search from './components/Search';
 
