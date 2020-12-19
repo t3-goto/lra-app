@@ -2,15 +2,14 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
-import { configureStore, history } from './stores';
+import { createBrowserHistory } from 'history';
+import { configureStore } from './configureStore';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './assets/styles/index.scss';
 
-/**
- * Configure the store.
- */
-const store = configureStore();
+const history = createBrowserHistory();
+const store = configureStore(history);
 
 /**
  * Entry Point.

@@ -29,6 +29,8 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  value: string;
+  onChange: any;
 }
 
 /**
@@ -36,10 +38,9 @@ interface IProps {
  */
 const Component: React.FC<IProps> = (props) => {
   const classes = useStyles();
-  const { className } = props;
 
   return (
-    <div className={className}>
+    <div className={props.className}>
       <FormControl className={classes.formControl}>
         <Input
           className={classes.input}
@@ -49,6 +50,10 @@ const Component: React.FC<IProps> = (props) => {
             </InputAdornment>
           }
           placeholder='Email'
+          value={props.value}
+          onChange={(e) => {
+            props.onChange(e.target.value);
+          }}
         />
       </FormControl>
     </div>

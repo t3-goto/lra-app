@@ -40,13 +40,14 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  value: string;
+  onChange: any;
 }
 
 /**
  * Presentational Component.
  */
 const Component: React.FC<IProps> = (props) => {
-  const { className } = props;
   const classes = useStyles();
 
   // const [values, setValues] = React.useState<IState>({
@@ -64,7 +65,7 @@ const Component: React.FC<IProps> = (props) => {
   // };
 
   return (
-    <div className={className}>
+    <div className={props.className}>
       <FormControl className={classes.formControl}>
         <Input
           type='password'
@@ -75,6 +76,10 @@ const Component: React.FC<IProps> = (props) => {
               <Lock />
             </InputAdornment>
           }
+          value={props.value}
+          onChange={(e) => {
+            props.onChange(e.target.value);
+          }}
         />
       </FormControl>
       {/* <FormControl className={classes.formControl}>
