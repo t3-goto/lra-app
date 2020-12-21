@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { createStyles, Theme, makeStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 
 /**
  * Styles.
@@ -25,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  onClick: any;
 }
 
 /**
@@ -35,9 +37,18 @@ const Component: React.FC<IProps> = (props) => {
   const classes = useStyles();
   return (
     <span className={className}>
-      <p className={classes.skipLoginLink}>
-        <span className={classes.link}>Skip</span> Login?
-      </p>
+      <h1 className={classes.skipLoginLink}>
+        <Link
+          to='/search'
+          className={classes.link}
+          onClick={(e) => {
+            props.onClick();
+          }}
+        >
+          Skip
+        </Link>{' '}
+        Login?
+      </h1>
     </span>
   );
 };

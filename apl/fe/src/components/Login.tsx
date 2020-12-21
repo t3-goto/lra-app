@@ -27,7 +27,7 @@ type TProps = IProps & RootState & LoginActions;
 /**
  * Presentational Component.
  */
-const Component: React.FC<TProps> = (props: TProps) => {
+const Component: React.FC<TProps> = (props) => {
   return (
     <div className='login'>
       <AuthTitleLabel className='login-auth-title-label' />
@@ -38,22 +38,28 @@ const Component: React.FC<TProps> = (props: TProps) => {
       /> */}
       <NameInputText
         className='login-name-input-text'
-        value={props.auth.username}
-        onChange={props.updateUsername}
+        value={props.auth.loginInfo.username}
+        onChange={props.updateLoginUsername}
       />
       <PasswordInputText
         className='login-password-input-text'
-        value={props.auth.password}
-        onChange={props.updatePassword}
+        value={props.auth.loginInfo.password}
+        onChange={props.updateLoginPassword}
       />
-      <AuthForgotPasswordLink className='login-auth-forgot-password-link' />
+      {/* <AuthForgotPasswordLink className='login-auth-forgot-password-link' /> */}
+      <AuthSkipLoginLink
+        className='login-auth-skip-login-link'
+        onClick={props.resetLogin}
+      />
       <LoginButton
         className='login-login-button'
         onClick={props.requestLogin}
       />
       <LoginIconButtonGroup className='login-login-icon-button-group' />
-      <AuthCreateNewAccountLink className='login-auth-create-new-account-link' />
-      {/* <AuthSkipLoginLink className='auth-skip-login-link' /> */}
+      <AuthCreateNewAccountLink
+        className='login-auth-create-new-account-link'
+        onClick={props.resetLogin}
+      />
     </div>
   );
 };

@@ -26,6 +26,7 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  onClick: any;
 }
 
 /**
@@ -37,7 +38,13 @@ const Component: React.FC<IProps> = (props) => {
   return (
     <span className={className}>
       <h1 className={classes.forgotPasswordLink}>
-        <Link to='/register' className={classes.link}>
+        <Link
+          to='/register'
+          className={classes.link}
+          onClick={(e) => {
+            props.onClick();
+          }}
+        >
           Create
         </Link>{' '}
         New Account?

@@ -7,7 +7,8 @@ import ConfirmPasswordInputText from './ConfirmPasswordInputText';
 import RegisterButton from './RegisterButton';
 import RegisterIconButtonGroup from './RegisterIconButtonGroup';
 import AuthAlreadyHaveAnAccountLink from './AuthAlreadyHaveAnAccountLink';
-
+import { RootState } from '../reducers';
+import { RegisterActions } from '../containers/Register';
 import '../assets/styles/Register.scss';
 
 /**
@@ -18,37 +19,46 @@ interface IProps {
 }
 
 /**
+ * TProps.
+ */
+type TProps = IProps & RootState & RegisterActions;
+
+/**
  * Presentational Component.
  */
-const Component: React.FC<IProps> = () => {
+const Component: React.FC<TProps> = (props) => {
   return (
     <div className='register'>
       <AuthTitleLabel className='register-auth-title-label' />
       <NameInputText
         className='register-name-input-text'
-        value=''
-        onChange={() => {
-          console.log('dd');
-        }}
+        value={props.auth.registerInfo.username}
+        onChange={props.updateRegisterUsername}
       />
-      <EmailInputText
+      {/* <EmailInputText
         className='register-email-input-text'
-        value=''
-        onChange={() => {
-          console.log('dd');
-        }}
-      />
+        value={props.auth.registerInfo.email}
+        onChange={props.updateRegisterEmail}
+      /> */}
       <PasswordInputText
         className='register-password-input-text'
-        value=''
-        onChange={() => {
-          console.log('dd');
-        }}
+        value={props.auth.registerInfo.password}
+        onChange={props.updateRegisterPassword}
       />
-      <ConfirmPasswordInputText className='register-confirm-password-input-text' />
-      <RegisterButton className='register-register-button' />
+      <ConfirmPasswordInputText
+        className='register-confirm-password-input-text'
+        value={props.auth.registerInfo.passwordConfirm}
+        onChange={props.updateRegisterPasswordConfirm}
+      />
+      <RegisterButton
+        className='register-register-button'
+        onClick={props.requestRegister}
+      />
       <RegisterIconButtonGroup className='register-register-icon-button-group' />
-      <AuthAlreadyHaveAnAccountLink className='register-auth-already-have-an-account-link' />
+      <AuthAlreadyHaveAnAccountLink
+        className='register-auth-already-have-an-account-link'
+        onClick={props.resetRegister}
+      />
     </div>
   );
 };

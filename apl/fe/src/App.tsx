@@ -3,7 +3,8 @@ import { Switch, Route } from 'react-router';
 import Div100vh from 'react-div-100vh';
 import './assets/styles/App.scss';
 import Login from './containers/Login';
-import Register from './components/Register';
+// import Register from './components/Register';
+import Register from './containers/Register';
 import Search from './components/Search';
 
 /**

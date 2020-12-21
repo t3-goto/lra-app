@@ -23,6 +23,7 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  onClick: any;
 }
 
 /**
@@ -37,6 +38,9 @@ const Component: React.FC<IProps> = (props) => {
         variant='contained'
         color='primary'
         className={classes.loginButton}
+        onClick={(e) => {
+          props.onClick();
+        }}
       >
         Register
       </Button>
