@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { AnyAction, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import {
   updateRegisterEmail,
   updateRegisterUsername,
@@ -12,21 +12,33 @@ import { RootState } from '../reducers';
 import Register from '../components/Register';
 
 /**
- * Action Interface.
+ * Action Creater Types
  */
-export interface RegisterActions {
-  updateRegisterEmail: (v: string) => AnyAction;
-  updateRegisterUsername: (v: string) => AnyAction;
-  updateRegisterPassword: (v: string) => AnyAction;
-  updateRegisterPasswordConfirm: (v: string) => AnyAction;
-  requestRegister: () => AnyAction;
-  resetRegister: () => AnyAction;
-}
+export type ActionCreators = {
+  updateRegisterEmail: typeof updateRegisterEmail;
+  updateRegisterUsername: typeof updateRegisterUsername;
+  updateRegisterPassword: typeof updateRegisterPassword;
+  updateRegisterPasswordConfirm: typeof updateRegisterPasswordConfirm;
+  requestRegister: typeof requestRegister;
+  resetRegister: typeof resetRegister;
+};
+
+/**
+ * Action Type
+ */
+type Action = ReturnType<
+  | typeof updateRegisterEmail
+  | typeof updateRegisterUsername
+  | typeof updateRegisterPassword
+  | typeof updateRegisterPasswordConfirm
+  | typeof requestRegister
+  | typeof resetRegister
+>;
 
 /**
  * Map Dispatch to Props.
  */
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => {
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
     updateRegisterEmail: (v: string) => dispatch(updateRegisterEmail(v)),
     updateRegisterUsername: (v: string) => dispatch(updateRegisterUsername(v)),
