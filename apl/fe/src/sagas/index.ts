@@ -1,5 +1,10 @@
 import { fork } from 'redux-saga/effects';
-import { handleRequestLogin, handleSuccessLogin } from './auth';
+import {
+  handleRequestLogin,
+  handleRequestRegister,
+  handleSuccessLogin,
+  handleSuccessRegister,
+} from './auth';
 
 /**
  * Root Saga.
@@ -7,4 +12,6 @@ import { handleRequestLogin, handleSuccessLogin } from './auth';
 export function* rootSaga() {
   yield fork(handleRequestLogin);
   yield fork(handleSuccessLogin);
+  yield fork(handleRequestRegister);
+  yield fork(handleSuccessRegister);
 }

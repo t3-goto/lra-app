@@ -45,6 +45,15 @@
   margin: auto;
 }
 
+.login-auth-skip-login-link {
+  position: absolute;
+  // top: 95%;
+  top: 67.3%;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
 .login-login-button {
   position: absolute;
   top: 71.5%;
@@ -64,14 +73,6 @@
 .login-auth-create-new-account-link {
   position: absolute;
   top: 90.8%;
-  left: 0;
-  right: 0;
-  margin: auto;
-}
-
-.login-auth-skip-login-link {
-  position: absolute;
-  top: 95%;
   left: 0;
   right: 0;
   margin: auto;

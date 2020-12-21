@@ -1,13 +1,13 @@
 import { ApiCore } from './utilities';
 
-const authLoginUrl = 'auth/login';
+const usersUrl = 'users';
 
-export const apiAuthLogin = new ApiCore({
+export const apiUsers = new ApiCore({
   getAll: true,
   getSingle: true,
   post: true,
   put: false,
   patch: true,
   delete: false,
-  url: authLoginUrl,
+  url: usersUrl,
 });

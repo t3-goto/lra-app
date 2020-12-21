@@ -1,10 +1,11 @@
 import { connect } from 'react-redux';
 import { AnyAction, Dispatch } from 'redux';
 import {
-  updateEmail,
-  updateUsername,
-  updatePassword,
+  updateLoginEmail,
+  updateLoginUsername,
+  updateLoginPassword,
   requestLogin,
+  resetLogin,
 } from '../actions';
 import { RootState } from '../reducers';
 import Login from '../components/Login';
@@ -13,10 +14,11 @@ import Login from '../components/Login';
  * Action Interface.
  */
 export interface LoginActions {
-  updateEmail: (v: string) => AnyAction;
-  updateUsername: (v: string) => AnyAction;
-  updatePassword: (v: string) => AnyAction;
+  updateLoginEmail: (v: string) => AnyAction;
+  updateLoginUsername: (v: string) => AnyAction;
+  updateLoginPassword: (v: string) => AnyAction;
   requestLogin: () => AnyAction;
+  resetLogin: () => AnyAction;
 }
 
 /**
@@ -24,10 +26,11 @@ export interface LoginActions {
  */
 const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => {
   return {
-    updateEmail: (v: string) => dispatch(updateEmail(v)),
-    updateUsername: (v: string) => dispatch(updateUsername(v)),
-    updatePassword: (v: string) => dispatch(updatePassword(v)),
+    updateLoginEmail: (v: string) => dispatch(updateLoginEmail(v)),
+    updateLoginUsername: (v: string) => dispatch(updateLoginUsername(v)),
+    updateLoginPassword: (v: string) => dispatch(updateLoginPassword(v)),
     requestLogin: () => dispatch(requestLogin()),
+    resetLogin: () => dispatch(resetLogin()),
   };
 };
 
