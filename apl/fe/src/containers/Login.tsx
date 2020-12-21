@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import { AnyAction, Dispatch } from 'redux';
+import { Dispatch } from 'redux';
 import {
   updateLoginEmail,
   updateLoginUsername,
@@ -11,20 +11,31 @@ import { RootState } from '../reducers';
 import Login from '../components/Login';
 
 /**
- * Action Interface.
+ * Action Creater Types
  */
-export interface LoginActions {
-  updateLoginEmail: (v: string) => AnyAction;
-  updateLoginUsername: (v: string) => AnyAction;
-  updateLoginPassword: (v: string) => AnyAction;
-  requestLogin: () => AnyAction;
-  resetLogin: () => AnyAction;
-}
+export type ActionCreators = {
+  updateLoginEmail: typeof updateLoginEmail;
+  updateLoginUsername: typeof updateLoginUsername;
+  updateLoginPassword: typeof updateLoginPassword;
+  requestLogin: typeof requestLogin;
+  resetLogin: typeof resetLogin;
+};
+
+/**
+ * Action Type
+ */
+type Action = ReturnType<
+  | typeof updateLoginEmail
+  | typeof updateLoginUsername
+  | typeof updateLoginPassword
+  | typeof requestLogin
+  | typeof resetLogin
+>;
 
 /**
  * Map Dispatch to Props.
  */
-const mapDispatchToProps = (dispatch: Dispatch<AnyAction>) => {
+const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
     updateLoginEmail: (v: string) => dispatch(updateLoginEmail(v)),
     updateLoginUsername: (v: string) => dispatch(updateLoginUsername(v)),

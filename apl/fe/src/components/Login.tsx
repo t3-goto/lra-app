@@ -9,20 +9,20 @@ import LoginIconButtonGroup from './LoginIconButtonGroup';
 import AuthCreateNewAccountLink from './AuthCreateNewAccountLink';
 import AuthSkipLoginLink from './AuthSkipLoginLink';
 import { RootState } from '../reducers';
-import { LoginActions } from '../containers/Login';
+import { ActionCreators } from '../containers/Login';
 import '../assets/styles/Login.scss';
 
 /**
- * IProps.
+ * Own Props.
  */
-interface IProps {
+type OwnProps = {
   className?: string;
-}
+};
 
 /**
  * TProps.
  */
-type TProps = IProps & RootState & LoginActions;
+type TProps = OwnProps & RootState & ActionCreators;
 
 /**
  * Presentational Component.

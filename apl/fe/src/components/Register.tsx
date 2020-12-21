@@ -8,20 +8,20 @@ import RegisterButton from './RegisterButton';
 import RegisterIconButtonGroup from './RegisterIconButtonGroup';
 import AuthAlreadyHaveAnAccountLink from './AuthAlreadyHaveAnAccountLink';
 import { RootState } from '../reducers';
-import { RegisterActions } from '../containers/Register';
+import { ActionCreators } from '../containers/Register';
 import '../assets/styles/Register.scss';
 
 /**
- * IProps.
+ * Own Props.
  */
-interface IProps {
+type OwnProps = {
   className?: string;
-}
+};
 
 /**
  * TProps.
  */
-type TProps = IProps & RootState & RegisterActions;
+type TProps = OwnProps & RootState & ActionCreators;
 
 /**
  * Presentational Component.
