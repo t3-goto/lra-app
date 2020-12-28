@@ -5,6 +5,7 @@ import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CatsModule } from './modules/cats/cats.module';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
+import { GeocodingModule } from './modules/geocoding/geocoding.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { SharedModule } from './shared/shared.module';
@@ -23,6 +24,7 @@ import { ConfigService } from './core/config/config.service';
     AuthModule,
     CatsModule,
     RestaurantsModule,
+    GeocodingModule,
     SharedModule,
     CoreModule,
   ],
