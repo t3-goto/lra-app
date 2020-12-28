@@ -5,6 +5,10 @@ import {
   handleSuccessLogin,
   handleSuccessRegister,
 } from './auth';
+import {
+  handleRequestGeolocation,
+  handleFinishGeolocation,
+} from './geolocation';
 
 /**
  * Root Saga.
@@ -14,4 +18,6 @@ export function* rootSaga() {
   yield fork(handleSuccessLogin);
   yield fork(handleRequestRegister);
   yield fork(handleSuccessRegister);
+  yield fork(handleRequestGeolocation);
+  yield fork(handleFinishGeolocation);
 }
