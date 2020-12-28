@@ -7,33 +7,10 @@ import {
   updateRegisterPasswordConfirm,
   requestRegister,
   resetRegister,
+  AuthAction as Action,
 } from '../actions';
 import { RootState } from '../reducers';
-import Register from '../components/Register';
-
-/**
- * Action Creater Types
- */
-export type ActionCreators = {
-  updateRegisterEmail: typeof updateRegisterEmail;
-  updateRegisterUsername: typeof updateRegisterUsername;
-  updateRegisterPassword: typeof updateRegisterPassword;
-  updateRegisterPasswordConfirm: typeof updateRegisterPasswordConfirm;
-  requestRegister: typeof requestRegister;
-  resetRegister: typeof resetRegister;
-};
-
-/**
- * Action Type
- */
-type Action = ReturnType<
-  | typeof updateRegisterEmail
-  | typeof updateRegisterUsername
-  | typeof updateRegisterPassword
-  | typeof updateRegisterPasswordConfirm
-  | typeof requestRegister
-  | typeof resetRegister
->;
+import Component from '../components/Register';
 
 /**
  * Map Dispatch to Props.
@@ -60,4 +37,4 @@ function mapStateToProps(rootState: RootState) {
 /**
  * Connect Presentational Component.
  */
-export default connect(mapStateToProps, mapDispatchToProps)(Register);
+export default connect(mapStateToProps, mapDispatchToProps)(Component);

@@ -1,20 +1,8 @@
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { requestRestaurant } from '../actions';
+import { requestRestaurant, RestaurantAction as Action } from '../actions';
 import { RootState } from '../reducers';
-import Search from '../components/Search';
-
-/**
- * Action Creater Types
- */
-export type ActionCreators = {
-  requestRestaurant: typeof requestRestaurant;
-};
-
-/**
- * Action Type
- */
-type Action = ReturnType<typeof requestRestaurant>;
+import Component from '../components/Search';
 
 /**
  * Map Dispatch to Props.
@@ -35,4 +23,4 @@ function mapStateToProps(rootState: RootState) {
 /**
  * Connect Presentational Component.
  */
-export default connect(mapStateToProps, mapDispatchToProps)(Search);
+export default connect(mapStateToProps, mapDispatchToProps)(Component);

@@ -1,11 +1,4 @@
-/**
- * Position Object.
- */
-export interface PositionInfo {
-  latitude: number;
-  longitude: number;
-  accuracy: number;
-}
+import { PositionInfo } from '../../interfaces/PositionInfo';
 
 /**
  * Success Callback of the Get Current Position.

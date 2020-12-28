@@ -1,20 +1,8 @@
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { requestGeolocation } from '../actions';
+import { requestGeolocation, GeolocationAction as Action } from '../actions';
 import { RootState } from '../reducers';
-import Top from '../components/Top';
-
-/**
- * Action Creater Types
- */
-export type ActionCreators = {
-  requestGeolocation: typeof requestGeolocation;
-};
-
-/**
- * Action Type
- */
-type Action = ReturnType<typeof requestGeolocation>;
+import Component from '../components/Top';
 
 /**
  * Map Dispatch to Props.
@@ -35,4 +23,4 @@ function mapStateToProps(rootState: RootState) {
 /**
  * Connect Presentational Component.
  */
-export default connect(mapStateToProps, mapDispatchToProps)(Top);
+export default connect(mapStateToProps, mapDispatchToProps)(Component);
