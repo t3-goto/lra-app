@@ -1,4 +1,10 @@
-import { IsOptional, IsLongitude, IsLatitude, IsIn } from 'class-validator';
+import {
+  IsOptional,
+  IsLongitude,
+  IsLatitude,
+  IsIn,
+  IsString,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetRestaurantsDto {
@@ -24,4 +30,9 @@ export class GetRestaurantsDto {
   @ApiProperty()
   @IsOptional()
   hit_per_page: number;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address: string;
 }

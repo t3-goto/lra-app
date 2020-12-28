@@ -1,6 +1,10 @@
 import { connect } from 'react-redux';
 import { Dispatch } from 'redux';
-import { requestRestaurant, RestaurantAction as Action } from '../actions';
+import {
+  requestSearch,
+  updateSearchText,
+  RestaurantAction as Action,
+} from '../actions';
 import { RootState } from '../reducers';
 import Component from '../components/Search';
 
@@ -9,7 +13,8 @@ import Component from '../components/Search';
  */
 const mapDispatchToProps = (dispatch: Dispatch<Action>) => {
   return {
-    requestRestaurant: () => dispatch(requestRestaurant()),
+    updateSearchText: (v: string) => dispatch(updateSearchText(v)),
+    requestSearch: () => dispatch(requestSearch()),
   };
 };
 

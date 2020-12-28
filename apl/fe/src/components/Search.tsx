@@ -24,7 +24,12 @@ type TProps = OwnProps & RootState & ActionCreators;
 const Component: React.FC<TProps> = (props) => {
   return (
     <div className='search'>
-      <Header className='search-header' />
+      <Header
+        className='search-header'
+        onClick={props.requestSearch}
+        value={props.restaurant.searchInfo.searchText}
+        onChange={props.updateSearchText}
+      />
       <RestaurantList
         className='search-restaurant-list'
         tileData={props.restaurant.searchInfo.restaurants}

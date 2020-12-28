@@ -3,9 +3,13 @@ import { push } from 'connected-react-router';
 import { apiRestaurants } from '../services/api/restaurant';
 import {
   REQUEST_RESTAURANT,
+  REQUEST_SEARCH,
   successRestaurant,
   failureRestaurant,
+  successSearch,
+  failureSearch,
   updateSearchRestaurants,
+  recreateSearchRestaurants,
 } from '../actions';
 import { RootState } from '../reducers';
 import { Restaurant } from '../interfaces/Restaurant';
@@ -52,6 +56,49 @@ export function* handleRequestRestaurant() {
           return !!restaurant.img;
         });
       yield put(updateSearchRestaurants(restaurants));
+    }
+  }
+}
+
+/**
+ * Handle The Action Type of REQUEST_SEARCH.
+ */
+export function* handleRequestSearch() {
+  while (true) {
+    yield take(REQUEST_SEARCH);
+    const state: RootState = yield select();
+    const data = {
+      address: state.restaurant.searchInfo.searchText,
+    };
+
+    const { payload, error } = yield call(apiRestaurants.getAllByQuery, data);
+    if (!payload && error) {
+      yield put(failureSearch(error.message));
+    } else {
+      yield put(successSearch(payload.data.rest));
+      const restDataArray = payload.data.rest;
+      const restaurants = restDataArray
+        .map(
+          (restData: {
+            image_url: { shop_image1: string };
+            name: string;
+            category: string;
+            budget: number;
+          }) => {
+            const restaurant: Restaurant = {
+              img: restData.image_url.shop_image1,
+              title: restData.name,
+              genre: restData.category,
+              budget: restData.budget,
+              cols: 1,
+            };
+            return restaurant;
+          }
+        )
+        .filter((restaurant: Restaurant) => {
+          return !!restaurant.img;
+        });
+      yield put(recreateSearchRestaurants(restaurants));
     }
   }
 }
