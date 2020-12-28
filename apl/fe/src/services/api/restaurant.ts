@@ -1,8 +1,8 @@
 import { ApiCore } from './utilities';
 
-const authLoginUrl = 'auth/login';
+const usersUrl = 'restaurants';
 
-export const apiAuthLogin = new ApiCore({
+export const apiRestaurants = new ApiCore({
   getAll: true,
   getSingle: true,
   getAllByQuery: true,
@@ -10,5 +10,5 @@ export const apiAuthLogin = new ApiCore({
   put: false,
   patch: true,
   delete: false,
-  url: authLoginUrl,
+  url: usersUrl,
 });

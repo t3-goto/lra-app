@@ -4,9 +4,9 @@ import { AppService } from './app.service';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CatsModule } from './modules/cats/cats.module';
+import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
-import { RecipesModule } from './modules/recipes/recipes.module';
 import { SharedModule } from './shared/shared.module';
 import { CoreModule } from './core/core.module';
 import { ConfigService } from './core/config/config.service';
@@ -22,7 +22,7 @@ import { ConfigService } from './core/config/config.service';
     UsersModule,
     AuthModule,
     CatsModule,
-    RecipesModule,
+    RestaurantsModule,
     SharedModule,
     CoreModule,
   ],

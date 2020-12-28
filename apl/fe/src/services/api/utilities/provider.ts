@@ -27,6 +27,17 @@ const getSingle = (resource: string, id: string) => {
 
 /** @param {string} resource */
 
+/** @param {object} query */
+
+const getAllByQuery = (resource: string, model: any) => {
+  return axios
+    .get(`${BASE_URL}/${resource}`, { params: model })
+    .then(handleResponse)
+    .catch(handleError);
+};
+
+/** @param {string} resource */
+
 /** @param {object} model */
 
 const post = (resource: string, model: any) => {
@@ -72,6 +83,7 @@ const remove = (resource: string, id: undefined) => {
 export const apiProvider = {
   getAll,
   getSingle,
+  getAllByQuery,
   post,
   put,
   patch,

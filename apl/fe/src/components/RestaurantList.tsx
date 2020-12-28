@@ -6,7 +6,7 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 import clsx from 'clsx';
-import tileData from '../mocks/imgMocks';
+// import tileData from '../mocks/imgMocks';
 
 /**
  * Styles.
@@ -41,6 +41,13 @@ const useStyles = makeStyles((theme: Theme) =>
  */
 interface IProps {
   className?: string;
+  tileData: {
+    img: string;
+    title: string;
+    genre: string;
+    budget: number;
+    cols: number;
+  }[];
 }
 
 /**
@@ -53,7 +60,7 @@ const Component: React.FC<IProps> = (props) => {
   return (
     <div className={clsx(className, classes.root)}>
       <GridList cellHeight={180} className={classes.gridList} cols={2}>
-        {tileData.map((tile) => (
+        {props.tileData.map((tile) => (
           <GridListTile key={tile.img} className={classes.gridListTileBar}>
             <img src={tile.img} alt={tile.title} />
             <GridListTileBar

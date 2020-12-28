@@ -9,6 +9,7 @@ const single = 'cat';
 export const apiCats = new ApiCore({
   getAll: true,
   getSingle: true,
+  getAllByQuery: true,
   post: true,
   put: false,
   patch: true,

@@ -9,6 +9,7 @@ import {
   handleRequestGeolocation,
   handleFinishGeolocation,
 } from './geolocation';
+import { handleRequestRestaurant } from './restaurant';
 
 /**
  * Root Saga.
@@ -20,4 +21,5 @@ export function* rootSaga() {
   yield fork(handleSuccessRegister);
   yield fork(handleRequestGeolocation);
   yield fork(handleFinishGeolocation);
+  yield fork(handleRequestRestaurant);
 }

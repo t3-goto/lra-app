@@ -5,6 +5,8 @@ export class ApiCore {
 
   getSingle!: (id: any) => Promise<any>;
 
+  getAllByQuery!: (model: any) => Promise<any>;
+
   post!: (model: any) => Promise<any>;
 
   put!: (model: any) => Promise<any>;
@@ -23,6 +25,12 @@ export class ApiCore {
     if (options.getSingle) {
       this.getSingle = (id) => {
         return apiProvider.getSingle(options.url, id);
+      };
+    }
+
+    if (options.getAllByQuery) {
+      this.getAllByQuery = (model) => {
+        return apiProvider.getAllByQuery(options.url, model);
       };
     }
 
