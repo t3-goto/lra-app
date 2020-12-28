@@ -14,6 +14,7 @@ import {
   successGeolocation,
   failureGeolocation,
   finishGeolocation,
+  requestRestaurant,
 } from '../actions';
 import { getCurrentPosition } from '../services/geolocation';
 
@@ -24,13 +25,13 @@ export function* handleRequestGeolocation() {
   while (true) {
     yield take(REQUEST_GEOLOCATION);
     const { payload, error } = yield call(getCurrentPosition);
-    console.log(payload, error);
     if (!payload && error) {
       yield put(failureGeolocation(error.message));
     } else {
       yield put(successGeolocation(payload));
     }
     yield put(finishGeolocation());
+    yield put(requestRestaurant());
   }
 }
 

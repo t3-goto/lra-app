@@ -5,7 +5,8 @@ import './assets/styles/App.scss';
 import Login from './containers/Login';
 // import Register from './components/Register';
 import Register from './containers/Register';
-import Search from './components/Search';
+// import Search from './components/Search';
+import Search from './containers/Search';
 // import Top from './components/Top';
 import Top from './containers/Top';
 

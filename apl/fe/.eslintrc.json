@@ -91,6 +91,7 @@
     "import/prefer-default-export": "off",
     "no-continue": "off",
     "consistent-return": "off",
+    "camelcase": "off",
     // devDependenciesのimportを許可する
     "import/no-extraneous-dependencies": [
       "error",
