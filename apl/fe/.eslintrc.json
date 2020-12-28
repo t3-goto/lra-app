@@ -90,6 +90,7 @@
     "@typescript-eslint/no-explicit-any": "off",
     "import/prefer-default-export": "off",
     "no-continue": "off",
+    "consistent-return": "off",
     // devDependenciesのimportを許可する
     "import/no-extraneous-dependencies": [
       "error",
