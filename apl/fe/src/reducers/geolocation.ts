@@ -1,15 +1,11 @@
 import { Reducer } from 'redux';
 import {
+  REQUEST_GEOLOCATION,
   SUCCESS_GEOLOCATION,
   FAILURE_GEOLOCATION,
-  successGeolocation,
-  failureGeolocation,
+  FINISH_GEOLOCATION,
+  GeolocationAction as Action,
 } from '../actions';
-
-/**
- * Action Type.
- */
-type Action = ReturnType<typeof successGeolocation | typeof failureGeolocation>;
 
 /**
  * IState Geolocation State.
@@ -41,6 +37,11 @@ export const geolocationReducer: Reducer<GeolocationState, Action> = (
   action
 ) => {
   switch (action.type) {
+    case REQUEST_GEOLOCATION: {
+      return {
+        ...state,
+      };
+    }
     case SUCCESS_GEOLOCATION: {
       return {
         ...state,
@@ -56,6 +57,11 @@ export const geolocationReducer: Reducer<GeolocationState, Action> = (
         ...state,
         isGeolocation: false,
         errorInfo: action.payload,
+      };
+    }
+    case FINISH_GEOLOCATION: {
+      return {
+        ...state,
       };
     }
     default: {

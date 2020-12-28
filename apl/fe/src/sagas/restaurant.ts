@@ -1,12 +1,4 @@
-import {
-  all,
-  fork,
-  call,
-  put,
-  takeEvery,
-  take,
-  select,
-} from 'redux-saga/effects';
+import { call, put, take, select } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import { apiRestaurants } from '../services/api/restaurant';
 import {

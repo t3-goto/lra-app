@@ -9,7 +9,7 @@ import LoginIconButtonGroup from './LoginIconButtonGroup';
 import AuthCreateNewAccountLink from './AuthCreateNewAccountLink';
 import AuthSkipLoginLink from './AuthSkipLoginLink';
 import { RootState } from '../reducers';
-import { ActionCreators } from '../containers/Login';
+import { AuthActionCreators as ActionCreators } from '../actions';
 import '../assets/styles/Login.scss';
 
 /**

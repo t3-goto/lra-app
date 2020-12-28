@@ -8,7 +8,7 @@ import RegisterButton from './RegisterButton';
 import RegisterIconButtonGroup from './RegisterIconButtonGroup';
 import AuthAlreadyHaveAnAccountLink from './AuthAlreadyHaveAnAccountLink';
 import { RootState } from '../reducers';
-import { ActionCreators } from '../containers/Register';
+import { AuthActionCreators as ActionCreators } from '../actions';
 import '../assets/styles/Register.scss';
 
 /**

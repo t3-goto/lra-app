@@ -3,8 +3,7 @@ import Header from './Header';
 import Footer from './Footer';
 import RestaurantList from './RestaurantList';
 import { RootState } from '../reducers';
-import { ActionCreators } from '../containers/Search';
-
+import { RestaurantActionCreators as ActionCreators } from '../actions';
 import '../assets/styles/Search.scss';
 
 /**

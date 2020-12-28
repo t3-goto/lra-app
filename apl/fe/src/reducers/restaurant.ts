@@ -1,22 +1,12 @@
 import { Reducer } from 'redux';
 import {
+  REQUEST_RESTAURANT,
   SUCCESS_RESTAURANT,
   FAILURE_RESTAURANT,
   UPDATE_SEARCH_RESTAURANTS,
-  successRestaurant,
-  failureRestaurant,
-  updateSearchRestaurants,
+  RestaurantAction as Action,
 } from '../actions';
 import { Restaurant } from '../interfaces/Restaurant';
-
-/**
- * Action Type.
- */
-type Action = ReturnType<
-  | typeof successRestaurant
-  | typeof failureRestaurant
-  | typeof updateSearchRestaurants
->;
 
 /**
  * IState Search Info.
@@ -60,6 +50,11 @@ export const restaurantReducer: Reducer<RestaurantState, Action> = (
   action
 ) => {
   switch (action.type) {
+    case REQUEST_RESTAURANT: {
+      return {
+        ...state,
+      };
+    }
     case SUCCESS_RESTAURANT: {
       return {
         ...state,

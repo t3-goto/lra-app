@@ -1,12 +1,4 @@
-import {
-  all,
-  fork,
-  call,
-  put,
-  takeEvery,
-  take,
-  select,
-} from 'redux-saga/effects';
+import { call, put, take, select } from 'redux-saga/effects';
 import { push } from 'connected-react-router';
 import {
   REQUEST_LOGIN,
@@ -20,7 +12,6 @@ import {
   successRegister,
   failureRegister,
   resetRegister,
-  updateLoginEmail,
   updateLoginUsername,
 } from '../actions';
 import { apiAuthLogin } from '../services/api/auth';

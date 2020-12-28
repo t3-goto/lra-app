@@ -7,48 +7,18 @@ import {
   UPDATE_REGISTER_USERNAME,
   UPDATE_REGISTER_PASSWORD,
   UPDATE_REGISTER_PASSWORD_CONFIRM,
+  REQUEST_LOGIN,
   SUCCESS_LOGIN,
   FAILURE_LOGIN,
+  REQUEST_REGISTER,
   SUCCESS_REGISTER,
   FAILURE_REGISTER,
+  REQUEST_LOGOUT,
   SUCCESS_LOGOUT,
   RESET_LOGIN,
   RESET_REGISTER,
-  updateLoginEmail,
-  updateLoginUsername,
-  updateLoginPassword,
-  updateRegisterEmail,
-  updateRegisterUsername,
-  updateRegisterPassword,
-  updateRegisterPasswordConfirm,
-  successLogin,
-  failureLogin,
-  successRegister,
-  failureRegister,
-  successLogout,
-  resetLogin,
-  resetRegister,
+  AuthAction as Action,
 } from '../actions';
-
-/**
- * Action Type.
- */
-type Action = ReturnType<
-  | typeof updateLoginEmail
-  | typeof updateLoginUsername
-  | typeof updateLoginPassword
-  | typeof updateRegisterEmail
-  | typeof updateRegisterUsername
-  | typeof updateRegisterPassword
-  | typeof updateRegisterPasswordConfirm
-  | typeof successLogin
-  | typeof failureLogin
-  | typeof successRegister
-  | typeof failureRegister
-  | typeof successLogout
-  | typeof resetLogin
-  | typeof resetRegister
->;
 
 /**
  * IState Login Info.
@@ -165,6 +135,11 @@ export const authReducer: Reducer<AuthState, Action> = (
         },
       };
     }
+    case REQUEST_LOGIN: {
+      return {
+        ...state,
+      };
+    }
     case SUCCESS_LOGIN: {
       return {
         ...state,
@@ -178,6 +153,11 @@ export const authReducer: Reducer<AuthState, Action> = (
         ...state,
         isLogin: false,
         loginInfo: { ...state.loginInfo, errorInfo: action.payload },
+      };
+    }
+    case REQUEST_REGISTER: {
+      return {
+        ...state,
       };
     }
     case SUCCESS_REGISTER: {
@@ -202,6 +182,11 @@ export const authReducer: Reducer<AuthState, Action> = (
       return {
         ...state,
         registerInfo: { ...initialRegisterInfo },
+      };
+    }
+    case REQUEST_LOGOUT: {
+      return {
+        ...state,
       };
     }
     case SUCCESS_LOGOUT: {

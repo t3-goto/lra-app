@@ -2,7 +2,7 @@ import * as React from 'react';
 import AuthTitleLabel from './AuthTitleLabel';
 import { RootState } from '../reducers';
 import '../assets/styles/Top.scss';
-import { ActionCreators } from '../containers/Top';
+import { GeolocationActionCreators as ActionCreators } from '../actions';
 
 /**
  * Own Props.

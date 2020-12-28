@@ -6,31 +6,10 @@ import {
   updateLoginPassword,
   requestLogin,
   resetLogin,
+  AuthAction as Action,
 } from '../actions';
 import { RootState } from '../reducers';
-import Login from '../components/Login';
-
-/**
- * Action Creater Types
- */
-export type ActionCreators = {
-  updateLoginEmail: typeof updateLoginEmail;
-  updateLoginUsername: typeof updateLoginUsername;
-  updateLoginPassword: typeof updateLoginPassword;
-  requestLogin: typeof requestLogin;
-  resetLogin: typeof resetLogin;
-};
-
-/**
- * Action Type
- */
-type Action = ReturnType<
-  | typeof updateLoginEmail
-  | typeof updateLoginUsername
-  | typeof updateLoginPassword
-  | typeof requestLogin
-  | typeof resetLogin
->;
+import Component from '../components/Login';
 
 /**
  * Map Dispatch to Props.
@@ -55,4 +34,4 @@ function mapStateToProps(rootState: RootState) {
 /**
  * Connect Presentational Component.
  */
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default connect(mapStateToProps, mapDispatchToProps)(Component);
