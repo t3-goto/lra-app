@@ -1,6 +1,4 @@
 import { call, put, take, select } from 'redux-saga/effects';
-import { push } from 'connected-react-router';
-import { apiRestaurants } from '../services/api/restaurant';
 import {
   REQUEST_RESTAURANT,
   REQUEST_SEARCH,
@@ -12,7 +10,12 @@ import {
   recreateSearchRestaurants,
 } from '../actions';
 import { RootState } from '../reducers';
-import { Restaurant } from '../interfaces/Restaurant';
+import {
+  Restaurant,
+  GetRestaurantsApiRequestSchema,
+  GetRestaurantsApiResponseSchema,
+} from '../interfaces';
+import { restaurantsHttpClient } from '../services/http-cliient';
 
 /**
  * Handle The Action Type of REQUEST_RESTAURANT.
@@ -20,38 +23,35 @@ import { Restaurant } from '../interfaces/Restaurant';
 export function* handleRequestRestaurant() {
   while (true) {
     yield take(REQUEST_RESTAURANT);
-    const state: RootState = yield select();
-    const data = {
-      latitude: state.geolocation.latitude,
-      longitude: state.geolocation.longitude,
-      // latitude: 35.6869,
-      // longitude: 139.7494,
+    const { latitude, longitude } = ((yield select()) as RootState).geolocation;
+    const getRestaurantsApiRequestSchema: GetRestaurantsApiRequestSchema = {
+      latitude,
+      longitude,
     };
-
-    const { payload, error } = yield call(apiRestaurants.getAllByQuery, data);
+    type returnType = {
+      payload: GetRestaurantsApiResponseSchema;
+      error: any;
+    };
+    const { payload, error }: returnType = yield call(
+      restaurantsHttpClient.getAllByQuery,
+      getRestaurantsApiRequestSchema
+    );
     if (!payload && error) {
       yield put(failureRestaurant(error.message));
     } else {
-      yield put(successRestaurant(payload.data.rest));
-      const restDataArray = payload.data.rest;
+      yield put(successRestaurant(payload.restaurants));
+      const restDataArray = payload.restaurants;
       const restaurants = restDataArray
-        .map(
-          (restData: {
-            image_url: { shop_image1: string };
-            name: string;
-            category: string;
-            budget: number;
-          }) => {
-            const restaurant: Restaurant = {
-              img: restData.image_url.shop_image1,
-              title: restData.name,
-              genre: restData.category,
-              budget: restData.budget,
-              cols: 1,
-            };
-            return restaurant;
-          }
-        )
+        .map((restData) => {
+          const restaurant: Restaurant = {
+            img: restData.shopImage1,
+            title: restData.name,
+            genre: restData.category,
+            budget: restData.budget,
+            cols: 1,
+          };
+          return restaurant;
+        })
         .filter((restaurant: Restaurant) => {
           return !!restaurant.img;
         });
@@ -66,35 +66,36 @@ export function* handleRequestRestaurant() {
 export function* handleRequestSearch() {
   while (true) {
     yield take(REQUEST_SEARCH);
-    const state: RootState = yield select();
-    const data = {
-      address: state.restaurant.searchInfo.searchText,
+    const address = ((yield select()) as RootState).restaurant.searchInfo
+      .searchText;
+    const getRestaurantsApiRequestSchema: GetRestaurantsApiRequestSchema = {
+      address,
     };
+    type returnType = {
+      payload: GetRestaurantsApiResponseSchema;
+      error: any;
+    };
+    const { payload, error }: returnType = yield call(
+      restaurantsHttpClient.getAllByQuery,
+      getRestaurantsApiRequestSchema
+    );
 
-    const { payload, error } = yield call(apiRestaurants.getAllByQuery, data);
     if (!payload && error) {
       yield put(failureSearch(error.message));
     } else {
-      yield put(successSearch(payload.data.rest));
-      const restDataArray = payload.data.rest;
+      yield put(successSearch(payload.restaurants));
+      const restDataArray = payload.restaurants;
       const restaurants = restDataArray
-        .map(
-          (restData: {
-            image_url: { shop_image1: string };
-            name: string;
-            category: string;
-            budget: number;
-          }) => {
-            const restaurant: Restaurant = {
-              img: restData.image_url.shop_image1,
-              title: restData.name,
-              genre: restData.category,
-              budget: restData.budget,
-              cols: 1,
-            };
-            return restaurant;
-          }
-        )
+        .map((restData) => {
+          const restaurant: Restaurant = {
+            img: restData.shopImage1,
+            title: restData.name,
+            genre: restData.category,
+            budget: restData.budget,
+            cols: 1,
+          };
+          return restaurant;
+        })
         .filter((restaurant: Restaurant) => {
           return !!restaurant.img;
         });

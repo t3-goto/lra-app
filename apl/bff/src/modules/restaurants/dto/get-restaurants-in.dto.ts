@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class GetRestaurantsDto {
+export class GetRestaurantsInDto {
   @ApiProperty()
   @IsLatitude()
   @IsOptional()
@@ -24,6 +24,7 @@ export class GetRestaurantsDto {
   range: number;
 
   @ApiProperty()
+  @IsIn(['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'])
   @IsOptional()
   offset_page: number;
 

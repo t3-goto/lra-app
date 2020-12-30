@@ -1,6 +1,7 @@
 import { Controller, Query, Get } from '@nestjs/common';
 import { RestaurantsService } from './restaurants.service';
-import { GetRestaurantsDto } from './dto/get-restaurants.dto';
+import { GetRestaurantsInDto } from './dto/get-restaurants-in.dto';
+import { GetRestaurantsOutDto } from './dto/get-restaurants-out.dto';
 
 @Controller('restaurants')
 export class RestaurantsController {
@@ -8,8 +9,8 @@ export class RestaurantsController {
 
   @Get()
   async findByKeys(
-    @Query() getRestaurantsDto: GetRestaurantsDto
-  ): Promise<any> {
-    return this.restaurantsService.findByKeys(getRestaurantsDto);
+    @Query() getRestaurantsInDto: GetRestaurantsInDto
+  ): Promise<GetRestaurantsOutDto> {
+    return this.restaurantsService.findByKeys(getRestaurantsInDto);
   }
 }

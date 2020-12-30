@@ -10,7 +10,6 @@ import {
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { LoggingInterceptor } from './interceptors/logging.interceptor';
 import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
-import { TransformInterceptor } from './interceptors/transform.interceptor';
 import * as helmet from 'helmet';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
@@ -56,11 +55,8 @@ async function bootstrap() {
   const reflector = app.get(Reflector);
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
-  // graphqlの場合NG（何も出ない）
   app.useGlobalInterceptors(new LoggingInterceptor(app.get(CustomLogger)));
   app.useGlobalInterceptors(new TimeoutInterceptor());
-  // graphqlの場合NG（エラー）
-  app.useGlobalInterceptors(new TransformInterceptor());
 
   app.useGlobalPipes(new ValidationPipe());
 

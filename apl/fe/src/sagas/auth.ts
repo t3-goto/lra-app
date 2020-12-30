@@ -14,9 +14,14 @@ import {
   resetRegister,
   updateLoginUsername,
 } from '../actions';
-import { apiAuthLogin } from '../services/api/auth';
-import { apiUsers } from '../services/api/users';
+import { authHttpClient, usersHttpClient } from '../services/http-cliient';
 import { RootState } from '../reducers';
+import {
+  PostAuthApiRequestSchema,
+  PostAuthApiResponseSchema,
+  PostUsersApiRequestSchema,
+  PostUsersApiResponseSchema,
+} from '../interfaces';
 
 /**
  * Handle The Action Type of REQUEST_LOGIN.
@@ -24,17 +29,27 @@ import { RootState } from '../reducers';
 export function* handleRequestLogin() {
   while (true) {
     yield take(REQUEST_LOGIN);
-    const state: RootState = yield select();
-    const data = {
-      username: state.auth.loginInfo.username,
-      password: state.auth.loginInfo.password,
+    const {
+      username,
+      password,
+    } = ((yield select()) as RootState).auth.loginInfo;
+    const postAuthApiRequestSchema: PostAuthApiRequestSchema = {
+      username,
+      password,
     };
-    const { payload, error } = yield call(apiAuthLogin.post, data);
+    type returnType = {
+      payload: PostAuthApiResponseSchema;
+      error: any;
+    };
+    const { payload, error }: returnType = yield call(
+      authHttpClient.post,
+      postAuthApiRequestSchema
+    );
     if (!payload && error) {
       yield put(failureLogin(error.message));
       continue;
     }
-    yield put(successLogin(payload.data.access_token));
+    yield put(successLogin(payload.access_token));
     yield take(REQUEST_LOGOUT);
     yield put(successLogout());
   }
@@ -56,19 +71,30 @@ export function* handleSuccessLogin() {
 export function* handleRequestRegister() {
   while (true) {
     yield take(REQUEST_REGISTER);
-    const state: RootState = yield select();
-    const data = {
-      username: state.auth.registerInfo.username,
-      password: state.auth.registerInfo.password,
+    const {
+      username,
+      password,
+    } = ((yield select()) as RootState).auth.registerInfo;
+    const postUsersApiRequestSchema: PostUsersApiRequestSchema = {
+      username,
+      password,
     };
-    const { payload, error } = yield call(apiUsers.post, data);
+    type returnType = {
+      payload: PostUsersApiResponseSchema;
+      error: any;
+    };
+    const { payload, error }: returnType = yield call(
+      usersHttpClient.post,
+      postUsersApiRequestSchema
+    );
+
     if (!payload && error) {
       yield put(failureRegister(error.message));
       continue;
     }
     yield put(successRegister());
     yield put(resetRegister());
-    yield put(updateLoginUsername(data.username));
+    yield put(updateLoginUsername(payload.username));
   }
 }
 
@@ -78,6 +104,6 @@ export function* handleRequestRegister() {
 export function* handleSuccessRegister() {
   while (true) {
     yield take(SUCCESS_REGISTER);
-    yield put(push('/'));
+    yield put(push('/login'));
   }
 }

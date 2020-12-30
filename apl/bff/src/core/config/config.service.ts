@@ -131,7 +131,7 @@ export class ConfigService {
     return {
       secret: this.get('JWT_SECRET'),
       signOptions: {
-        expiresIn: this.get('JWT_EXPIRES_IN'),
+        expiresIn: this.getNumber('JWT_EXPIRES_IN'),
       },
     };
   }

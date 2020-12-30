@@ -1,43 +1,58 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { User, UserSchema } from './user.entity';
-import { UtilService } from '../../common/util/util.service';
+import { CreateUserInDto } from './dto/create-user-in.dto';
+import { CreateUserOutDto } from './dto/create-user-out.dto';
+import { GetUsersOutDto } from './dto/get-users-out.dto';
+import { GetUserOutDto } from './dto/get-user-out.dto';
+import { DeleteUserOutDto } from './dto/delete-user-out.dto';
+import { User, UserEntity } from './user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(UserSchema)
+    @InjectRepository(UserEntity)
     private readonly usersRepository: Repository<User>
   ) {}
 
-  create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserInDto: CreateUserInDto): Promise<CreateUserOutDto> {
     const user = new User();
-    console.log(createUserDto);
-    user.username = createUserDto.username;
-    user.password = createUserDto.password;
-    user.firstName = createUserDto.firstName;
-    user.lastName = createUserDto.lastName;
-    return this.usersRepository.save(user);
+    user.username = createUserInDto.username;
+    user.password = createUserInDto.password;
+    if (
+      await this.usersRepository.findOne({ username: createUserInDto.username })
+    ) {
+      throw new BadRequestException(`This name is already registered.`);
+    }
+    const registerdUser = await this.usersRepository.save(user);
+    const createUserOutDto = registerdUser;
+    return createUserOutDto;
   }
 
-  async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+  async findAll(): Promise<GetUsersOutDto> {
+    const userList = await this.usersRepository.find();
+    const getUsersOutDto = new GetUsersOutDto();
+    getUsersOutDto.users = userList;
+    return getUsersOutDto;
   }
 
-  async findOne(id: string): Promise<User> {
-    return this.usersRepository.findOne(id);
+  async findOne(userId: string): Promise<GetUserOutDto> {
+    const user = await this.usersRepository.findOne(userId);
+    const getUserOutDto = user;
+    return getUserOutDto;
   }
 
-  async remove(id: string): Promise<void> {
-    await this.usersRepository.delete(id);
+  async remove(userId: string): Promise<DeleteUserOutDto> {
+    const user = await this.usersRepository.findOne(userId);
+    if (!user) {
+      throw new BadRequestException(`This name does not exist.`);
+    }
+    await this.usersRepository.delete(userId);
+    const deleteUserOutDto = user;
+    return deleteUserOutDto;
   }
 
   async findByUsername(username: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ username: username });
-    // .createQueryBuilder('user')
-    // .where('user.username = :username', { username: username })
-    // .getOne();
   }
 }
