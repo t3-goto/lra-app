@@ -2,6 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { UtilService } from '../../common/util/util.service';
+import { ValidateUserInDto } from './dto/validate-user-in.dto';
+import { ValidateUserOutDto } from './dto/validate-user-out.dto';
+import { LoginInDto } from './dto/login-in.dto';
+import { LoginOutDto } from './dto/login-out.dto';
+import { ProfileInDto } from './dto/profile-in.dto';
+import { ProfileOutDto } from './dto/profile-out.dto';
 
 @Injectable()
 export class AuthService {
@@ -10,19 +16,34 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByUsername(username);
-    if (user && UtilService.validateHash(pass, user.password)) {
+  async validateUser(
+    validateUserInDto: ValidateUserInDto
+  ): Promise<ValidateUserOutDto> {
+    const user = await this.usersService.findByUsername(
+      validateUserInDto.username
+    );
+    if (
+      user &&
+      UtilService.validateHash(validateUserInDto.password, user.password)
+    ) {
       const { password, ...result } = user;
-      return result;
+      return result as ValidateUserOutDto;
     }
     return null;
   }
 
-  async login(user: any) {
-    const payload = { username: user.username, sub: user.userId };
-    return {
-      access_token: this.jwtService.sign(payload),
+  async login(loginInDto: LoginInDto): Promise<LoginOutDto> {
+    const payload = {
+      username: loginInDto.username,
+      sub: loginInDto.userId,
     };
+    const loginOutDto = new LoginOutDto();
+    loginOutDto.access_token = this.jwtService.sign(payload);
+    return loginOutDto;
+  }
+
+  async profile(profileInDto: ProfileInDto): Promise<ProfileOutDto> {
+    const profileOutDto = profileInDto as ProfileOutDto;
+    return profileOutDto;
   }
 }

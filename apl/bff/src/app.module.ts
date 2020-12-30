@@ -1,9 +1,6 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CatsModule } from './modules/cats/cats.module';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { GeocodingModule } from './modules/geocoding/geocoding.module';
 import { UsersModule } from './modules/users/users.module';
@@ -22,14 +19,13 @@ import { ConfigService } from './core/config/config.service';
     }),
     UsersModule,
     AuthModule,
-    CatsModule,
     RestaurantsModule,
     GeocodingModule,
     SharedModule,
     CoreModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

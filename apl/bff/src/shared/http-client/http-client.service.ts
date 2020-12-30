@@ -4,7 +4,7 @@ import { HttpService } from '@nestjs/common';
 @Injectable()
 export class HttpClientService {
   constructor(private readonly httpService: HttpService) {}
-  public get(url: string) {
-    return this.httpService.get(url).toPromise();
+  public get<S>(url: string) {
+    return this.httpService.get<S>(url).toPromise();
   }
 }

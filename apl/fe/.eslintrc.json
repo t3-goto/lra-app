@@ -92,6 +92,7 @@
     "no-continue": "off",
     "consistent-return": "off",
     "camelcase": "off",
+    "no-underscore-dangle": "off",
     // devDependenciesのimportを許可する
     "import/no-extraneous-dependencies": [
       "error",
