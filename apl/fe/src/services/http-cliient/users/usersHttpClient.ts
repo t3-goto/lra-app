@@ -1,5 +1,4 @@
-import { HttpClient } from './HttpClient';
-import { HttpClientOptions } from './HttpClientOptions';
+import { HttpClient, HttpClientOptions } from '../common';
 
 const baseUrl = process.env.BFF_BASE_URL as string;
 const resourcePath = 'users';

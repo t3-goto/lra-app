@@ -12,7 +12,7 @@ const getAll = <S>(baseUrl: string, resourcePath: string) => {
 
 /** @param {string} baseUrl */
 /** @param {string} resourcePath */
-/** @param {object} query */
+/** @param {object} model */
 const getAllByQuery = <T, S>(
   baseUrl: string,
   resourcePath: string,

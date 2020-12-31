@@ -1,9 +1,9 @@
-export interface GoogleGeocodingApiResponseSchema {
+export type GoogleGeocodingApiResponseSchema = {
   results: Array<Results>;
   status: string;
-}
+};
 
-interface Results {
+type Results = {
   address_components: Array<AddressComponent>;
   formatted_address: string;
   geometry: {
@@ -35,10 +35,10 @@ interface Results {
   };
   place_id: string;
   types: Array<string>;
-}
+};
 
-interface AddressComponent {
+type AddressComponent = {
   long_name: string;
   short_name: string;
   types: Array<string>;
-}
+};

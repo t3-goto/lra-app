@@ -1,4 +1,4 @@
-export interface GetGeocodingApiResponseSchema {
+export type GetGeocodingApiResponseSchema = {
   latitude: number;
   longitude: number;
-}
+};
