@@ -2,6 +2,7 @@ import { Module, HttpModule } from '@nestjs/common';
 import { HttpClientService } from './http-client.service';
 import { CoreModule } from './../../core/core.module';
 import { ConfigService } from './../../core/config/config.service';
+import { CustomLoggerModule } from './../custom-logger/custom-logger.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { ConfigService } from './../../core/config/config.service';
         configService.httpModuleOptions,
       inject: [ConfigService],
     }),
+    CustomLoggerModule,
   ],
   providers: [HttpClientService],
   exports: [HttpClientService],

@@ -14,14 +14,15 @@ import {
   resetRegister,
   updateLoginUsername,
 } from '../actions';
-import { authHttpClient, usersHttpClient } from '../services/http-cliient';
-import { RootState } from '../reducers';
 import {
+  authHttpClient,
+  usersHttpClient,
   PostAuthApiRequestSchema,
   PostAuthApiResponseSchema,
   PostUsersApiRequestSchema,
   PostUsersApiResponseSchema,
-} from '../interfaces';
+} from '../services/http-cliient';
+import { RootState } from '../reducers';
 
 /**
  * Handle The Action Type of REQUEST_LOGIN.

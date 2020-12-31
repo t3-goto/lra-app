@@ -1,3 +1,3 @@
-export * from './authHttpClient';
-export * from './usersHttpClient';
-export * from './restaurantsHttpClient';
+export * from './auth';
+export * from './users';
+export * from './restaurants';

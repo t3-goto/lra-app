@@ -1,4 +1,4 @@
-export interface GnaviRestSearchApiResponseSchema {
+export type GnaviRestSearchApiResponseSchema = {
   '@attributes': {
     api_version: string;
   };
@@ -6,9 +6,9 @@ export interface GnaviRestSearchApiResponseSchema {
   hit_per_page: number;
   page_offset: number;
   rest: Array<Rest>;
-}
+};
 
-interface Rest {
+type Rest = {
   '@attributes': {
     order: number;
   };
@@ -70,4 +70,4 @@ interface Rest {
     mobile_coupon: number;
     pc_coupon: number;
   };
-}
+};

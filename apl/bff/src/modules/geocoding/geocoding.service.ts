@@ -1,13 +1,10 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
-import { GetGeocodingInDto } from './dto/get-geocoding-in.dto';
-import { GetGeocodingOutDto } from './dto/get-geocoding-out.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from './../../core/config/config.service';
 import { HttpClientService } from 'src/shared/http-client/http-client.service';
-import { GoogleGeocodingApiResponseSchema } from '../../interfaces/google-geocoding-api-response-shema';
+import { GetGeocodingInDto } from './dto/get-geocoding-in.dto';
+import { GetGeocodingOutDto } from './dto/get-geocoding-out.dto';
+import { GoogleGeocodingApiRequestSchema } from '../../interfaces/google-geocoding-api-request-schema';
+import { GoogleGeocodingApiResponseSchema } from '../../interfaces/google-geocoding-api-response-schema';
 
 @Injectable()
 export class GeocodingService {
@@ -18,27 +15,22 @@ export class GeocodingService {
   async findByKeys(
     getGeocodingInDto: GetGeocodingInDto
   ): Promise<GetGeocodingOutDto> {
-    let googleGeocodingUrl = `${this.configService.get(
+    const googleGeocodingUrl = this.configService.get(
       'HTTP_URL_GOOGLE_GEOCODING'
-    )}?key=${this.configService.get('ACCESS_KEY_GOOGLE')}`;
-    if (!!getGeocodingInDto.address) {
-      googleGeocodingUrl = `${googleGeocodingUrl}&address=${encodeURIComponent(
-        getGeocodingInDto.address
-      )}`;
-    } else {
-      throw new BadRequestException(`"Request failed with status code 400`);
-    }
-
+    );
+    const key = this.configService.get('ACCESS_KEY_GOOGLE');
+    const address = getGeocodingInDto.address;
+    const googleGeocodingApiRequestSchema: GoogleGeocodingApiRequestSchema = {
+      key,
+      address,
+    };
     try {
-      const httpResponse = await this.httpClientService.get<GoogleGeocodingApiResponseSchema>(
-        googleGeocodingUrl
-      );
-      const latitude = httpResponse.data.results[0].geometry.location.lat;
-      const longitude = httpResponse.data.results[0].geometry.location.lng;
-      const getGeocodingOutDto = new GetGeocodingOutDto();
-      getGeocodingOutDto.latitude = latitude;
-      getGeocodingOutDto.longitude = longitude;
-      return getGeocodingOutDto;
+      const httpResponse = await this.httpClientService.getAllByQuery<
+        GoogleGeocodingApiRequestSchema,
+        GoogleGeocodingApiResponseSchema
+      >(googleGeocodingUrl, googleGeocodingApiRequestSchema);
+      const { lat, lng } = httpResponse.results[0].geometry.location;
+      return new GetGeocodingOutDto(lat, lng);
     } catch (error) {
       throw new NotFoundException(error.message);
     }

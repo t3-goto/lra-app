@@ -10,12 +10,12 @@ import {
   recreateSearchRestaurants,
 } from '../actions';
 import { RootState } from '../reducers';
+import { Restaurant } from '../interfaces';
 import {
-  Restaurant,
+  restaurantsHttpClient,
   GetRestaurantsApiRequestSchema,
   GetRestaurantsApiResponseSchema,
-} from '../interfaces';
-import { restaurantsHttpClient } from '../services/http-cliient';
+} from '../services/http-cliient';
 
 /**
  * Handle The Action Type of REQUEST_RESTAURANT.
