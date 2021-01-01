@@ -2,7 +2,9 @@ import { IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetGeocodingInDto {
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Address you want to search.',
+  })
   @IsString()
   address: string;
 }

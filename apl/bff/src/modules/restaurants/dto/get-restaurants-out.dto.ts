@@ -1,8 +1,19 @@
+import { ApiProperty } from '@nestjs/swagger';
+
 export class GetRestaurantsOutDto {
+  @ApiProperty()
   isNext: boolean;
+
+  @ApiProperty()
   totalHitCount: number;
+
+  @ApiProperty()
   startItemNo: number;
+
+  @ApiProperty()
   lastItemNo: number;
+
+  @ApiProperty()
   restaurants: Array<Restaurant>;
 }
 

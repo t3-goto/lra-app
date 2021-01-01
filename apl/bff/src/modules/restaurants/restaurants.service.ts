@@ -3,11 +3,9 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
-import { GetRestaurantsInDto } from './dto/get-restaurants-in.dto';
-import { GetRestaurantsOutDto } from './dto/get-restaurants-out.dto';
-import { Restaurant } from './dto/get-restaurants-out.dto';
 import { ConfigService } from './../../core/config/config.service';
 import { HttpClientService } from 'src/shared/http-client/http-client.service';
+import { GetRestaurantsInDto, GetRestaurantsOutDto, Restaurant } from './dto';
 import { GnaviRestSearchApiRequestSchema } from '../../interfaces/gnavi-rest-search-api-request-schema';
 import { GnaviRestSearchApiResponseSchema } from '../../interfaces/gnavi-rest-search-api-response-schema';
 import { GetGeocodingApiRequestSchema } from '../../interfaces/get-geocoding-api-request-schema';
@@ -28,7 +26,7 @@ export class RestaurantsService {
     private readonly httpClientService: HttpClientService
   ) {}
 
-  public async findByKeys(
+  public async findAllByKeys(
     getRestaurantsInDto: GetRestaurantsInDto
   ): Promise<GetRestaurantsOutDto> {
     let latitude, longitude: number;

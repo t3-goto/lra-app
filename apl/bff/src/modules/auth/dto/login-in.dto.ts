@@ -1,18 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class LoginInDto {
-  @ApiProperty()
-  userId: number;
-
-  @ApiProperty()
+  @ApiProperty({
+    description: 'Username you want to login.',
+  })
   username: string;
 
-  @ApiProperty()
-  isActive: boolean;
-
-  @ApiProperty()
-  createdAt: string;
-
-  @ApiProperty()
-  updatedAt: string;
+  @ApiProperty({
+    description: 'Password you want to login.',
+  })
+  password: string;
 }
