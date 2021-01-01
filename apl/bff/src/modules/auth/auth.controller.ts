@@ -1,27 +1,60 @@
-import { Controller, Request, Post, Get, UseGuards } from '@nestjs/common';
-import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import {
+  Controller,
+  Request,
+  Post,
+  Get,
+  UseGuards,
+  Body,
+} from '@nestjs/common';
+import {
+  ApiCreatedResponse,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
-import { LoginInDto } from './dto/login-in.dto';
-import { LoginOutDto } from './dto/login-out.dto';
-import { ProfileInDto } from './dto/profile-in.dto';
-import { ProfileOutDto } from './dto/profile-out.dto';
+import { LocalAuthGuard, JwtAuthGuard } from './guards';
+import {
+  ValidateUserOutDto,
+  ValidateJwtOutDto,
+  LoginInDto,
+  LoginOutDto,
+  ProfileOutDto,
+  GetTokenInDto,
+  GetProfileInDto,
+} from './dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @ApiCreatedResponse({ description: 'Created.', type: LoginOutDto })
+  @ApiUnauthorizedResponse({ description: 'Uauthorized.' })
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req): Promise<LoginOutDto> {
-    const loginInDto = req.user as LoginInDto;
-    return this.authService.login(loginInDto);
+  async login(
+    @Request() req,
+    @Body() loginInDto: LoginInDto
+  ): Promise<LoginOutDto> {
+    const validateUserOutDto = req.user as ValidateUserOutDto;
+    const getTokenInDto = validateUserOutDto as GetTokenInDto;
+    console.log(JSON.stringify(getTokenInDto));
+    const getTokenOutDto = await this.authService.getToken(getTokenInDto);
+    return new LoginOutDto(getTokenOutDto.access_token);
   }
 
+  @ApiBearerAuth()
+  @ApiOkResponse({ description: 'OK.', type: ProfileOutDto })
+  @ApiUnauthorizedResponse({ description: 'Uauthorized.' })
   @UseGuards(JwtAuthGuard)
   @Get('profile')
   async profile(@Request() req): Promise<ProfileOutDto> {
-    const profileInDto = req.user as ProfileInDto;
-    return this.authService.profile(profileInDto);
+    const validateJwtOutDto = req.user as ValidateJwtOutDto;
+    const getProfileInDto = validateJwtOutDto as GetProfileInDto;
+    const getProfileOutDto = await this.authService.getProfile(getProfileInDto);
+    return new ProfileOutDto(
+      getProfileOutDto.userId,
+      getProfileOutDto.username
+    );
   }
 }

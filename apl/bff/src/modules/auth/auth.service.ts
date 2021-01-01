@@ -2,12 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { UtilService } from '../../common/util/util.service';
-import { ValidateUserInDto } from './dto/validate-user-in.dto';
-import { ValidateUserOutDto } from './dto/validate-user-out.dto';
-import { LoginInDto } from './dto/login-in.dto';
-import { LoginOutDto } from './dto/login-out.dto';
-import { ProfileInDto } from './dto/profile-in.dto';
-import { ProfileOutDto } from './dto/profile-out.dto';
+import {
+  ValidateUserInDto,
+  ValidateUserOutDto,
+  ValidateJwtInDto,
+  ValidateJwtOutDto,
+  GetTokenInDto,
+  GetTokenOutDto,
+  GetProfileInDto,
+  GetProfileOutDto,
+} from './dto';
 
 @Injectable()
 export class AuthService {
@@ -16,10 +20,10 @@ export class AuthService {
     private jwtService: JwtService
   ) {}
 
-  async validateUser(
+  public async validateUser(
     validateUserInDto: ValidateUserInDto
   ): Promise<ValidateUserOutDto> {
-    const user = await this.usersService.findByUsername(
+    const user = await this.usersService.findOneByUsername(
       validateUserInDto.username
     );
     if (
@@ -32,18 +36,29 @@ export class AuthService {
     return null;
   }
 
-  async login(loginInDto: LoginInDto): Promise<LoginOutDto> {
-    const payload = {
-      username: loginInDto.username,
-      sub: loginInDto.userId,
-    };
-    const loginOutDto = new LoginOutDto();
-    loginOutDto.access_token = this.jwtService.sign(payload);
-    return loginOutDto;
+  public async validateJwt(
+    validateJwtInDto: ValidateJwtInDto
+  ): Promise<ValidateJwtOutDto> {
+    const validateJwtOutDto = new ValidateJwtOutDto();
+    validateJwtOutDto.username = validateJwtInDto.payload.username;
+    validateJwtOutDto.userId = validateJwtInDto.payload.sub;
+    return validateJwtOutDto;
   }
 
-  async profile(profileInDto: ProfileInDto): Promise<ProfileOutDto> {
-    const profileOutDto = profileInDto as ProfileOutDto;
-    return profileOutDto;
+  public async getToken(getTokenInDto: GetTokenInDto): Promise<GetTokenOutDto> {
+    const payload = {
+      username: getTokenInDto.username,
+      sub: getTokenInDto.userId,
+    };
+    const getTokenOutDto = new GetTokenOutDto();
+    getTokenOutDto.access_token = this.jwtService.sign(payload);
+    return getTokenOutDto;
+  }
+
+  public async getProfile(
+    getProfileInDto: GetProfileInDto
+  ): Promise<GetProfileOutDto> {
+    const getProfileOutDto = getProfileInDto as GetProfileOutDto;
+    return getProfileOutDto;
   }
 }

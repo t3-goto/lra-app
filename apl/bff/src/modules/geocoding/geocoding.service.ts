@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from './../../core/config/config.service';
 import { HttpClientService } from 'src/shared/http-client/http-client.service';
-import { GetGeocodingInDto } from './dto/get-geocoding-in.dto';
-import { GetGeocodingOutDto } from './dto/get-geocoding-out.dto';
+import { GetGeocodingInDto, GetGeocodingOutDto } from './dto';
 import { GoogleGeocodingApiRequestSchema } from '../../interfaces/google-geocoding-api-request-schema';
 import { GoogleGeocodingApiResponseSchema } from '../../interfaces/google-geocoding-api-response-schema';
 
@@ -12,7 +11,8 @@ export class GeocodingService {
     private readonly configService: ConfigService,
     private readonly httpClientService: HttpClientService
   ) {}
-  async findByKeys(
+
+  public async findOneByKeys(
     getGeocodingInDto: GetGeocodingInDto
   ): Promise<GetGeocodingOutDto> {
     const googleGeocodingUrl = this.configService.get(

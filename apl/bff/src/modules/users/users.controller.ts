@@ -1,34 +1,54 @@
 import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
-import { CreateUserInDto } from './dto/create-user-in.dto';
-import { CreateUserOutDto } from './dto/create-user-out.dto';
-import { GetUsersOutDto } from './dto/get-users-out.dto';
-import { GetUserOutDto } from './dto/get-user-out.dto';
-import { DeleteUserOutDto } from './dto/delete-user-out.dto';
+import {
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiBadRequestResponse,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
+import {
+  CreateUserInDto,
+  CreateUserOutDto,
+  GetUsersOutDto,
+  GetUserInDto,
+  GetUserOutDto,
+  DeleteUserInDto,
+  DeleteUserOutDto,
+} from './dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @ApiCreatedResponse({ description: 'OK.', type: CreateUserOutDto })
+  @ApiBadRequestResponse({ description: 'Bad Request.' })
   @Post()
-  async create(
+  public async create(
     @Body() createUserInDto: CreateUserInDto
   ): Promise<CreateUserOutDto> {
     return this.usersService.create(createUserInDto);
   }
 
+  @ApiOkResponse({ description: 'OK.', type: GetUsersOutDto })
   @Get()
-  async findAll(): Promise<GetUsersOutDto> {
+  public async findAll(): Promise<GetUsersOutDto> {
     return this.usersService.findAll();
   }
 
-  @Get(':id')
-  async findOne(@Param('id') userId: string): Promise<GetUserOutDto> {
-    return this.usersService.findOne(userId);
+  @ApiOkResponse({ description: 'OK.', type: GetUserOutDto })
+  @ApiBadRequestResponse({ description: 'Bad Request.' })
+  @Get(':userId')
+  public async findOne(
+    @Param() getUserInDto: GetUserInDto
+  ): Promise<GetUserOutDto> {
+    return this.usersService.findOne(getUserInDto);
   }
 
-  @Delete(':id')
-  async remove(@Param('id') userId: string): Promise<DeleteUserOutDto> {
-    return this.usersService.remove(userId);
+  @ApiOkResponse({ description: 'OK.', type: DeleteUserOutDto })
+  @ApiBadRequestResponse({ description: 'Bad Request.' })
+  @Delete(':userId')
+  public async delete(
+    @Param() deleteUserInDto: DeleteUserInDto
+  ): Promise<DeleteUserOutDto> {
+    return this.usersService.delete(deleteUserInDto);
   }
 }
