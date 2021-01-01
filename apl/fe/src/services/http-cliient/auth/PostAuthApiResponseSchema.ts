@@ -1,3 +1,3 @@
 export type PostAuthApiResponseSchema = {
-  access_token: string;
+  accessToken: string;
 };

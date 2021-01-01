@@ -50,7 +50,7 @@ export function* handleRequestLogin() {
       yield put(failureLogin(error.message));
       continue;
     }
-    yield put(successLogin(payload.access_token));
+    yield put(successLogin(payload.accessToken));
     yield take(REQUEST_LOGOUT);
     yield put(successLogout());
   }

@@ -1,3 +1,7 @@
 export class GetTokenOutDto {
-  access_token: string;
+  accessToken: string;
+
+  constructor(accessToken: string) {
+    this.accessToken = accessToken;
+  }
 }
