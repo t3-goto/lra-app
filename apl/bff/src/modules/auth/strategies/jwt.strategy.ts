@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './../auth.service';
 import { ConfigService } from 'src/core/config/config.service';
 import { ValidateJwtInDto, ValidateJwtOutDto } from '../dto';
@@ -19,11 +19,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   public async validate(payload: any): Promise<ValidateJwtOutDto> {
-    const validateJwtInDto = new ValidateJwtInDto();
-    validateJwtInDto.payload = payload;
+    const validateJwtInDto = new ValidateJwtInDto(payload);
     const validateJwtOutDto = await this.authService.validateJwt(
       validateJwtInDto
     );
+    if (!validateJwtOutDto) {
+      throw new UnauthorizedException();
+    }
     return validateJwtOutDto;
   }
 }

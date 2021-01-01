@@ -39,10 +39,15 @@ export class AuthService {
   public async validateJwt(
     validateJwtInDto: ValidateJwtInDto
   ): Promise<ValidateJwtOutDto> {
-    const validateJwtOutDto = new ValidateJwtOutDto();
-    validateJwtOutDto.username = validateJwtInDto.payload.username;
-    validateJwtOutDto.userId = validateJwtInDto.payload.sub;
-    return validateJwtOutDto;
+    const user = await this.usersService.findOneByUsername(
+      validateJwtInDto.payload.username
+    );
+    if (user) {
+      const { userId, username, ..._ } = user;
+      const validateJwtOutDto = new ValidateJwtOutDto(userId, username);
+      return validateJwtOutDto;
+    }
+    return null;
   }
 
   public async getToken(getTokenInDto: GetTokenInDto): Promise<GetTokenOutDto> {
@@ -50,9 +55,7 @@ export class AuthService {
       username: getTokenInDto.username,
       sub: getTokenInDto.userId,
     };
-    const getTokenOutDto = new GetTokenOutDto();
-    getTokenOutDto.access_token = this.jwtService.sign(payload);
-    return getTokenOutDto;
+    return new GetTokenOutDto(this.jwtService.sign(payload));
   }
 
   public async getProfile(

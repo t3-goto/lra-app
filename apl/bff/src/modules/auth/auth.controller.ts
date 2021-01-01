@@ -40,7 +40,7 @@ export class AuthController {
     const getTokenInDto = validateUserOutDto as GetTokenInDto;
     console.log(JSON.stringify(getTokenInDto));
     const getTokenOutDto = await this.authService.getToken(getTokenInDto);
-    return new LoginOutDto(getTokenOutDto.access_token);
+    return new LoginOutDto(getTokenOutDto.accessToken);
   }
 
   @ApiBearerAuth()

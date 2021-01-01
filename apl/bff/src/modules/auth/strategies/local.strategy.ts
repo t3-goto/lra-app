@@ -14,9 +14,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     username: string,
     password: string
   ): Promise<ValidateUserOutDto> {
-    const validateUserInDto = new ValidateUserInDto();
-    validateUserInDto.username = username;
-    validateUserInDto.password = password;
+    const validateUserInDto = new ValidateUserInDto(username, password);
     const validateUserOutDto = await this.authService.validateUser(
       validateUserInDto
     );
