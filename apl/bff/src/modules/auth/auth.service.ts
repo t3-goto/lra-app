@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { UtilService } from '../../common/util/util.service';
 import {
@@ -12,20 +11,35 @@ import {
   GetProfileInDto,
   GetProfileOutDto,
 } from './dto';
+import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
+import { rpc } from 'codegen/grpc';
+import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
+import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
 
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private readonly grpcClientService: GrpcClientService
   ) {}
 
   public async validateUser(
     validateUserInDto: ValidateUserInDto
   ): Promise<ValidateUserOutDto> {
-    const user = await this.usersService.findOneByUsername(
-      validateUserInDto.username
-    );
+    let user: GetUserByUsernameResponse;
+    const username = validateUserInDto.username;
+    const getUserByUsernameRequest = GetUserByUsernameRequest.create({
+      username,
+    });
+    try {
+      const grpcResponse = await this.grpcClientService.getUserByUsername(
+        getUserByUsernameRequest
+      );
+      user = grpcResponse;
+    } catch (error) {
+      return null;
+    }
+
     if (
       user &&
       UtilService.validateHash(validateUserInDto.password, user.password)
@@ -39,9 +53,20 @@ export class AuthService {
   public async validateJwt(
     validateJwtInDto: ValidateJwtInDto
   ): Promise<ValidateJwtOutDto> {
-    const user = await this.usersService.findOneByUsername(
-      validateJwtInDto.payload.username
-    );
+    let user: GetUserByUsernameResponse;
+    const username = validateJwtInDto.payload.username;
+    const getUserByUsernameRequest = GetUserByUsernameRequest.create({
+      username,
+    });
+    try {
+      const grpcResponse = await this.grpcClientService.getUserByUsername(
+        getUserByUsernameRequest
+      );
+      user = grpcResponse;
+    } catch (error) {
+      return null;
+    }
+
     if (user) {
       const { userId, username, ..._ } = user;
       const validateJwtOutDto = new ValidateJwtOutDto(userId, username);

@@ -8,6 +8,8 @@ import {
   GetUsersOutDto,
   GetUserInDto,
   GetUserOutDto,
+  GetUserByUsernameInDto,
+  GetUserByUsernameOutDto,
   DeleteUserInDto,
   DeleteUserOutDto,
 } from './dto';
@@ -48,6 +50,16 @@ export class UsersService {
     return getUserOutDto;
   }
 
+  public async findOneByUsername(
+    getUserByUsernameInDto: GetUserByUsernameInDto
+  ): Promise<GetUserByUsernameOutDto> {
+    const user = await this.usersRepository.findOne({
+      username: getUserByUsernameInDto.username,
+    });
+    const getUserOutDto = user;
+    return getUserOutDto;
+  }
+
   public async delete(
     deleteUserInDto: DeleteUserInDto
   ): Promise<DeleteUserOutDto> {
@@ -58,9 +70,5 @@ export class UsersService {
     await this.usersRepository.delete(deleteUserInDto.userId);
     const deleteUserOutDto = user;
     return deleteUserOutDto;
-  }
-
-  public async findOneByUsername(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ username: username });
   }
 }

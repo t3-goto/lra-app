@@ -4,8 +4,13 @@ import {
   ApiBadRequestResponse,
   ApiNotFoundResponse,
 } from '@nestjs/swagger';
+import { GrpcMethod } from '@nestjs/microservices';
+import { Metadata, ServerUnaryCall } from 'grpc';
 import { RestaurantsService } from './restaurants.service';
 import { GetRestaurantsInDto, GetRestaurantsOutDto } from './dto';
+import { rpc } from 'codegen/grpc';
+import GetRestaurantsRequest = rpc.GetRestaurantsRequest;
+import GetRestaurantsResponse = rpc.GetRestaurantsResponse;
 
 @Controller('restaurants')
 export class RestaurantsController {
@@ -19,5 +24,19 @@ export class RestaurantsController {
     @Query() getRestaurantsInDto: GetRestaurantsInDto
   ): Promise<GetRestaurantsOutDto> {
     return this.restaurantsService.findAllByKeys(getRestaurantsInDto);
+  }
+
+  @GrpcMethod('RestaurantsService', 'GetRestaurants')
+  public async findAllByKeysGrpc(
+    request: GetRestaurantsRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<GetRestaurantsResponse> {
+    const getRestaurantsInDto = request as GetRestaurantsInDto;
+    const getRestaurantsOutDto = await this.restaurantsService.findAllByKeys(
+      getRestaurantsInDto
+    );
+    const response = getRestaurantsOutDto as GetRestaurantsResponse;
+    return response;
   }
 }

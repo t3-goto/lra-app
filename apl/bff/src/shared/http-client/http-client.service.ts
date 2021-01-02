@@ -10,9 +10,6 @@ export class HttpClientService {
     private readonly httpService: HttpService,
     private readonly customLogger: CustomLogger
   ) {}
-  public get<S>(url: string) {
-    return this.httpService.get<S>(url).toPromise();
-  }
 
   /** @param {string} url */
   public getAll<S>(url: string) {
@@ -32,9 +29,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -56,9 +51,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -80,9 +73,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -104,9 +95,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -128,9 +117,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -152,9 +139,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /** @param {string} url */
@@ -176,9 +161,7 @@ export class HttpClientService {
         this.customLogger.info(JSON.stringify(httpLoggingResInfo));
         return this.successCallback(response);
       })
-      .catch((error) => {
-        throw new HttpError(error);
-      });
+      .catch(this.errorCallback);
   }
 
   /**
@@ -186,5 +169,12 @@ export class HttpClientService {
    */
   private successCallback<S>(response: AxiosResponse<S>): S {
     return response.data;
+  }
+
+  /**
+   * Error Callback.
+   */
+  private errorCallback(error: any): null {
+    throw new HttpError(error);
   }
 }

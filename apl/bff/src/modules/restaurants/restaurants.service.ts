@@ -8,8 +8,6 @@ import { HttpClientService } from 'src/shared/http-client/http-client.service';
 import { GetRestaurantsInDto, GetRestaurantsOutDto, Restaurant } from './dto';
 import { GnaviRestSearchApiRequestSchema } from '../../interfaces/gnavi-rest-search-api-request-schema';
 import { GnaviRestSearchApiResponseSchema } from '../../interfaces/gnavi-rest-search-api-response-schema';
-import { GetGeocodingApiRequestSchema } from '../../interfaces/get-geocoding-api-request-schema';
-import { GetGeocodingApiResponseSchema } from '../../interfaces/get-geocoding-api-response-schema';
 import {
   DEFAULT_RANGE,
   DEFAULT_HIT_PER_PAGE,
@@ -19,11 +17,16 @@ import {
   BAD_REQUEST,
   FindMode,
 } from './constants';
+import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
+import { rpc } from 'codegen/grpc';
+import GetGeocodingRequest = rpc.GetGeocodingRequest;
+
 @Injectable()
 export class RestaurantsService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly httpClientService: HttpClientService
+    private readonly httpClientService: HttpClientService,
+    private readonly grpcClientService: GrpcClientService
   ) {}
 
   public async findAllByKeys(
@@ -99,16 +102,12 @@ export class RestaurantsService {
   private async getLatLngByAddress(
     address: string
   ): Promise<{ latitude: number; longitude: number }> {
-    const geocodingUrl = `${this.configService.get('HTTP_URL_GEOCODING')}`;
-    const getGeocodingApiRequestSchema: GetGeocodingApiRequestSchema = {
-      address,
-    };
+    const getGeocodingRequest = GetGeocodingRequest.create({ address });
     try {
-      const httpResponse = await this.httpClientService.getAllByQuery<
-        GetGeocodingApiRequestSchema,
-        GetGeocodingApiResponseSchema
-      >(geocodingUrl, getGeocodingApiRequestSchema);
-      const { latitude, longitude } = httpResponse;
+      const grpcResponse = await this.grpcClientService.getGeocoding(
+        getGeocodingRequest
+      );
+      const { latitude, longitude } = grpcResponse;
       return { latitude, longitude };
     } catch (error) {
       throw new NotFoundException(error.message);
