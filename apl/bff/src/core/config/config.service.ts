@@ -14,6 +14,8 @@ import * as redisStore from 'cache-manager-redis-store';
 import { HttpModuleOptions } from '@nestjs/common';
 // JwtModule
 import { JwtModuleOptions } from '@nestjs/jwt';
+// Grpc
+import { GrpcOptions, ClientOptions, Transport } from '@nestjs/microservices';
 
 @Injectable()
 export class ConfigService {
@@ -34,6 +36,10 @@ export class ConfigService {
 
   public get(key: string): string {
     return process.env[key] || this.envConfig[key];
+  }
+
+  public getArray(key: string, delimiter = ','): string[] {
+    return this.get(key).split(delimiter) || [];
   }
 
   public get isDevelopment(): boolean {
@@ -132,6 +138,92 @@ export class ConfigService {
       secret: this.get('JWT_SECRET'),
       signOptions: {
         expiresIn: this.getNumber('JWT_EXPIRES_IN'),
+      },
+    };
+  }
+
+  /**
+   * Grpc Server Options.
+   */
+  get grpcServerOptions(): GrpcOptions {
+    const protoDir = path.join(__dirname, '../../..', 'protos');
+    const protoPath = this.getArray('GRPC_SV_PROTOS');
+    const url = `${this.get('GRPC_SV_HOST')}:${this.get('GRPC_SV_PORT')}`;
+    return {
+      transport: Transport.GRPC,
+      options: {
+        package: this.get('GRPC_SV_PAKAGE'),
+        protoPath,
+        url,
+        loader: {
+          includeDirs: [protoDir],
+        },
+      },
+    };
+  }
+
+  /**
+   * Grpc Client Options For Geocoding.
+   */
+  get grpcClientGeocodingOptions(): ClientOptions {
+    const protoDir = path.join(__dirname, '../../..', 'protos');
+    const protoPath = this.getArray('GRPC_CL_GEOCODING_PROTOS');
+    const url = `${this.get('GRPC_CL_GEOCODING_HOST')}:${this.get(
+      'GRPC_CL_GEOCODING_PORT'
+    )}`;
+    return {
+      transport: Transport.GRPC,
+      options: {
+        package: this.get('GRPC_CL_GEOCODING_PAKAGE'),
+        protoPath,
+        url,
+        loader: {
+          includeDirs: [protoDir],
+        },
+      },
+    };
+  }
+
+  /**
+   * Grpc Client Options For Restaurants.
+   */
+  get grpcClientRestaurantsOptions(): ClientOptions {
+    const protoDir = path.join(__dirname, '../../..', 'protos');
+    const protoPath = this.getArray('GRPC_CL_RESTAURANTS_PROTOS');
+    const url = `${this.get('GRPC_CL_RESTAURANTS_HOST')}:${this.get(
+      'GRPC_CL_RESTAURANTS_PORT'
+    )}`;
+    return {
+      transport: Transport.GRPC,
+      options: {
+        package: this.get('GRPC_CL_RESTAURANTS_PAKAGE'),
+        protoPath,
+        url,
+        loader: {
+          includeDirs: [protoDir],
+        },
+      },
+    };
+  }
+
+  /**
+   * Grpc Client Options For Users.
+   */
+  get grpcClientUsersOptions(): ClientOptions {
+    const protoDir = path.join(__dirname, '../../..', 'protos');
+    const protoPath = this.getArray('GRPC_CL_USERS_PROTOS');
+    const url = `${this.get('GRPC_CL_USERS_HOST')}:${this.get(
+      'GRPC_CL_USERS_PORT'
+    )}`;
+    return {
+      transport: Transport.GRPC,
+      options: {
+        package: this.get('GRPC_CL_USERS_PAKAGE'),
+        protoPath,
+        url,
+        loader: {
+          includeDirs: [protoDir],
+        },
       },
     };
   }

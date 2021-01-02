@@ -1,9 +1,19 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Query,
+} from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiCreatedResponse,
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
+import { GrpcMethod } from '@nestjs/microservices';
+import { Metadata, ServerUnaryCall } from 'grpc';
 import { UsersService } from './users.service';
 import {
   CreateUserInDto,
@@ -11,9 +21,21 @@ import {
   GetUsersOutDto,
   GetUserInDto,
   GetUserOutDto,
+  GetUserByUsernameInDto,
   DeleteUserInDto,
   DeleteUserOutDto,
 } from './dto';
+import { rpc } from 'codegen/grpc';
+import PostUserRequest = rpc.PostUserRequest;
+import PostUserResponse = rpc.PostUserResponse;
+import GetUsersRequest = rpc.GetUsersRequest;
+import GetUsersResponse = rpc.GetUsersResponse;
+import GetUserRequest = rpc.GetUserRequest;
+import GetUserResponse = rpc.GetUserResponse;
+import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
+import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
+import DeleteUserRequest = rpc.DeleteUserRequest;
+import DeleteUserResponse = rpc.DeleteUserResponse;
 
 @Controller('users')
 export class UsersController {
@@ -28,10 +50,34 @@ export class UsersController {
     return this.usersService.create(createUserInDto);
   }
 
+  @GrpcMethod('UsersService', 'PostUser')
+  public async createGrpc(
+    request: PostUserRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<PostUserResponse> {
+    const createUserInDto = request as CreateUserInDto;
+    const createUserOutDto = await this.usersService.create(createUserInDto);
+    const response = createUserOutDto as PostUserResponse;
+    return response;
+  }
+
   @ApiOkResponse({ description: 'OK.', type: GetUsersOutDto })
   @Get()
   public async findAll(): Promise<GetUsersOutDto> {
     return this.usersService.findAll();
+  }
+
+  @GrpcMethod('UsersService', 'GetUsers')
+  public async findAllGrpc(
+    request: GetUsersRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<GetUsersResponse> {
+    console.log(metadata);
+    const getUsersOutDto = await this.usersService.findAll();
+    const response = getUsersOutDto as GetUsersResponse;
+    return response;
   }
 
   @ApiOkResponse({ description: 'OK.', type: GetUserOutDto })
@@ -43,6 +89,32 @@ export class UsersController {
     return this.usersService.findOne(getUserInDto);
   }
 
+  @GrpcMethod('UsersService', 'GetUser')
+  public async findOneGrpc(
+    request: GetUserRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<GetUserResponse> {
+    const getUserInDto = request as GetUserInDto;
+    const getUserOutDto = await this.usersService.findOne(getUserInDto);
+    const response = getUserOutDto as GetUserResponse;
+    return response;
+  }
+
+  @GrpcMethod('UsersService', 'GetUserByUsername')
+  public async findOneByUsernameGrpc(
+    request: GetUserByUsernameRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<GetUserByUsernameResponse> {
+    const getUserByUsernameInDto = request as GetUserByUsernameInDto;
+    const getUserByUsernameOutDto = await this.usersService.findOneByUsername(
+      getUserByUsernameInDto
+    );
+    const response = getUserByUsernameOutDto as GetUserByUsernameResponse;
+    return response;
+  }
+
   @ApiOkResponse({ description: 'OK.', type: DeleteUserOutDto })
   @ApiBadRequestResponse({ description: 'Bad Request.' })
   @Delete(':userId')
@@ -50,5 +122,17 @@ export class UsersController {
     @Param() deleteUserInDto: DeleteUserInDto
   ): Promise<DeleteUserOutDto> {
     return this.usersService.delete(deleteUserInDto);
+  }
+
+  @GrpcMethod('UsersService', 'DeleteUser')
+  public async deleteGrpc(
+    request: DeleteUserRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<DeleteUserResponse> {
+    const deleteUserInDto = request as DeleteUserInDto;
+    const deleteUserOutDto = await this.usersService.delete(deleteUserInDto);
+    const response = deleteUserOutDto as DeleteUserResponse;
+    return response;
   }
 }

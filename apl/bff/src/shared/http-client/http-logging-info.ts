@@ -4,10 +4,9 @@ type HttpLoggingType = typeof HTTP_REQ | typeof HTTP_RES;
 
 export type HttpLoggingInfo = {
   type: HttpLoggingType;
-  url?: string;
+  url: string;
   id?: string;
   model?: any;
-  error?: any;
   header?: any;
   status?: any;
   data?: any;

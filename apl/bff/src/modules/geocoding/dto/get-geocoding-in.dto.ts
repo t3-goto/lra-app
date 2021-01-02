@@ -7,4 +7,8 @@ export class GetGeocodingInDto {
   })
   @IsString()
   address: string;
+
+  constructor(address: string) {
+    this.address = address;
+  }
 }

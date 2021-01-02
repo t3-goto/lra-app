@@ -2,7 +2,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
 import { ConfigService } from './core/config/config.service';
-import { Transport } from '@nestjs/microservices';
+import { GrpcOptions } from '@nestjs/microservices';
 import {
   NestExpressApplication,
   ExpressAdapter,
@@ -57,22 +57,14 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   app.useGlobalInterceptors(new LoggingInterceptor(app.get(CustomLogger)));
   app.useGlobalInterceptors(new TimeoutInterceptor());
-
   app.useGlobalPipes(new ValidationPipe());
-
-  app.connectMicroservice({
-    transport: Transport.TCP,
-    options: {
-      port: configService.getNumber('MICROSERVICE_TCP_PORT'),
-      retryAttempts: configService.getNumber('MICROSERVICE_TCP_RETRY_ATTEMPTS'),
-      retryDelay: configService.getNumber('MICROSERVICE_TCP_DELAY'),
-    },
-  });
-  await app.startAllMicroservicesAsync();
 
   if (!configService.isProduction) {
     setupSwagger(app);
   }
-  await app.listen(configService.getNumber('PORT'));
+  await app.listen(configService.getNumber('HTTP_SV_PORT'));
+
+  app.connectMicroservice<GrpcOptions>(configService.grpcServerOptions);
+  await app.startAllMicroservicesAsync();
 }
 bootstrap();
