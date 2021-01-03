@@ -1,4 +1,4 @@
-import { Controller, Query, Get } from '@nestjs/common';
+import { Controller, Query, Get, UseInterceptors } from '@nestjs/common';
 import {
   ApiOkResponse,
   ApiBadRequestResponse,
@@ -6,6 +6,7 @@ import {
 } from '@nestjs/swagger';
 import { GrpcMethod } from '@nestjs/microservices';
 import { Metadata, ServerUnaryCall } from 'grpc';
+import { GrpcAccessLoggerInterceptor } from '../../interceptors/grpc-access-logger.interceptor';
 import { GeocodingService } from './geocoding.service';
 import { GetGeocodingInDto, GetGeocodingOutDto } from './dto';
 import { rpc } from 'codegen/grpc';
@@ -26,6 +27,7 @@ export class GeocodingController {
     return this.geocodingService.findOneByKeys(getGeocodingInDto);
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('GeocodingService', 'GetGeocoding')
   public async findOneByKeysGrpc(
     request: GetGeocodingRequest,

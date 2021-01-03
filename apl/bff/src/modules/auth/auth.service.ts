@@ -15,12 +15,14 @@ import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
 import { rpc } from 'codegen/grpc';
 import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
 import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
+import { CacheClientService } from '../../shared/cache-client/cache-client.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private readonly grpcClientService: GrpcClientService
+    private readonly grpcClientService: GrpcClientService,
+    private readonly cacheClientService: CacheClientService
   ) {}
 
   public async validateUser(

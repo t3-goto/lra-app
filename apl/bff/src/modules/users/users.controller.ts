@@ -5,7 +5,7 @@ import {
   Get,
   Param,
   Post,
-  Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiOkResponse,
@@ -14,6 +14,7 @@ import {
 } from '@nestjs/swagger';
 import { GrpcMethod } from '@nestjs/microservices';
 import { Metadata, ServerUnaryCall } from 'grpc';
+import { GrpcAccessLoggerInterceptor } from '../../interceptors/grpc-access-logger.interceptor';
 import { UsersService } from './users.service';
 import {
   CreateUserInDto,
@@ -50,6 +51,7 @@ export class UsersController {
     return this.usersService.create(createUserInDto);
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'PostUser')
   public async createGrpc(
     request: PostUserRequest,
@@ -68,13 +70,13 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUsers')
   public async findAllGrpc(
     request: GetUsersRequest,
     metadata: Metadata,
     call: ServerUnaryCall<any>
   ): Promise<GetUsersResponse> {
-    console.log(metadata);
     const getUsersOutDto = await this.usersService.findAll();
     const response = getUsersOutDto as GetUsersResponse;
     return response;
@@ -89,6 +91,7 @@ export class UsersController {
     return this.usersService.findOne(getUserInDto);
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUser')
   public async findOneGrpc(
     request: GetUserRequest,
@@ -101,6 +104,7 @@ export class UsersController {
     return response;
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUserByUsername')
   public async findOneByUsernameGrpc(
     request: GetUserByUsernameRequest,
@@ -124,6 +128,7 @@ export class UsersController {
     return this.usersService.delete(deleteUserInDto);
   }
 
+  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'DeleteUser')
   public async deleteGrpc(
     request: DeleteUserRequest,

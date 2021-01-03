@@ -8,14 +8,14 @@ import {
   ExpressAdapter,
 } from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { LoggingInterceptor } from './interceptors/logging.interceptor';
+import { HttpAccessLoggerInterceptor } from './interceptors/http-access-logger.interceptor';
 import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
 import * as helmet from 'helmet';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import * as rateLimit from 'express-rate-limit';
-import { CustomLogger } from './shared/custom-logger/custom-logger.service';
+import { HttpAccessLogger } from './shared/custom-logger';
 import {
   initializeTransactionalContext,
   patchTypeORMRepositoryWithBaseRepository,
@@ -23,6 +23,9 @@ import {
 import { setupSwagger } from './setup-swagger';
 
 async function bootstrap() {
+  /**
+   * Initialize Settings.
+   */
   initializeTransactionalContext();
   patchTypeORMRepositoryWithBaseRepository();
   const app = await NestFactory.create<NestExpressApplication>(
@@ -30,8 +33,11 @@ async function bootstrap() {
     new ExpressAdapter(),
     { cors: true }
   );
-  const configService = app.select(CoreModule).get(ConfigService);
 
+  /**
+   * Global Middleware For Http.
+   */
+  const configService = app.select(CoreModule).get(ConfigService);
   app.enable('trust proxy');
   app.setGlobalPrefix('api/v1');
   app.use(helmet());
@@ -52,18 +58,32 @@ async function bootstrap() {
   );
   app.use(cookieParser());
 
+  /**
+   * Global Interceptors For Http.
+   */
   const reflector = app.get(Reflector);
-
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
-  app.useGlobalInterceptors(new LoggingInterceptor(app.get(CustomLogger)));
+  app.useGlobalInterceptors(
+    new HttpAccessLoggerInterceptor(app.get(HttpAccessLogger))
+  );
   app.useGlobalInterceptors(new TimeoutInterceptor());
   app.useGlobalPipes(new ValidationPipe());
 
+  /**
+   * Swagger.
+   */
   if (!configService.isProduction) {
     setupSwagger(app);
   }
+
+  /**
+   * Http Server.
+   */
   await app.listen(configService.getNumber('HTTP_SV_PORT'));
 
+  /**
+   * gRPC Server.
+   */
   app.connectMicroservice<GrpcOptions>(configService.grpcServerOptions);
   await app.startAllMicroservicesAsync();
 }

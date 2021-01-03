@@ -1,8 +1,11 @@
 import { Injectable, OnModuleInit, Inject } from '@nestjs/common';
 import { ClientGrpc } from '@nestjs/microservices';
 import { GrpcError } from './grpc-error';
-import { CustomLogger } from '../custom-logger/custom-logger.service';
-import { GrpcLoggingInfo, GRPC_REQ, GRPC_RES } from './grpc-logging-info';
+import {
+  GrpcClientLogger,
+  createGrpcClientLoggerReqInfo,
+  createGrpcClientLoggerResInfo,
+} from '../custom-logger';
 import { rpc } from 'codegen/grpc';
 import GeocodingService = rpc.GeocodingService;
 import RestaurantsService = rpc.RestaurantsService;
@@ -39,7 +42,7 @@ export class GrpcClientService implements OnModuleInit {
   private METHOD_DELETE_USER = 'DeleteUser' as const;
 
   constructor(
-    private readonly customLogger: CustomLogger,
+    private readonly logger: GrpcClientLogger,
     @Inject('GRPC_GEOCODING') private clientGrpcGeocoding: ClientGrpc,
     @Inject('GRPC_RESTAURANTS') private clientGrpcRestaurants: ClientGrpc,
     @Inject('GRPC_USERS') private clientGrpcUsers: ClientGrpc
@@ -61,23 +64,26 @@ export class GrpcClientService implements OnModuleInit {
   public getGeocoding(
     request: GetGeocodingRequest
   ): Promise<GetGeocodingResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_GEOCODING,
-      method: this.METHOD_GET_GEOCODING,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_GEOCODING,
+        this.METHOD_GET_GEOCODING,
+        request
+      )
+    );
+    this.logger.info();
     return this.geocodingService
       .getGeocoding(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_GEOCODING,
+            this.METHOD_GET_GEOCODING,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -87,23 +93,26 @@ export class GrpcClientService implements OnModuleInit {
   public getRestaurants(
     request: GetRestaurantsRequest
   ): Promise<GetRestaurantsResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_RESTAURANTS,
-      method: this.METHOD_GET_RESTAURANTS,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_RESTAURANTS,
+        this.METHOD_GET_RESTAURANTS,
+        request
+      )
+    );
+    this.logger.info();
     return this.restaurantsService
       .getRestaurants(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_RESTAURANTS,
+            this.METHOD_GET_RESTAURANTS,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -111,23 +120,26 @@ export class GrpcClientService implements OnModuleInit {
 
   /** @param {PostUserRequest} request */
   public postUser(request: PostUserRequest): Promise<PostUserResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_USERS,
-      method: this.METHOD_POST_USER,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_USERS,
+        this.METHOD_POST_USER,
+        request
+      )
+    );
+    this.logger.info();
     return this.usersService
       .postUser(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_USERS,
+            this.METHOD_POST_USER,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -135,23 +147,26 @@ export class GrpcClientService implements OnModuleInit {
 
   /** @param {GetUsersRequest} request */
   public getUsers(request: GetUsersRequest): Promise<GetUsersResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_USERS,
-      method: this.METHOD_GET_USERS,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_USERS,
+        this.METHOD_GET_USERS,
+        request
+      )
+    );
+    this.logger.info();
     return this.usersService
       .getUsers(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_USERS,
+            this.METHOD_GET_USERS,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -159,23 +174,26 @@ export class GrpcClientService implements OnModuleInit {
 
   /** @param {GetUserRequest} request */
   public getUser(request: GetUserRequest): Promise<GetUserResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_USERS,
-      method: this.METHOD_GET_USER,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_USERS,
+        this.METHOD_GET_USER,
+        request
+      )
+    );
+    this.logger.info();
     return this.usersService
       .getUser(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_USERS,
+            this.METHOD_GET_USER,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -185,23 +203,26 @@ export class GrpcClientService implements OnModuleInit {
   public getUserByUsername(
     request: GetUserByUsernameRequest
   ): Promise<GetUserByUsernameResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_USERS,
-      method: this.METHOD_GET_USER_BY_USERNAME,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_USERS,
+        this.METHOD_GET_USER_BY_USERNAME,
+        request
+      )
+    );
+    this.logger.info();
     return this.usersService
       .getUserByUsername(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_USERS,
+            this.METHOD_GET_USER_BY_USERNAME,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
@@ -209,23 +230,26 @@ export class GrpcClientService implements OnModuleInit {
 
   /** @param {DeleteUserRequest} request */
   public deleteUser(request: DeleteUserRequest): Promise<DeleteUserResponse> {
-    const grpcLoggingReqInfo: GrpcLoggingInfo = {
-      type: GRPC_REQ,
-      service: this.SERVICE_USERS,
-      method: this.METHOD_DELETE_USER,
-      request,
-    };
-    this.customLogger.info(JSON.stringify(grpcLoggingReqInfo));
+    this.logger.setGrpcClientReqInfo(
+      createGrpcClientLoggerReqInfo(
+        this.SERVICE_USERS,
+        this.METHOD_DELETE_USER,
+        request
+      )
+    );
+    this.logger.info();
     return this.usersService
       .deleteUser(request)
       .toPromise()
       .then((response) => {
-        const grpcLoggingResInfo: GrpcLoggingInfo = {
-          ...grpcLoggingReqInfo,
-          type: GRPC_RES,
-          response,
-        };
-        this.customLogger.info(JSON.stringify(grpcLoggingResInfo));
+        this.logger.setGrpcClientResInfo(
+          createGrpcClientLoggerResInfo(
+            this.SERVICE_USERS,
+            this.METHOD_DELETE_USER,
+            response
+          )
+        );
+        this.logger.info();
         return this.successCallback(response);
       })
       .catch(this.errorCallback);
