@@ -1,16 +1,101 @@
 import { LoggerService, Injectable, Scope } from '@nestjs/common';
 import { Logger } from 'log4js';
-import { Request } from 'express';
 import { basename } from 'path';
 
 @Injectable({ scope: Scope.TRANSIENT })
-export class CustomLogger implements LoggerService {
-  constructor(private readonly logger: Logger) {}
+export class DefaultLogger implements LoggerService {
+  constructor(protected readonly logger: Logger) {}
 
-  setRequestInfo(req: Request) {
-    this.logger.addContext('ip', req.ip);
-    this.logger.addContext('method', req.method);
-    this.logger.addContext('uri', req.originalUrl);
+  setType(v: string) {
+    this.logger.addContext('type', v);
+  }
+
+  setIp(v: string) {
+    this.logger.addContext('ip', v);
+  }
+
+  setMethod(v: string) {
+    this.logger.addContext('method', v);
+  }
+
+  setUrl(v: string) {
+    this.logger.addContext('url', v);
+  }
+
+  setHeaders(v: string) {
+    this.logger.addContext('headers', v);
+  }
+
+  setBody(v: string) {
+    this.logger.addContext('body', v);
+  }
+
+  setStatusCode(v: string) {
+    this.logger.addContext('statusCode', v);
+  }
+
+  setCallClass(v: string) {
+    this.logger.addContext('callClass', v);
+  }
+
+  setCallFunc(v: string) {
+    this.logger.addContext('callFunc', v);
+  }
+
+  setMetadata(v: string) {
+    this.logger.addContext('metadata', v);
+  }
+
+  setGrpcData(v: string) {
+    this.logger.addContext('grpcData', v);
+  }
+
+  setHttpClientReqUrl(v: string) {
+    this.logger.addContext('httpClientReqUrl', v);
+  }
+
+  setHttpClientReqMethod(v: string) {
+    this.logger.addContext('httpClientReqMethod', v);
+  }
+
+  setHttpClientReqData(v: string) {
+    this.logger.addContext('httpClientReqData', v);
+  }
+
+  setHttpClientResStatusCode(v: string) {
+    this.logger.addContext('httpClientResStatusCode', v);
+  }
+
+  setHttpClientResData(v: string) {
+    this.logger.addContext('httpClientResData', v);
+  }
+
+  setGrpcClientReqService(v: string) {
+    this.logger.addContext('grpcClientReqService', v);
+  }
+
+  setGrpcClientReqMethod(v: string) {
+    this.logger.addContext('grpcClientReqMethod', v);
+  }
+
+  setGrpcClientReqData(v: string) {
+    this.logger.addContext('grpcClientReqData', v);
+  }
+
+  setGrpcClientResData(v: string) {
+    this.logger.addContext('grpcClientResData', v);
+  }
+
+  setCacheClientMethod(v: string) {
+    this.logger.addContext('cacheClientMethod', v);
+  }
+
+  setCacheClientKey(v: string) {
+    this.logger.addContext('cacheClientKey', v);
+  }
+
+  setCacheClientValue(v: string) {
+    this.logger.addContext('cacheClientValue', v);
   }
 
   log(message?: any, context?: string) {

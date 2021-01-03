@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import { RedisCacheModule } from './redis-cache/redis-cache.module';
+import { CacheClientModule } from './cache-client/cache-client.module';
 import { HttpClientModule } from './http-client/http-client.module';
 import { CustomLoggerModule } from './custom-logger/custom-logger.module';
 import { GrpcClientModule } from './grpc-client/grpc-client.module';
@@ -8,13 +8,13 @@ import { GrpcClientModule } from './grpc-client/grpc-client.module';
 @Module({
   providers: [],
   imports: [
-    RedisCacheModule,
+    CacheClientModule,
     HttpClientModule,
     CustomLoggerModule,
     GrpcClientModule,
   ],
   exports: [
-    RedisCacheModule,
+    CacheClientModule,
     HttpClientModule,
     CustomLoggerModule,
     GrpcClientModule,

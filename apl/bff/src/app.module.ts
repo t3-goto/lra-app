@@ -1,5 +1,4 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { RestaurantsModule } from './modules/restaurants/restaurants.module';
 import { GeocodingModule } from './modules/geocoding/geocoding.module';
@@ -29,6 +28,6 @@ import { ConfigService } from './core/config/config.service';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
+    consumer.apply().forRoutes('*');
   }
 }

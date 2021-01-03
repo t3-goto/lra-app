@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CustomLoggerService } from './custom-logger.service';
+import { CacheClientService } from './cache-client.service';
 
-describe('CustomLoggerService', () => {
-  let service: CustomLoggerService;
+describe('CacheClientService', () => {
+  let service: CacheClientService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CustomLoggerService],
+      providers: [CacheClientService],
     }).compile();
 
-    service = module.get<CustomLoggerService>(CustomLoggerService);
+    service = module.get<CacheClientService>(CacheClientService);
   });
 
   it('should be defined', () => {
