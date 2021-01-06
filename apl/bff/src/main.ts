@@ -2,7 +2,6 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { CoreModule } from './core/core.module';
 import { ConfigService } from './core/config/config.service';
-import { GrpcOptions } from '@nestjs/microservices';
 import {
   NestExpressApplication,
   ExpressAdapter,
@@ -80,11 +79,5 @@ async function bootstrap() {
    * Http Server.
    */
   await app.listen(configService.getNumber('HTTP_SV_PORT'));
-
-  /**
-   * gRPC Server.
-   */
-  app.connectMicroservice<GrpcOptions>(configService.grpcServerOptions);
-  await app.startAllMicroservicesAsync();
 }
 bootstrap();

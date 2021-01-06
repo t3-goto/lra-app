@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package rpc;
+
+service UsersService {
+  rpc PostUser (PostUserRequest) returns (PostUserResponse) {}
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse) {}
+  rpc GetUser (GetUserRequest) returns (GetUserResponse) {}
+  rpc GetUserByUsername (GetUserByUsernameRequest) returns (GetUserByUsernameResponse) {}
+  rpc DeleteUser (DeleteUserRequest) returns (DeleteUserResponse) {}
+}
+
+message PostUserRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message PostUserResponse {
+  int32 userId = 1;
+  string username = 2;
+  string password = 3;
+  bool isActive = 4;
+  string createdAt = 5;
+  string updatedAt =6;
+}
+
+message GetUsersRequest {
+}
+
+message GetUsersResponse {
+  repeated User users = 1;
+}
+
+message GetUserRequest {
+  int32 userId = 1;
+}
+
+message GetUserResponse {
+  int32 userId = 1;
+  string username = 2;
+  string password = 3;
+  bool isActive = 4;
+  string createdAt = 5;
+  string updatedAt =6;
+}
+
+message GetUserByUsernameRequest {
+  string username = 1;
+}
+
+message GetUserByUsernameResponse {
+  int32 userId = 1;
+  string username = 2;
+  string password = 3;
+  bool isActive = 4;
+  string createdAt = 5;
+  string updatedAt =6;
+}
+
+message DeleteUserRequest {
+  int32 userId = 1;
+}
+
+message DeleteUserResponse {
+  int32 userId = 1;
+  string username = 2;
+  string password = 3;
+  bool isActive = 4;
+  string createdAt = 5;
+  string updatedAt =6;
+}
+
+message User {
+  int32 userId = 1;
+  string username = 2;
+  string password = 3;
+  bool isActive = 4;
+  string createdAt = 5;
+  string updatedAt =6;
+}
+
+// message UserResponse {
+//   int32 userId = 1;
+//   string username = 2;
+//   string password = 3;
+//   bool isActive = 4;
+//   string createdAt = 5;
+//   string updatedAt =6;
+// }
+
+// message UsersResponse {
+//   repeated User users = 1;
+// }
