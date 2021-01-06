@@ -1,168 +1,44 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
-import { ConfigService } from './../../core/config/config.service';
-import { HttpClientService } from 'src/shared/http-client/http-client.service';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { GetRestaurantsInDto, GetRestaurantsOutDto, Restaurant } from './dto';
-import { GnaviRestSearchApiRequestSchema } from '../../interfaces/gnavi-rest-search-api-request-schema';
-import { GnaviRestSearchApiResponseSchema } from '../../interfaces/gnavi-rest-search-api-response-schema';
-import {
-  DEFAULT_RANGE,
-  DEFAULT_HIT_PER_PAGE,
-  DEFAULT_OFFSET_PAGE,
-  FIND_BY_LATLNG,
-  FIND_BY_ADDRESS,
-  BAD_REQUEST,
-  FindMode,
-} from './constants';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
 import { rpc } from 'codegen/grpc';
-import GetGeocodingRequest = rpc.GetGeocodingRequest;
+import GetRestaurantsRequest = rpc.GetRestaurantsRequest;
 
 @Injectable()
 export class RestaurantsService {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly httpClientService: HttpClientService,
-    private readonly grpcClientService: GrpcClientService
-  ) {}
+  constructor(private readonly grpcClientService: GrpcClientService) {}
 
+  /**
+   * REST: GET /restaurants
+   */
   public async findAllByKeys(
-    getRestaurantsInDto: GetRestaurantsInDto
+    inDto: GetRestaurantsInDto
   ): Promise<GetRestaurantsOutDto> {
-    let latitude, longitude: number;
-    switch (this.getFindMode(getRestaurantsInDto)) {
-      case FIND_BY_LATLNG: {
-        latitude = getRestaurantsInDto.latitude;
-        longitude = getRestaurantsInDto.longitude;
-        break;
-      }
-      case FIND_BY_ADDRESS: {
-        const retObj = await this.getLatLngByAddress(
-          getRestaurantsInDto.address
-        );
-        latitude = retObj.latitude;
-        longitude = retObj.longitude;
-        break;
-      }
-      default: {
-        throw new BadRequestException(`"Request failed with status code 400`);
-      }
-    }
-    const gnaviUrl = this.configService.get('HTTP_URL_GNAVI');
-    const keyid = this.configService.get('ACCESS_KEY_GNAVI');
-    const range = getRestaurantsInDto.range
-      ? getRestaurantsInDto.range
-      : DEFAULT_RANGE;
-    const hit_per_page = getRestaurantsInDto.hitPerPage
-      ? getRestaurantsInDto.hitPerPage
-      : DEFAULT_HIT_PER_PAGE;
-    const offset_page = getRestaurantsInDto.pageOffset
-      ? getRestaurantsInDto.pageOffset
-      : DEFAULT_OFFSET_PAGE;
-    const gnaviRestSearchApiRequestSchema: GnaviRestSearchApiRequestSchema = {
-      keyid,
+    const {
       latitude,
       longitude,
       range,
-      hit_per_page,
-      offset_page,
-    };
-    try {
-      const httpResponse = await this.httpClientService.getAllByQuery<
-        GnaviRestSearchApiRequestSchema,
-        GnaviRestSearchApiResponseSchema
-      >(gnaviUrl, gnaviRestSearchApiRequestSchema);
-      return this.createGetRestaurantsOutDto(httpResponse);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
-
-  private getFindMode(getRestaurantsInDto: GetRestaurantsInDto): FindMode {
-    if (
-      !!getRestaurantsInDto.latitude &&
-      !!getRestaurantsInDto.longitude &&
-      !getRestaurantsInDto.address
-    ) {
-      return FIND_BY_LATLNG;
-    } else if (
-      !getRestaurantsInDto.latitude &&
-      !getRestaurantsInDto.longitude &&
-      !!getRestaurantsInDto.address
-    ) {
-      return FIND_BY_ADDRESS;
-    } else {
-      return BAD_REQUEST;
-    }
-  }
-
-  private async getLatLngByAddress(
-    address: string
-  ): Promise<{ latitude: number; longitude: number }> {
-    const getGeocodingRequest = GetGeocodingRequest.create({ address });
-    try {
-      const grpcResponse = await this.grpcClientService.getGeocoding(
-        getGeocodingRequest
-      );
-      const { latitude, longitude } = grpcResponse;
-      return { latitude, longitude };
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
-
-  private createGetRestaurantsOutDto(
-    httpResponse: GnaviRestSearchApiResponseSchema
-  ): GetRestaurantsOutDto {
-    const totalHitCount = httpResponse.total_hit_count;
-    const hitPerPage = httpResponse.hit_per_page;
-    const pageOffset = httpResponse.page_offset;
-    const startItemNo = hitPerPage * (pageOffset - 1) + 1;
-    const lastItemNo = hitPerPage * pageOffset;
-    const isNext = totalHitCount >= lastItemNo;
-    const getRestaurantsOutDto = new GetRestaurantsOutDto();
-    getRestaurantsOutDto.isNext = isNext;
-    getRestaurantsOutDto.totalHitCount = totalHitCount;
-    getRestaurantsOutDto.startItemNo = startItemNo;
-    getRestaurantsOutDto.lastItemNo = lastItemNo;
-    getRestaurantsOutDto.restaurants = httpResponse.rest.map((restItem) => {
-      const restaurant = new Restaurant();
-      restaurant.order = restItem['@attributes'].order;
-      restaurant.id = restItem.id;
-      restaurant.updateAt = restItem.update_date;
-      restaurant.name = restItem.name;
-      restaurant.nameKana = restItem.name_kana;
-      restaurant.latitude = parseFloat(restItem.latitude);
-      restaurant.longitude = parseFloat(restItem.longitude);
-      restaurant.category = restItem.category;
-      restaurant.url = restItem.url;
-      restaurant.urlMobile = restItem.url_mobile;
-      restaurant.shopImage1 = restItem.image_url.shop_image1;
-      restaurant.shopImage2 = restItem.image_url.shop_image2;
-      restaurant.address = restItem.address;
-      restaurant.tel = restItem.tel;
-      restaurant.telSub = restItem.tel_sub;
-      restaurant.fax = restItem.fax;
-      restaurant.opentime = restItem.opentime;
-      restaurant.holiday = restItem.holiday;
-      restaurant.line = restItem.access.line;
-      restaurant.station = restItem.access.station;
-      restaurant.stationExit = restItem.access.station_exit;
-      restaurant.walk = restItem.access.walk;
-      restaurant.note = restItem.access.note;
-      restaurant.parkingLots = restItem.parking_lots;
-      restaurant.prShort = restItem.pr.pr_short;
-      restaurant.prLong = restItem.pr.pr_long;
-      restaurant.budget = restItem.budget;
-      restaurant.party = restItem.party;
-      restaurant.lunch = restItem.lunch;
-      restaurant.creditCard = restItem.credit_card;
-      restaurant.eMoney = restItem.e_money;
-      return restaurant;
+      hitPerPage,
+      pageOffset,
+      address,
+    } = inDto;
+    const request = GetRestaurantsRequest.create({
+      latitude,
+      longitude,
+      range,
+      hitPerPage,
+      pageOffset,
+      address,
     });
-    return getRestaurantsOutDto;
+    try {
+      const response = await this.grpcClientService.getRestaurants(request);
+      const restaurants = response.restaurants as Restaurant[];
+      return GetRestaurantsOutDto.create({
+        ...response,
+        restaurants,
+      });
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
 }

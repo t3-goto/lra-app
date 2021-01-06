@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package rpc;
+
+service GeocodingService {
+  rpc GetGeocoding (GetGeocodingRequest) returns (GetGeocodingResponse) {}
+}
+
+message GetGeocodingRequest {
+  string address = 1;
+}
+
+message GetGeocodingResponse {
+  double latitude = 1;
+  double longitude = 2;
+}

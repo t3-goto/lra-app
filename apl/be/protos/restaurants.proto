@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package rpc;
+
+service RestaurantsService {
+  rpc GetRestaurants (GetRestaurantsRequest) returns (GetRestaurantsResponse) {}
+}
+
+message GetRestaurantsRequest {
+  double latitude = 1;
+  double longitude = 2;
+  int32 range = 3;
+  int32 pageOffset = 4;
+  int32 hitPerPage = 5;
+  string address = 6;
+}
+
+message GetRestaurantsResponse {
+  bool isNext = 1;
+  int32 totalHitCount = 2;
+  int32 startItemNo = 3;
+  int32 lastItemNo = 4;
+  repeated Restaurant restaurants = 5;
+}
+
+message Restaurant {
+  int32 order = 1;
+  string id = 2;
+  string updateAt = 3;
+  string name = 4;
+  string nameKana = 5;
+  double latitude = 6;
+  double longitude = 7;
+  string category = 8;
+  string url = 9;
+  string urlMobile = 10;
+  string shopImage1 = 11;
+  string shopImage2 = 12;
+  string address = 13;
+  string tel = 14;
+  string telSub = 15;
+  string fax = 16;
+  string opentime = 17;
+  string holiday = 18;
+  string line = 19;
+  string station = 20;
+  string stationExit = 21;
+  string walk = 22;
+  string note = 23;
+  string parkingLots = 24;
+  string prShort = 25;
+  string prLong = 26;
+  int32 budget = 27;
+  int32 party =28;
+  int32 lunch = 29;
+  string creditCard = 30;
+  string eMoney = 31;
+}

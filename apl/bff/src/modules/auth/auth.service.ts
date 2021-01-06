@@ -15,56 +15,53 @@ import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
 import { rpc } from 'codegen/grpc';
 import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
 import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
-import { CacheClientService } from '../../shared/cache-client/cache-client.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private readonly grpcClientService: GrpcClientService,
-    private readonly cacheClientService: CacheClientService
+    private readonly grpcClientService: GrpcClientService
   ) {}
 
+  /**
+   * Guard: local
+   */
   public async validateUser(
-    validateUserInDto: ValidateUserInDto
+    inDto: ValidateUserInDto
   ): Promise<ValidateUserOutDto> {
     let user: GetUserByUsernameResponse;
-    const username = validateUserInDto.username;
-    const getUserByUsernameRequest = GetUserByUsernameRequest.create({
+    const username = inDto.username;
+    const request = GetUserByUsernameRequest.create({
       username,
     });
     try {
-      const grpcResponse = await this.grpcClientService.getUserByUsername(
-        getUserByUsernameRequest
-      );
-      user = grpcResponse;
+      const response = await this.grpcClientService.getUserByUsername(request);
+      user = response;
     } catch (error) {
       return null;
     }
 
-    if (
-      user &&
-      UtilService.validateHash(validateUserInDto.password, user.password)
-    ) {
+    if (user && UtilService.validateHash(inDto.password, user.password)) {
       const { password, ...result } = user;
       return result as ValidateUserOutDto;
     }
     return null;
   }
 
+  /**
+   * Guard: jwt
+   */
   public async validateJwt(
-    validateJwtInDto: ValidateJwtInDto
+    inDto: ValidateJwtInDto
   ): Promise<ValidateJwtOutDto> {
     let user: GetUserByUsernameResponse;
-    const username = validateJwtInDto.payload.username;
-    const getUserByUsernameRequest = GetUserByUsernameRequest.create({
+    const username = inDto.payload.username;
+    const request = GetUserByUsernameRequest.create({
       username,
     });
     try {
-      const grpcResponse = await this.grpcClientService.getUserByUsername(
-        getUserByUsernameRequest
-      );
-      user = grpcResponse;
+      const response = await this.grpcClientService.getUserByUsername(request);
+      user = response;
     } catch (error) {
       return null;
     }
@@ -77,18 +74,22 @@ export class AuthService {
     return null;
   }
 
-  public async getToken(getTokenInDto: GetTokenInDto): Promise<GetTokenOutDto> {
+  /**
+   * REST: POST /auth/login
+   */
+  public async getToken(inDto: GetTokenInDto): Promise<GetTokenOutDto> {
     const payload = {
-      username: getTokenInDto.username,
-      sub: getTokenInDto.userId,
+      username: inDto.username,
+      sub: inDto.userId,
     };
     return new GetTokenOutDto(this.jwtService.sign(payload));
   }
 
-  public async getProfile(
-    getProfileInDto: GetProfileInDto
-  ): Promise<GetProfileOutDto> {
-    const getProfileOutDto = getProfileInDto as GetProfileOutDto;
-    return getProfileOutDto;
+  /**
+   * REST: POST /auth/profile
+   */
+  public async getProfile(inDto: GetProfileInDto): Promise<GetProfileOutDto> {
+    const outDto = inDto as GetProfileOutDto;
+    return outDto;
   }
 }
