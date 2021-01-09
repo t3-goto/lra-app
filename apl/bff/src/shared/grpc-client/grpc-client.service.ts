@@ -10,20 +10,22 @@ import { rpc } from 'codegen/grpc';
 import GeocodingService = rpc.GeocodingService;
 import RestaurantsService = rpc.RestaurantsService;
 import UsersService = rpc.UsersService;
-import GetGeocodingRequest = rpc.GetGeocodingRequest;
-import GetGeocodingResponse = rpc.GetGeocodingResponse;
-import GetRestaurantsRequest = rpc.GetRestaurantsRequest;
-import GetRestaurantsResponse = rpc.GetRestaurantsResponse;
-import PostUserRequest = rpc.PostUserRequest;
-import PostUserResponse = rpc.PostUserResponse;
-import GetUsersRequest = rpc.GetUsersRequest;
-import GetUsersResponse = rpc.GetUsersResponse;
-import GetUserRequest = rpc.GetUserRequest;
-import GetUserResponse = rpc.GetUserResponse;
-import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
-import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
-import DeleteUserRequest = rpc.DeleteUserRequest;
-import DeleteUserResponse = rpc.DeleteUserResponse;
+import {
+  GetGeocodingRequest,
+  GetGeocodingResponse,
+  GetRestaurantsRequest,
+  GetRestaurantsResponse,
+  PostUserRequest,
+  PostUserResponse,
+  GetUsersRequest,
+  GetUsersResponse,
+  GetUserRequest,
+  GetUserResponse,
+  GetUserByUsernameRequest,
+  GetUserByUsernameResponse,
+  DeleteUserRequest,
+  DeleteUserResponse,
+} from '../../interfaces';
 
 @Injectable()
 export class GrpcClientService implements OnModuleInit {
