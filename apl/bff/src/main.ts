@@ -1,20 +1,22 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CoreModule } from './core/core.module';
+import { CONFIG_PATH } from './core/core.module';
 import { ConfigService } from './core/config/config.service';
 import {
   NestExpressApplication,
   ExpressAdapter,
 } from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { HttpAccessLoggerInterceptor } from './interceptors/http-access-logger.interceptor';
-import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
+import {
+  HttpAccessLoggerInterceptor,
+  HttpTimeoutInterceptor,
+} from './interceptors';
 import * as helmet from 'helmet';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import * as rateLimit from 'express-rate-limit';
-import { HttpAccessLogger } from './shared/custom-logger';
+import { HttpAccessLogger, DefaultLogger } from './shared/custom-logger';
 import {
   initializeTransactionalContext,
   patchTypeORMRepositoryWithBaseRepository,
@@ -23,10 +25,15 @@ import { setupSwagger } from './setup-swagger';
 
 async function bootstrap() {
   /**
-   * Initialize Settings.
+   * Transaction Settings.
    */
   initializeTransactionalContext();
   patchTypeORMRepositoryWithBaseRepository();
+
+  /**
+   * Initialize Settings For App.
+   */
+  const configService = new ConfigService({ folder: CONFIG_PATH });
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
@@ -36,7 +43,6 @@ async function bootstrap() {
   /**
    * Global Middleware For Http.
    */
-  const configService = app.select(CoreModule).get(ConfigService);
   app.enable('trust proxy');
   app.setGlobalPrefix('api/v1');
   app.use(helmet());
@@ -65,7 +71,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     new HttpAccessLoggerInterceptor(app.get(HttpAccessLogger))
   );
-  app.useGlobalInterceptors(new TimeoutInterceptor());
+  app.useGlobalInterceptors(new HttpTimeoutInterceptor());
   app.useGlobalPipes(new ValidationPipe());
 
   /**
@@ -76,8 +82,11 @@ async function bootstrap() {
   }
 
   /**
-   * Http Server.
+   * Start Http Server.
    */
+  const logger = app.get(DefaultLogger);
+  logger.setType('BOOT');
   await app.listen(configService.getNumber('HTTP_SV_PORT'));
+  logger.info('Http sever is listening.');
 }
 bootstrap();

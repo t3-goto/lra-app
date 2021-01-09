@@ -266,7 +266,6 @@ export class GrpcClientService implements OnModuleInit {
    * Error Callback.
    */
   private errorCallback(error: any): null {
-    console.log(JSON.stringify(error));
     throw new GrpcError(error);
   }
 }

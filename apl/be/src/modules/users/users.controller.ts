@@ -1,93 +1,27 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Param,
-  Post,
-  UseInterceptors,
-} from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiCreatedResponse,
-  ApiBadRequestResponse,
-} from '@nestjs/swagger';
+import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { Metadata, ServerUnaryCall } from 'grpc';
-import { GrpcAccessLoggerInterceptor } from '../../interceptors/grpc-access-logger.interceptor';
 import { UsersService } from './users.service';
 import {
-  CreateUserInDto,
-  CreateUserOutDto,
-  GetUsersOutDto,
-  GetUserInDto,
-  GetUserOutDto,
-  DeleteUserInDto,
-  DeleteUserOutDto,
-} from './dto';
-import { rpc } from 'codegen/grpc';
-import PostUserRequest = rpc.PostUserRequest;
-import PostUserResponse = rpc.PostUserResponse;
-import GetUsersRequest = rpc.GetUsersRequest;
-import GetUsersResponse = rpc.GetUsersResponse;
-import GetUserRequest = rpc.GetUserRequest;
-import GetUserResponse = rpc.GetUserResponse;
-import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
-import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
-import DeleteUserRequest = rpc.DeleteUserRequest;
-import DeleteUserResponse = rpc.DeleteUserResponse;
+  PostUserRequest,
+  PostUserResponse,
+  GetUsersRequest,
+  GetUsersResponse,
+  GetUserRequest,
+  GetUserResponse,
+  GetUserByUsernameRequest,
+  GetUserByUsernameResponse,
+  DeleteUserRequest,
+  DeleteUserResponse,
+} from './interfaces';
 
-@Controller('users')
+@Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   /**
-   * REST: POST /users
-   */
-  @ApiCreatedResponse({ description: 'OK.', type: CreateUserOutDto })
-  @ApiBadRequestResponse({ description: 'Bad Request.' })
-  @Post()
-  public async create(
-    @Body() inDto: CreateUserInDto
-  ): Promise<CreateUserOutDto> {
-    return this.usersService.create(inDto);
-  }
-
-  /**
-   * REST: GET /users
-   */
-  @ApiOkResponse({ description: 'OK.', type: GetUsersOutDto })
-  @Get()
-  public async findAll(): Promise<GetUsersOutDto> {
-    return this.usersService.findAll();
-  }
-
-  /**
-   * REST: GET /users/userId
-   */
-  @ApiOkResponse({ description: 'OK.', type: GetUserOutDto })
-  @ApiBadRequestResponse({ description: 'Bad Request.' })
-  @Get(':userId')
-  public async findOne(@Param() inDto: GetUserInDto): Promise<GetUserOutDto> {
-    return this.usersService.findOne(inDto);
-  }
-
-  /**
-   * REST: DELETE /users/userId
-   */
-  @ApiOkResponse({ description: 'OK.', type: DeleteUserOutDto })
-  @ApiBadRequestResponse({ description: 'Bad Request.' })
-  @Delete(':userId')
-  public async delete(
-    @Param() inDto: DeleteUserInDto
-  ): Promise<DeleteUserOutDto> {
-    return this.usersService.delete(inDto);
-  }
-
-  /**
    * gRPC: UsersService.PostUser
    */
-  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'PostUser')
   public async postUser(
     request: PostUserRequest,
@@ -100,7 +34,6 @@ export class UsersController {
   /**
    * gRPC: UsersService.GetUsers
    */
-  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUsers')
   public async getUsers(
     request: GetUsersRequest,
@@ -113,7 +46,6 @@ export class UsersController {
   /**
    * gRPC: UsersService.GetUser
    */
-  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUser')
   public async getUser(
     request: GetUserRequest,
@@ -126,7 +58,6 @@ export class UsersController {
   /**
    * gRPC: UsersService.GetUserByUsername
    */
-  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'GetUserByUsername')
   public async getUserByUsername(
     request: GetUserByUsernameRequest,
@@ -139,7 +70,6 @@ export class UsersController {
   /**
    * gRPC: UsersService.DeleteUser
    */
-  @UseInterceptors(GrpcAccessLoggerInterceptor)
   @GrpcMethod('UsersService', 'DeleteUser')
   public async deleteUser(
     request: DeleteUserRequest,

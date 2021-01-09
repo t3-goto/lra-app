@@ -1,90 +1,53 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CoreModule } from './core/core.module';
+import { CONFIG_PATH } from './core/core.module';
 import { ConfigService } from './core/config/config.service';
 import { GrpcOptions } from '@nestjs/microservices';
-import {
-  NestExpressApplication,
-  ExpressAdapter,
-} from '@nestjs/platform-express';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { HttpAccessLoggerInterceptor } from './interceptors/http-access-logger.interceptor';
-import { TimeoutInterceptor } from './interceptors/timeout.interceptor';
-import * as helmet from 'helmet';
-import * as compression from 'compression';
-import * as cookieParser from 'cookie-parser';
-import * as bodyParser from 'body-parser';
-import * as rateLimit from 'express-rate-limit';
-import { HttpAccessLogger } from './shared/custom-logger';
+import {
+  GrpcAccessLoggerInterceptor,
+  GrpcTimeoutInterceptor,
+} from './interceptors';
+import { GrpcAccessLogger, DefaultLogger } from './shared/custom-logger';
 import {
   initializeTransactionalContext,
   patchTypeORMRepositoryWithBaseRepository,
 } from 'typeorm-transactional-cls-hooked';
-import { setupSwagger } from './setup-swagger';
 
 async function bootstrap() {
   /**
-   * Initialize Settings.
+   * Transaction Settings.
    */
   initializeTransactionalContext();
   patchTypeORMRepositoryWithBaseRepository();
-  const app = await NestFactory.create<NestExpressApplication>(
-    AppModule,
-    new ExpressAdapter(),
-    { cors: true }
-  );
 
   /**
-   * Global Middleware For Http.
+   * Initialize Settings For App.
    */
-  const configService = app.select(CoreModule).get(ConfigService);
-  app.enable('trust proxy');
-  app.setGlobalPrefix('api/v1');
-  app.use(helmet());
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
-    })
+  const configService = new ConfigService({ folder: CONFIG_PATH });
+  const app = await NestFactory.createMicroservice<GrpcOptions>(
+    AppModule,
+    configService.grpcServerOptions
   );
-  app.use(compression());
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(
-    bodyParser.urlencoded({
-      limit: '50mb',
-      extended: true,
-      parameterLimit: 50000,
-    })
-  );
-  app.use(cookieParser());
 
   /**
-   * Global Interceptors For Http.
+   * Global Interceptors For gRPC.
    */
   const reflector = app.get(Reflector);
   app.useGlobalInterceptors(new ClassSerializerInterceptor(reflector));
   app.useGlobalInterceptors(
-    new HttpAccessLoggerInterceptor(app.get(HttpAccessLogger))
+    new GrpcAccessLoggerInterceptor(app.get(GrpcAccessLogger))
   );
-  app.useGlobalInterceptors(new TimeoutInterceptor());
+  app.useGlobalInterceptors(new GrpcTimeoutInterceptor());
   app.useGlobalPipes(new ValidationPipe());
 
   /**
-   * Swagger.
+   * Start gRPC Server.
    */
-  if (!configService.isProduction) {
-    setupSwagger(app);
-  }
-
-  /**
-   * Http Server.
-   */
-  await app.listen(configService.getNumber('HTTP_SV_PORT'));
-
-  /**
-   * gRPC Server.
-   */
-  app.connectMicroservice<GrpcOptions>(configService.grpcServerOptions);
-  await app.startAllMicroservicesAsync();
+  const logger = app.get(DefaultLogger);
+  logger.setType('BOOT');
+  await app.listen(() => {
+    logger.info('gRPC server is listening.');
+  });
 }
 bootstrap();
