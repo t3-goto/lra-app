@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GetRestaurantsInDto, GetRestaurantsOutDto, Restaurant } from './dto';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
-import { rpc } from 'codegen/grpc';
-import GetRestaurantsRequest = rpc.GetRestaurantsRequest;
+import { GetRestaurantsRequest } from '../../interfaces';
 
 @Injectable()
 export class RestaurantsService {

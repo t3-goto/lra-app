@@ -12,9 +12,10 @@ import {
   GetProfileOutDto,
 } from './dto';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
-import { rpc } from 'codegen/grpc';
-import GetUserByUsernameRequest = rpc.GetUserByUsernameRequest;
-import GetUserByUsernameResponse = rpc.GetUserByUsernameResponse;
+import {
+  GetUserByUsernameRequest,
+  GetUserByUsernameResponse,
+} from '../../interfaces';
 
 @Injectable()
 export class AuthService {

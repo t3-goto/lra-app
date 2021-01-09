@@ -5,3 +5,4 @@ export * from './get-user-in.dto';
 export * from './get-user-out.dto';
 export * from './delete-user-in.dto';
 export * from './delete-user-out.dto';
+export * from './user';
