@@ -4,7 +4,7 @@ export * from './get-restaurants-request';
 export * from './get-restaurants-response';
 export * from './restaurant';
 export * from './post-user-request';
-export * from './post-user-request';
+export * from './post-user-response';
 export * from './get-users-request';
 export * from './get-users-response';
 export * from './get-user-request';

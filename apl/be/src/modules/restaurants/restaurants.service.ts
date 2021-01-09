@@ -5,6 +5,7 @@ import { HttpClientService } from 'src/shared/http-client/http-client.service';
 import {
   GnaviRestSearchApiRequest,
   GnaviRestSearchApiResponse,
+  GetGeocodingRequest,
 } from '../../interfaces';
 import {
   DEFAULT_RANGE,
@@ -21,7 +22,6 @@ import {
   GetRestaurantsResponse,
   Restaurant,
 } from './interfaces';
-import { GetGeocodingRequest } from '../geocoding/interfaces';
 
 @Injectable()
 export class RestaurantsService {

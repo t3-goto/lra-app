@@ -1,7 +1,7 @@
-import { rpc } from 'codegen/grpc';
 import { IsPositive } from 'class-validator';
+import { DeleteUserRequest as Request } from '../../../interfaces';
 
-export class DeleteUserRequest extends rpc.DeleteUserRequest {
+export class DeleteUserRequest extends Request {
   @IsPositive()
   userId: number;
 }

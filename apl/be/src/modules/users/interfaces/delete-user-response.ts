@@ -1,3 +1,3 @@
-import { rpc } from 'codegen/grpc';
+import { DeleteUserResponse as Response } from '../../../interfaces';
 
-export class DeleteUserResponse extends rpc.DeleteUserResponse {}
+export class DeleteUserResponse extends Response {}

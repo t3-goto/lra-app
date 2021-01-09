@@ -1,3 +1,3 @@
-import { rpc } from 'codegen/grpc';
+import { PostUserResponse as Response } from '../../../interfaces';
 
-export class PostUserResponse extends rpc.PostUserResponse {}
+export class PostUserResponse extends Response {}
