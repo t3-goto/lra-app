@@ -1,3 +1,3 @@
-import { rpc } from 'codegen/grpc';
+import { GetUsersRequest as Request } from '../../../interfaces';
 
-export class GetUsersRequest extends rpc.GetUsersRequest {}
+export class GetUsersRequest extends Request {}

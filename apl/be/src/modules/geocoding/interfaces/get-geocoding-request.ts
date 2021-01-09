@@ -1,7 +1,7 @@
-import { rpc } from 'codegen/grpc';
 import { IsString, IsNotEmpty } from 'class-validator';
+import { GetGeocodingRequest as Request } from '../../../interfaces';
 
-export class GetGeocodingRequest extends rpc.GetGeocodingRequest {
+export class GetGeocodingRequest extends Request {
   @IsString()
   @IsNotEmpty()
   address: string;

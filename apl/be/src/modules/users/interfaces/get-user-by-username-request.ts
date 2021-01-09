@@ -1,7 +1,8 @@
-import { rpc } from 'codegen/grpc';
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
+import { GetUserByUsernameRequest as Request } from '../../../interfaces';
 
-export class GetUserByUsernameRequest extends rpc.GetUserByUsernameRequest {
+export class GetUserByUsernameRequest extends Request {
   @IsString()
+  @IsNotEmpty()
   username: string;
 }

@@ -1,3 +1,3 @@
-import { rpc } from 'codegen/grpc';
+import { GetGeocodingResponse as Response } from '../../../interfaces';
 
-export class GetGeocodingResponse extends rpc.GetGeocodingResponse {}
+export class GetGeocodingResponse extends Response {}

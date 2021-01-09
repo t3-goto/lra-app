@@ -1,4 +1,3 @@
-import { rpc } from 'codegen/grpc';
 import {
   IsString,
   IsOptional,
@@ -6,8 +5,9 @@ import {
   IsLongitude,
   IsIn,
 } from 'class-validator';
+import { GetRestaurantsRequest as Request } from '../../../interfaces';
 
-export class GetRestaurantsRequest extends rpc.GetRestaurantsRequest {
+export class GetRestaurantsRequest extends Request {
   @IsLatitude()
   @IsOptional()
   latitude: number;
