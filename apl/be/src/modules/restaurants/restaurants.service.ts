@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { ConfigService } from './../../core/config/config.service';
 import { HttpClientService } from 'src/shared/http-client/http-client.service';
-import { GetRestaurantsInDto, GetRestaurantsOutDto, Restaurant } from './dto';
-import { GnaviRestSearchApiRequestSchema } from '../../interfaces/gnavi-rest-search-api-request-schema';
-import { GnaviRestSearchApiResponseSchema } from '../../interfaces/gnavi-rest-search-api-response-schema';
+import {
+  GnaviRestSearchApiRequest,
+  GnaviRestSearchApiResponse,
+} from '../../interfaces';
 import {
   DEFAULT_RANGE,
   DEFAULT_HIT_PER_PAGE,
@@ -15,10 +16,12 @@ import {
   FindMode,
 } from './constants';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
-import { rpc } from 'codegen/grpc';
-import GetGeocodingRequest = rpc.GetGeocodingRequest;
-import GetRestaurantsRequest = rpc.GetRestaurantsRequest;
-import GetRestaurantsResponse = rpc.GetRestaurantsResponse;
+import {
+  GetRestaurantsRequest,
+  GetRestaurantsResponse,
+  Restaurant,
+} from './interfaces';
+import { GetGeocodingRequest } from '../geocoding/interfaces';
 
 @Injectable()
 export class RestaurantsService {
@@ -27,54 +30,6 @@ export class RestaurantsService {
     private readonly httpClientService: HttpClientService,
     private readonly grpcClientService: GrpcClientService
   ) {}
-
-  /**
-   * REST: GET /restaurants
-   */
-  public async findAllByKeys(
-    inDto: GetRestaurantsInDto
-  ): Promise<GetRestaurantsOutDto> {
-    const {
-      latitude,
-      longitude,
-      range,
-      hitPerPage,
-      pageOffset,
-      address,
-    } = inDto;
-    const request = GetRestaurantsRequest.create({
-      latitude,
-      longitude,
-      range,
-      hitPerPage,
-      pageOffset,
-      address,
-    });
-    try {
-      const response = await this.grpcClientService.getRestaurants(request);
-      // const {
-      //   isNext,
-      //   totalHitCount,
-      //   startItemNo,
-      //   lastItemNo,
-      //   restaurants,
-      // } = response;
-      // return new GetRestaurantsOutDto(
-      //   isNext,
-      //   totalHitCount,
-      //   startItemNo,
-      //   lastItemNo,
-      //   restaurants as Restaurant[]
-      // );
-      const restaurants = response.restaurants as Restaurant[];
-      return GetRestaurantsOutDto.create({
-        ...response,
-        restaurants,
-      });
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
 
   /**
    * gRPC: RestaurantsService.GetRestaurants
@@ -108,7 +63,7 @@ export class RestaurantsService {
     const offset_page = request.pageOffset
       ? request.pageOffset
       : DEFAULT_OFFSET_PAGE;
-    const gnaviRestSearchApiRequestSchema: GnaviRestSearchApiRequestSchema = {
+    const gnaviRestSearchApiRequest: GnaviRestSearchApiRequest = {
       keyid,
       latitude,
       longitude,
@@ -118,9 +73,9 @@ export class RestaurantsService {
     };
     try {
       const httpResponse = await this.httpClientService.getAllByQuery<
-        GnaviRestSearchApiRequestSchema,
-        GnaviRestSearchApiResponseSchema
-      >(gnaviUrl, gnaviRestSearchApiRequestSchema);
+        GnaviRestSearchApiRequest,
+        GnaviRestSearchApiResponse
+      >(gnaviUrl, gnaviRestSearchApiRequest);
       return this.createGetRestaurantsResponse(httpResponse);
     } catch (error) {
       throw new RpcException(error.message);
@@ -157,7 +112,7 @@ export class RestaurantsService {
   }
 
   private createGetRestaurantsResponse(
-    httpResponse: GnaviRestSearchApiResponseSchema
+    httpResponse: GnaviRestSearchApiResponse
   ): GetRestaurantsResponse {
     const totalHitCount = httpResponse.total_hit_count;
     const hitPerPage = httpResponse.hit_per_page;
@@ -165,12 +120,6 @@ export class RestaurantsService {
     const startItemNo = hitPerPage * (pageOffset - 1) + 1;
     const lastItemNo = hitPerPage * pageOffset;
     const isNext = totalHitCount >= lastItemNo;
-    // const response = new GetRestaurantsResponse();
-    // response.isNext = isNext;
-    // response.totalHitCount = totalHitCount;
-    // response.startItemNo = startItemNo;
-    // response.lastItemNo = lastItemNo;
-    // response.restaurants = httpResponse.rest.map((restItem) => {
     const restaurants = httpResponse.rest.map((restItem) => {
       const restaurant = new Restaurant();
       restaurant.order = restItem['@attributes'].order;
@@ -206,7 +155,6 @@ export class RestaurantsService {
       restaurant.eMoney = restItem.e_money;
       return restaurant;
     });
-    // return response;
     return GetRestaurantsResponse.create({
       isNext,
       totalHitCount,

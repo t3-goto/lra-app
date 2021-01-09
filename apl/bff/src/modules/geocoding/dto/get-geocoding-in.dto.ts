@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetGeocodingInDto {
@@ -6,6 +6,7 @@ export class GetGeocodingInDto {
     description: 'Address you want to search.',
   })
   @IsString()
+  @IsNotEmpty()
   address: string;
 
   constructor(address: string) {

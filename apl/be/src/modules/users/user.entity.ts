@@ -1,23 +1,15 @@
 import { EntitySchema } from 'typeorm';
-import { ApiProperty } from '@nestjs/swagger';
-
 export class User {
-  @ApiProperty()
   userId: number;
 
-  @ApiProperty()
   username: string;
 
-  @ApiProperty()
   password: string;
 
-  @ApiProperty()
   isActive: boolean;
 
-  @ApiProperty()
   createdAt: string;
 
-  @ApiProperty()
   updatedAt: string;
 }
 
