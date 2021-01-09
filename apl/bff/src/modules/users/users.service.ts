@@ -1,5 +1,4 @@
 import { NotFoundException, Injectable } from '@nestjs/common';
-import { User } from './user.entity';
 import {
   CreateUserInDto,
   CreateUserOutDto,
@@ -8,13 +7,15 @@ import {
   GetUserOutDto,
   DeleteUserInDto,
   DeleteUserOutDto,
+  User,
 } from './dto';
-import { rpc } from 'codegen/grpc';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
-import PostUserRequest = rpc.PostUserRequest;
-import GetUsersRequest = rpc.GetUsersRequest;
-import GetUserRequest = rpc.GetUserRequest;
-import DeleteUserRequest = rpc.DeleteUserRequest;
+import {
+  PostUserRequest,
+  GetUsersRequest,
+  GetUserRequest,
+  DeleteUserRequest,
+} from '../../interfaces';
 
 @Injectable()
 export class UsersService {
@@ -24,9 +25,6 @@ export class UsersService {
    * REST: POST /users
    */
   public async create(inDto: CreateUserInDto): Promise<CreateUserOutDto> {
-    const user = new User();
-    user.username = inDto.username;
-    user.password = inDto.password;
     const request = PostUserRequest.create({ ...inDto });
     try {
       const response = await this.grpcClientService.postUser(request);

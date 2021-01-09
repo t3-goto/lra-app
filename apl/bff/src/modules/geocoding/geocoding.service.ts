@@ -1,8 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { GetGeocodingInDto, GetGeocodingOutDto } from './dto';
 import { GrpcClientService } from 'src/shared/grpc-client/grpc-client.service';
-import { rpc } from 'codegen/grpc';
-import GetGeocodingRequest = rpc.GetGeocodingRequest;
+import { GetGeocodingRequest } from '../../interfaces';
 
 @Injectable()
 export class GeocodingService {
