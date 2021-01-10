@@ -1,51 +1,115 @@
-version: "3"
-
-volumes:
-    node_modules:
+version: '3'
 
 services:
     frontend-server:
-        image: node:12.16.1
-        command: bash -c "yarn install && yarn start" # yarn installは環境が変わるため必須。
-        volumes:
-            - ./../../apl/fe:/front
-            - node_modules:/front/node_modules # node_modulesはホストと共有しない（共有するとnpm install はうまくいかない）
-        working_dir: /front
+        build:
+            dockerfile: ./docker/Dockerfile
+            context: ../../apl/fe/
+        image: frontend-server:1.0
         ports:
-            - "8001:3000"
-        stdin_open: true # webpack-dev-serverの即終了回避のため
+            - 8001:8001
         depends_on:
             - bff-server
-        links:
-            - bff-server
         environment:
-            - HTTP_PROXY=bff-http://bff-server:9001
+            NODE_ENV: production
+            BFF_BASE_URL: http://bff-server/api/v1
     bff-server:
-        image: node:12.16.1
-        command: bash -c "yarn install && yarn start:dev" # yarn installは環境が変わるため必須。
-        volumes:
-            - ./../../apl/bff:/bff
-            - node_modules:/bff/node_modules # node_modulesはホストと共有しない（共有するとnpm install はうまくいかない）
-        working_dir: /bff
+        build:
+            dockerfile: ./docker/Dockerfile
+            context: ../../apl/bff/
+        image: bff-server:1.0
         ports:
             - "9001:9001"
-        stdin_open: true 
         depends_on:
             - db-server
             - cache-server
-        links:
+        environment:
+            NODE_ENV: production
+            HTTP_SV_PORT: 9001
+            GRPC_CL_GEOCODING_PAKAGE: rpc
+            GRPC_CL_GEOCODING_HOST: backend-server
+            GRPC_CL_GEOCODING_PORT: 9011
+            GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+            GRPC_CL_RESTAURANTS_PAKAGE: rpc
+            GRPC_CL_RESTAURANTS_HOST: backend-server
+            GRPC_CL_RESTAURANTS_PORT: 9011
+            GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+            GRPC_CL_USERS_PAKAGE: rpc
+            GRPC_CL_USERS_HOST: backend-server
+            GRPC_CL_USERS_PORT: 9011
+            GRPC_CL_USERS_PROTOS: users.proto
+            DB_TYPE: mysql
+            DB_HOST: db-server
+            DB_PORT: 3306
+            DB_USERNAME: lra
+            DB_PASSWORD: lra
+            DB_DATABASE: lradb
+            REDIS_HOST: cache-server
+            REDIS_PORT: 6379
+            REDIS_TTL: 1000
+            HTTP_TIMEOUT: 5000
+            HTTP_MAX_REDIRECTS: 5
+            JWT_EXPIRES_IN: 3600
+            JWT_SECRET: rxPhglGJWPlOW596
+    backend-server:
+        build:
+            dockerfile: ./docker/Dockerfile
+            context: ../../apl/be/
+        image: be-server:1.0
+        ports:
+            - "9011:9011"
+        depends_on:
             - db-server
             - cache-server
         environment:
-            - NODE_ENV=development
-            - DB_HOST=db-server
-            - REDIS_HOST=cache-server
+            NODE_ENV: production
+            GRPC_SV_PAKAGE: rpc
+            GRPC_SV_HOST: 0.0.0.0
+            GRPC_SV_PORT: 9011
+            GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto
+            GRPC_CL_GEOCODING_PAKAGE: rpc
+            GRPC_CL_GEOCODING_HOST: backend-server
+            GRPC_CL_GEOCODING_PORT: 9011
+            GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+            GRPC_CL_RESTAURANTS_PAKAGE: rpc
+            GRPC_CL_RESTAURANTS_HOST: backend-server
+            GRPC_CL_RESTAURANTS_PORT: 9011
+            GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+            GRPC_CL_USERS_PAKAGE: rpc
+            GRPC_CL_USERS_HOST: backend-server
+            GRPC_CL_USERS_PORT: 9011
+            GRPC_CL_USERS_PROTOS: users.proto
+            DB_TYPE: mysql
+            DB_HOST: db-server
+            DB_PORT: 3306
+            DB_USERNAME: lra
+            DB_PASSWORD: lra
+            DB_DATABASE: lradb
+            REDIS_HOST: cache-server
+            REDIS_PORT: 6379
+            REDIS_TTL: 1000
+            HTTP_TIMEOUT: 5000
+            HTTP_MAX_REDIRECTS: 5
+            HTTP_URL_GNAVI: https://api.gnavi.co.jp/RestSearchAPI/v3/
+            HTTP_URL_GOOGLE_GEOCODING: https://maps.googleapis.com/maps/api/geocode/json
+            JWT_EXPIRES_IN: 3600
+            JWT_SECRET: ${JWT_SECRET}
+            ACCESS_KEY_GNAVI: ${ACCESS_KEY_GNAVI}
+            ACCESS_KEY_GOOGLE: ${ACCESS_KEY_GOOGLE}
     db-server:
         image: mysql:5
         restart: always
         environment:
             MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: test
+            MYSQL_DATABASE: lradb
+            MYSQL_USER: lra
+            MYSQL_PASSWORD: lra
+            TZ: Asia/Tokyo
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ./db/data:/var/lib/mysql
+            - ./db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ./db/sql:/docker-entrypoint-initdb.d
         ports:
             - "3306:3306"
     cache-server:
