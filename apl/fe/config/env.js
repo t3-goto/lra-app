@@ -32,7 +32,6 @@ dotenvFiles.forEach((dotenvFile) => {
       })
     );
   }
-  console.log(fs.existsSync(dotenvFile));
 });
 
 // ______________________________________________

@@ -8,10 +8,16 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # install modules
-RUN npm install --only=production
+RUN npm install --production
 
 # copy config files
 COPY config ./config
+
+# copy codegen files
+COPY codegen ./codegen
+
+# copy proto files
+COPY protos ./protos
 
 # copy dist files
 COPY dist ./dist
@@ -21,4 +27,3 @@ EXPOSE 9001
 
 # execute
 CMD ["node", "./dist/main.js"]
-
