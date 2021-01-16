@@ -26,4 +26,5 @@ COPY dist ./dist
 EXPOSE 9001
 
 # execute
-CMD ["node", "./dist/main.js"]
+# CMD ["node", "./dist/main.js"]
+ENTRYPOINT ["node", "./dist/main.js"]

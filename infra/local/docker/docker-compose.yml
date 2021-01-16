@@ -4,8 +4,8 @@ services:
     frontend-server:
         build:
             dockerfile: ./docker/Dockerfile
-            context: ../../apl/fe/
-        image: frontend-server:1.0
+            context: ../../../apl/fe/
+        image: fe-server:0.1
         ports:
             - 8001:8001
         depends_on:
@@ -16,8 +16,8 @@ services:
     bff-server:
         build:
             dockerfile: ./docker/Dockerfile
-            context: ../../apl/bff/
-        image: bff-server:1.0
+            context: ../../../apl/bff/
+        image: bff-server:0.1
         ports:
             - "9001:9001"
         depends_on:
@@ -50,12 +50,12 @@ services:
             HTTP_TIMEOUT: 5000
             HTTP_MAX_REDIRECTS: 5
             JWT_EXPIRES_IN: 3600
-            JWT_SECRET: rxPhglGJWPlOW596
+            JWT_SECRET: ${JWT_SECRET}
     backend-server:
         build:
             dockerfile: ./docker/Dockerfile
-            context: ../../apl/be/
-        image: be-server:1.0
+            context: ../../../apl/be/
+        image: be-server:0.1
         ports:
             - "9011:9011"
         depends_on:
@@ -107,9 +107,9 @@ services:
             TZ: Asia/Tokyo
         command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
         volumes:
-            - ./db/data:/var/lib/mysql
-            - ./db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-            - ./db/sql:/docker-entrypoint-initdb.d
+            - ../db/data:/var/lib/mysql
+            - ../db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ../db/sql:/docker-entrypoint-initdb.d
         ports:
             - "3306:3306"
     cache-server:

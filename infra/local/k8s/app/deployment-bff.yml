@@ -1,0 +1,74 @@
+#################################
+# Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-server
+  namespace: lra-local
+  labels:
+    app: bff-server
+spec:
+  ports:
+    - name: bff-server
+      port: 9001
+      targetPort: 9001
+      # nodePort: 30901
+  selector:
+    app: bff-server
+  # type: NodePort
+---
+#################################
+# Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-server
+  namespace: lra-local
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bff-server
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      name: bff-server
+      labels:
+        app: bff-server
+    spec:
+      containers:
+        - name: bff-server
+          image: t3goto/bff-server:0.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: bff-config
+          - secretRef:
+              name: bff-secret
+          ports:
+            - containerPort: 9001
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 9001
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: ["ls","/usr/local/bin/node"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10

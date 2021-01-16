@@ -1,0 +1,79 @@
+#################################
+# Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: lra-local
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: db
+---
+#################################
+# Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: lra-local
+spec:
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - image: mysql:5
+        name: db
+        env:
+        - name: MYSQL_DATABASE
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: MYSQL_DATABASE
+        - name: TZ
+          valueFrom:
+            configMapKeyRef:
+              name: db-config
+              key: TZ
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: MYSQL_USER
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: MYSQL_PASSWORD
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: local-db-data-v
+          mountPath: /var/lib/mysql
+        - name: local-db-sql-v
+          mountPath: /docker-entrypoint-initdb.d
+        - name: local-db-conf-v
+          mountPath: /etc/mysql/conf.d/my.cnf
+      volumes:
+      - name: local-db-data-v
+        hostPath:
+            path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/data
+      - name: local-db-sql-v
+        hostPath:
+            path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/sql
+      - name: local-db-conf-v
+        hostPath:
+            path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/conf/my.cnf

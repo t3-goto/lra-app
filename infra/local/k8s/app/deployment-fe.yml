@@ -1,0 +1,72 @@
+#################################
+# Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe-server
+  namespace: lra-local
+  labels:
+    app: fe-server
+spec:
+  ports:
+    - name: fe-server
+      port: 8001
+      targetPort: 8001
+      # nodePort: 30801
+  selector:
+    app: fe-server
+  # type: NodePort
+---
+#################################
+# Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fe-server
+  namespace: lra-local
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fe-server
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      name: fe-server
+      labels:
+        app: fe-server
+    spec:
+      containers:
+        - name: fe-server
+          image: t3goto/fe-server:0.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: fe-config
+          ports:
+            - containerPort: 8001
+          readinessProbe:
+            httpGet:
+              path: /index.html
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: ["ls","/usr/share/nginx/html/50x.html"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10

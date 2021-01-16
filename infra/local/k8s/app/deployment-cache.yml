@@ -1,0 +1,36 @@
+#################################
+# Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  namespace: lra-local
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: cache
+---
+#################################
+# Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: lra-local
+spec:
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - image: redis:latest
+        name: cache
+        ports:
+        - containerPort: 6379
