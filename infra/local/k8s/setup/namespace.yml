@@ -1,0 +1,15 @@
+#################################
+# Namespace（application）
+#################################
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lra-local
+---
+#################################
+# Namespace（system）
+#################################
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lra-sys-local

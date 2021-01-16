@@ -1,0 +1,73 @@
+#################################
+# Service
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: be-server
+  namespace: lra-local
+  labels:
+    app: be-server
+spec:
+  ports:
+    - name: be-server
+      port: 9011
+      targetPort: 9011
+      # nodePort: 30911
+  selector:
+    app: be-server
+  # type: NodePort
+---
+#################################
+# Deployment
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-server
+  namespace: lra-local
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: be-server
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+  template:
+    metadata:
+      name: be-server
+      labels:
+        app: be-server
+    spec:
+      containers:
+        - name: be-server
+          image: t3goto/be-server:0.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: be-config
+          - secretRef:
+              name: be-secret
+          ports:
+            - containerPort: 9011
+          readinessProbe:
+            tcpSocket:
+              port: 9011
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10
+          livenessProbe:
+            exec:
+              command: ["ls","/usr/local/bin/node"]
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 10

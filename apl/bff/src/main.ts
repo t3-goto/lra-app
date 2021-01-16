@@ -15,7 +15,6 @@ import * as helmet from 'helmet';
 import * as compression from 'compression';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
-import * as rateLimit from 'express-rate-limit';
 import { HttpAccessLogger, DefaultLogger } from './shared/custom-logger';
 import {
   initializeTransactionalContext,
@@ -46,12 +45,6 @@ async function bootstrap() {
   app.enable('trust proxy');
   app.setGlobalPrefix('api/v1');
   app.use(helmet());
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 100,
-    })
-  );
   app.use(compression());
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(

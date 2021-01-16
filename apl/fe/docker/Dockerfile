@@ -12,4 +12,5 @@ COPY dist/ /usr/share/nginx/html/
 EXPOSE 8001
 
 # execute
-CMD /usr/sbin/nginx -g 'daemon off;' -c /etc/nginx/nginx.conf
+# CMD /usr/sbin/nginx -g 'daemon off;' -c /etc/nginx/nginx.conf
+ENTRYPOINT [ "/usr/sbin/nginx","-g","daemon off;","-c","/etc/nginx/nginx.conf" ]
