@@ -1,19 +1,31 @@
-# TODO:distをpushした後にfe配下のdistのみpullするようにに作りこむ。
 #!/bin/bash
-# 最新WebコンテンツをGitHubからコンテナへ取込む
+#################################
+# ContentsCloner（FE）
+#################################
 
-# コンテンツ元の環境変数が無ければエラー終了
+# Check contents source.
 if [ -z $CONTENTS_SOURCE_URL ]; then
   exit 1
 fi
 
-# 初回はGitHubからコンテンツをクローンする
-git clone $CONTENTS_SOURCE_URL /data
+# Define action to handle SIGTERM.
+save() {
+  exit 0
+}
+trap save TERM
 
-# ２回目以降は、1分ごとに変更差分を取得する
-cd /data
+# Initialize git.
+git init
+git config core.sparsecheckout true
+git remote add origin ${CONTENTS_SOURCE_URL}.git
+echo ${CONTENTS_SOURCE_DIR} >.git/info/sparse-checkout
+
+# Pull contents.
+git pull origin ${CONTENTS_SOURCE_BRANCH}
+
+# Pull diff contents every minute.
 while true; do
   date
   sleep 60
-  git pull
+  git pull origin ${CONTENTS_SOURCE_BRANCH}
 done

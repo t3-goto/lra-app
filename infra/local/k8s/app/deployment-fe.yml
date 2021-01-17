@@ -44,6 +44,9 @@ spec:
       labels:
         app: fe-server
     spec:
+      volumes:
+        - name: contents-vol
+          emptyDir: {}
       containers:
         - name: fe-server
           image: t3goto/fe-server:0.1
@@ -70,3 +73,16 @@ spec:
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: contents-vol
+              readOnly: true
+        - name: fe-contents-cloner
+          image: t3goto/contents-cloner:0.1
+          imagePullPolicy: IfNotPresent
+          envFrom:
+          - configMapRef:
+              name: fe-contents-cloner-config
+          volumeMounts:
+            - mountPath: /apl/fe/dist
+              name: contents-vol

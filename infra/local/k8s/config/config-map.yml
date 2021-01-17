@@ -94,3 +94,17 @@ metadata:
 data:
   NODE_ENV: production
   BFF_BASE_URL: http://lratg.com/api/v1
+---
+#################################
+# ConfigMap (FE ContentsCloner)
+#################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fe-contents-cloner-config
+  namespace: lra-local
+data:
+  CONTENTS_SOURCE_URL: https://github.com/t3-goto/lra-app
+  CONTENTS_SOURCE_BRANCH: develop
+  CONTENTS_SOURCE_DIR: apl/fe/dist
+
