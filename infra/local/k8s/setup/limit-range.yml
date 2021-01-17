@@ -1,0 +1,35 @@
+#################################
+# LimitRange（application）
+#################################
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: lra-local
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 200m
+        memory: 200Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 100Mi
+---
+#################################
+# LimitRange（system）
+#################################
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: lra-sys-local
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: 200m
+        memory: 200Mi
+      defaultRequest:
+        cpu: 100m
+        memory: 100Mi
