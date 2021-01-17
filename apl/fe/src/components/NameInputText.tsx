@@ -50,7 +50,7 @@ const Component: React.FC<IProps> = (props) => {
               <Person />
             </InputAdornment>
           }
-          placeholder='Teruki Goto'
+          placeholder='Taro Yamada'
           value={props.value}
           onChange={(e) => {
             props.onChange(e.target.value);
