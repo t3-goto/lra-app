@@ -1,19 +1,5 @@
 #################################
-# Service
-#################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: cache
-  namespace: lra-local
-spec:
-  ports:
-  - port: 6379
-  selector:
-    app: cache
----
-#################################
-# Deployment
+# Deployment (Cache Server)
 #################################
 apiVersion: apps/v1
 kind: Deployment
@@ -21,6 +7,7 @@ metadata:
   name: cache
   namespace: lra-local
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: cache
@@ -32,5 +19,13 @@ spec:
       containers:
       - image: redis:latest
         name: cache
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 6379

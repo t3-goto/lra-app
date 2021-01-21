@@ -1,0 +1,17 @@
+#################################
+# Service (BFF Application Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: bff-ap
+  namespace: lra-local
+  labels:
+    app: bff-ap
+spec:
+  ports:
+    - name: bff-ap
+      port: 9001
+      targetPort: 9001
+  selector:
+    app: bff-ap

@@ -1,19 +1,5 @@
 #################################
-# Service
-#################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: db
-  namespace: lra-local
-spec:
-  ports:
-  - port: 3306
-  selector:
-    app: db
----
-#################################
-# Deployment
+# Deployment (DB Server)
 #################################
 apiVersion: apps/v1
 kind: Deployment
@@ -21,6 +7,7 @@ metadata:
   name: db
   namespace: lra-local
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: db
@@ -32,32 +19,19 @@ spec:
       containers:
       - image: mysql:5
         name: db
-        env:
-        - name: MYSQL_DATABASE
-          valueFrom:
-            configMapKeyRef:
-              name: db-config
-              key: MYSQL_DATABASE
-        - name: TZ
-          valueFrom:
-            configMapKeyRef:
-              name: db-config
-              key: TZ
-        - name: MYSQL_ROOT_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: MYSQL_ROOT_PASSWORD
-        - name: MYSQL_USER
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: MYSQL_USER
-        - name: MYSQL_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: db-secret
-              key: MYSQL_PASSWORD
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 150m
+            memory: 300Mi
+        imagePullPolicy: IfNotPresent
+        envFrom:
+        - configMapRef:
+            name: db-config
+        - secretRef:
+            name: db-secret
         ports:
         - containerPort: 3306
         volumeMounts:

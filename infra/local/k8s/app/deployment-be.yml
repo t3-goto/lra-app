@@ -1,36 +1,16 @@
 #################################
-# Service
-#################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: be-server
-  namespace: lra-local
-  labels:
-    app: be-server
-spec:
-  ports:
-    - name: be-server
-      port: 9011
-      targetPort: 9011
-      # nodePort: 30911
-  selector:
-    app: be-server
-  # type: NodePort
----
-#################################
-# Deployment
+# Deployment (BE Application Server)
 #################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: be-server
+  name: be-ap
   namespace: lra-local
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: be-server
+      app: be-ap
   minReadySeconds: 0
   progressDeadlineSeconds: 600
   strategy:
@@ -40,25 +20,32 @@ spec:
       maxUnavailable: 50%
   template:
     metadata:
-      name: be-server
+      name: be-ap
       labels:
-        app: be-server
+        app: be-ap
     spec:
       containers:
-        - name: be-server
-          image: t3goto/be-server:0.1
+        - name: be-ap
+          image: t3goto/be-ap:0.1
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 150m
+              memory: 150Mi
           imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
-              name: be-config
+              name: be-ap-config
           - secretRef:
-              name: be-secret
+              name: be-ap-secret
           ports:
             - containerPort: 9011
           readinessProbe:
             tcpSocket:
               port: 9011
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1
@@ -66,7 +53,7 @@ spec:
           livenessProbe:
             exec:
               command: ["ls","/usr/local/bin/node"]
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1

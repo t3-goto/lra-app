@@ -1,28 +1,28 @@
 version: '3'
 
 services:
-    frontend-server:
+    fe-web:
         build:
             dockerfile: ./docker/Dockerfile
             context: ../../../apl/fe/
-        image: fe-server:0.1
+        image: t3goto/fe-web:0.1
         ports:
             - 8001:8001
         depends_on:
-            - bff-server
+            - bff-ap
         environment:
             NODE_ENV: production
-            BFF_BASE_URL: http://bff-server/api/v1
-    bff-server:
+            BFF_BASE_URL: http://bff-ap/api/v1
+    bff-ap:
         build:
             dockerfile: ./docker/Dockerfile
             context: ../../../apl/bff/
-        image: bff-server:0.1
+        image: t3goto/bff-ap:0.1
         ports:
             - "9001:9001"
         depends_on:
-            - db-server
-            - cache-server
+            - db
+            - cache
         environment:
             NODE_ENV: production
             HTTP_SV_PORT: 9001
@@ -39,28 +39,28 @@ services:
             GRPC_CL_USERS_PORT: 9011
             GRPC_CL_USERS_PROTOS: users.proto
             DB_TYPE: mysql
-            DB_HOST: db-server
+            DB_HOST: db
             DB_PORT: 3306
             DB_USERNAME: lra
             DB_PASSWORD: lra
             DB_DATABASE: lradb
-            REDIS_HOST: cache-server
+            REDIS_HOST: cache
             REDIS_PORT: 6379
             REDIS_TTL: 1000
             HTTP_TIMEOUT: 5000
             HTTP_MAX_REDIRECTS: 5
             JWT_EXPIRES_IN: 3600
             JWT_SECRET: ${JWT_SECRET}
-    backend-server:
+    be-ap:
         build:
             dockerfile: ./docker/Dockerfile
             context: ../../../apl/be/
-        image: be-server:0.1
+        image: t3goto/be-ap:0.1
         ports:
             - "9011:9011"
         depends_on:
-            - db-server
-            - cache-server
+            - db
+            - cache
         environment:
             NODE_ENV: production
             GRPC_SV_PAKAGE: rpc
@@ -80,12 +80,12 @@ services:
             GRPC_CL_USERS_PORT: 9011
             GRPC_CL_USERS_PROTOS: users.proto
             DB_TYPE: mysql
-            DB_HOST: db-server
+            DB_HOST: db
             DB_PORT: 3306
             DB_USERNAME: lra
             DB_PASSWORD: lra
             DB_DATABASE: lradb
-            REDIS_HOST: cache-server
+            REDIS_HOST: cache
             REDIS_PORT: 6379
             REDIS_TTL: 1000
             HTTP_TIMEOUT: 5000
@@ -96,7 +96,7 @@ services:
             JWT_SECRET: ${JWT_SECRET}
             ACCESS_KEY_GNAVI: ${ACCESS_KEY_GNAVI}
             ACCESS_KEY_GOOGLE: ${ACCESS_KEY_GOOGLE}
-    db-server:
+    db:
         image: mysql:5
         restart: always
         environment:
@@ -112,7 +112,7 @@ services:
             - ../db/sql:/docker-entrypoint-initdb.d
         ports:
             - "3306:3306"
-    cache-server:
+    cache:
         image: "redis:latest"
         ports:
             - "6379:6379"
