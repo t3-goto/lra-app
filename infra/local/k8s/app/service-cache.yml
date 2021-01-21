@@ -1,0 +1,13 @@
+#################################
+# Service (Cache Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache
+  namespace: lra-local
+spec:
+  ports:
+  - port: 6379
+  selector:
+    app: cache

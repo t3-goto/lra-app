@@ -1,36 +1,16 @@
 #################################
-# Service
-#################################
-apiVersion: v1
-kind: Service
-metadata:
-  name: fe-server
-  namespace: lra-local
-  labels:
-    app: fe-server
-spec:
-  ports:
-    - name: fe-server
-      port: 8001
-      targetPort: 8001
-      # nodePort: 30801
-  selector:
-    app: fe-server
-  # type: NodePort
----
-#################################
-# Deployment
+# Deployment (FE Web Server)
 #################################
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: fe-server
+  name: fe-web
   namespace: lra-local
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: fe-server
+      app: fe-web
   minReadySeconds: 0
   progressDeadlineSeconds: 600
   strategy:
@@ -40,27 +20,42 @@ spec:
       maxUnavailable: 50%
   template:
     metadata:
-      name: fe-server
+      name: fe-web
       labels:
-        app: fe-server
+        app: fe-web
     spec:
       volumes:
         - name: contents-vol
           emptyDir: {}
+        - name: nginx-conf-vol
+          configMap:
+            name: fe-web-config
+            items:
+              - key: nginx.conf
+                path: nginx.conf
+              - key: default.conf
+                path: conf.d/default.conf
       containers:
-        - name: fe-server
-          image: t3goto/fe-server:0.1
+        - name: fe-web
+          image: nginx:1.18-alpine
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi
+            limits:
+              cpu: 150m
+              memory: 150Mi
           imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
-              name: fe-config
+              name: fe-web-config
           ports:
             - containerPort: 8001
           readinessProbe:
             httpGet:
               path: /index.html
               port: 8001
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1
@@ -68,7 +63,7 @@ spec:
           livenessProbe:
             exec:
               command: ["ls","/usr/share/nginx/html/50x.html"]
-            initialDelaySeconds: 15
+            initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1
@@ -77,8 +72,18 @@ spec:
             - mountPath: /usr/share/nginx/html
               name: contents-vol
               readOnly: true
+            - mountPath: /etc/nginx
+              readOnly: true
+              name: nginx-conf-vol
         - name: fe-contents-cloner
           image: t3goto/contents-cloner:0.1
+          resources:
+            requests:
+              cpu: 50m
+              memory: 50Mi
+            limits:
+              cpu: 50m
+              memory: 50Mi
           imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:

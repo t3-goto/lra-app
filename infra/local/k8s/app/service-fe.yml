@@ -1,0 +1,17 @@
+#################################
+# Service (FE Web Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: fe-web
+  namespace: lra-local
+  labels:
+    app: fe-web
+spec:
+  ports:
+    - name: fe-web
+      port: 8001
+      targetPort: 8001
+  selector:
+    app: fe-web

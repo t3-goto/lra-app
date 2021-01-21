@@ -1,0 +1,13 @@
+#################################
+# Service (DB Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: lra-local
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: db

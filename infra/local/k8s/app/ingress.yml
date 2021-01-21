@@ -20,9 +20,9 @@ spec:
         paths:
           - path: /
             backend:
-              serviceName: fe-server
+              serviceName: fe-web
               servicePort: 8001
           - path: /api
             backend:
-              serviceName: bff-server
+              serviceName: bff-ap
               servicePort: 9001

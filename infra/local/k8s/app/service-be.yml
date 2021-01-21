@@ -1,0 +1,17 @@
+#################################
+# Service (BE Application Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: be-ap
+  namespace: lra-local
+  labels:
+    app: be-ap
+spec:
+  ports:
+    - name: be-ap
+      port: 9011
+      targetPort: 9011
+  selector:
+    app: be-ap
