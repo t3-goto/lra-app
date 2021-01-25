@@ -7,7 +7,7 @@ metadata:
   name: bff-ap
   namespace: lra-local
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: bff-ap
@@ -47,7 +47,7 @@ spec:
               path: /api/v1/health/readiness
               port: 9001
             initialDelaySeconds: 30
-            periodSeconds: 5
+            periodSeconds: 15
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10

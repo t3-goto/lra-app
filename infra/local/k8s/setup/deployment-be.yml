@@ -7,7 +7,7 @@ metadata:
   name: be-ap
   namespace: lra-local
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: be-ap
@@ -46,7 +46,7 @@ spec:
             tcpSocket:
               port: 9011
             initialDelaySeconds: 30
-            periodSeconds: 5
+            periodSeconds: 15
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10

@@ -1,17 +1,18 @@
 #################################
-# Service (BE Application Server)
+# Service (FE Web Server)
 #################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: be-ap
+  name: fe-web-svc
   namespace: lra-local
   labels:
-    app: be-ap
+    app: fe-web-svc
 spec:
   ports:
-    - name: be-ap
-      port: 9011
-      targetPort: 9011
+  - name: fe-web-port
+    port: 8001
+    targetPort: 8001
+    protocol: TCP
   selector:
-    app: be-ap
+    app: fe-web

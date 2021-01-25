@@ -1,17 +1,18 @@
 #################################
-# Service (BFF Application Server)
+# Service (BE Application Server)
 #################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: bff-ap
+  name: be-ap-svc
   namespace: lra-local
   labels:
-    app: bff-ap
+    app: be-ap-svc
 spec:
   ports:
-    - name: bff-ap
-      port: 9001
-      targetPort: 9001
+  - name: be-ap-port
+    port: 9011
+    targetPort: 9011
+    protocol: TCP
   selector:
-    app: bff-ap
+    app: be-ap

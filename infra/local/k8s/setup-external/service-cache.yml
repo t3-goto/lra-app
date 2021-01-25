@@ -4,10 +4,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: cache
-  namespace: lra-local
+  name: cache-svc
+  namespace: external-service
+  labels:
+    app: cache-svc
 spec:
   ports:
-  - port: 6379
+  - name: cache-port
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
   selector:
     app: cache

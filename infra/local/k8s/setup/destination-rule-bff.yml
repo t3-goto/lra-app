@@ -1,0 +1,10 @@
+#################################
+# DestinationRule
+#################################
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: bff-ap-dr
+  namespace: lra-local
+spec:
+  host: bff-ap-svc.lra-local.svc.cluster.local

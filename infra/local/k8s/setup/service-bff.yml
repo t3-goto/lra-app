@@ -1,17 +1,18 @@
 #################################
-# Service (FE Web Server)
+# Service (BFF Application Server)
 #################################
 apiVersion: v1
 kind: Service
 metadata:
-  name: fe-web
+  name: bff-ap-svc
   namespace: lra-local
   labels:
-    app: fe-web
+    app: bff-ap-svc
 spec:
   ports:
-    - name: fe-web
-      port: 8001
-      targetPort: 8001
+  - name: bff-ap-port
+    port: 9001
+    targetPort: 9001
+    protocol: TCP
   selector:
-    app: fe-web
+    app: bff-ap

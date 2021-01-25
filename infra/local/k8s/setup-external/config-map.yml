@@ -1,0 +1,11 @@
+#################################
+# ConfigMap (DB Server)
+#################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: external-service
+data:
+  MYSQL_DATABASE: lradb
+  TZ: Asia/Tokyo
