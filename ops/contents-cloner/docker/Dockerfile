@@ -1,6 +1,6 @@
-FROM ubuntu:16.04
+FROM alpine:3.13
 
-RUN apt-get update && apt-get install -y git
+RUN apk update && apk add bash && apk add git
 
 COPY src/main.sh /main.sh
 

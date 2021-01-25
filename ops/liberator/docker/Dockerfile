@@ -1,15 +1,13 @@
-FROM ubuntu:16.04
+FROM alpine:3.13
 
-RUN apt-get update && apt-get install -y curl apt-transport-https
+RUN apk --update-cache add bash python3 py3-pip
 
-RUN apt-get install -y python python-pip
+RUN pip3 install --upgrade pip
 
-RUN pip install --upgrade pip
-
-RUN pip install kubernetes
+RUN pip3 install kubernetes
 
 COPY src/main.py /main.py
 
 WORKDIR /
 
-CMD ["python","/main.py"]
+CMD ["python3","/main.py"]

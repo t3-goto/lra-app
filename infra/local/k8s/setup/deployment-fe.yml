@@ -7,7 +7,7 @@ metadata:
   name: fe-web
   namespace: lra-local
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: fe-web
@@ -25,16 +25,20 @@ spec:
         app: fe-web
     spec:
       volumes:
-        - name: contents-vol
-          emptyDir: {}
-        - name: nginx-conf-vol
-          configMap:
-            name: fe-web-config
-            items:
-              - key: nginx.conf
-                path: nginx.conf
-              - key: default.conf
-                path: conf.d/default.conf
+      - name: contents-vol
+        emptyDir: {}
+      - name: nginx-conf-vol
+        configMap:
+          name: fe-web-config
+          items:
+            - key: nginx.conf
+              path: nginx.conf
+      - name: nginx-conf-default-vol
+        configMap:
+          name: fe-web-config
+          items:
+            - key: default.conf
+              path: default.conf
       containers:
         - name: fe-web
           image: nginx:1.18-alpine
@@ -50,13 +54,14 @@ spec:
           - configMapRef:
               name: fe-web-config
           ports:
-            - containerPort: 8001
+          - containerPort: 8001
           readinessProbe:
             httpGet:
               path: /index.html
               port: 8001
+              scheme: HTTP
             initialDelaySeconds: 30
-            periodSeconds: 5
+            periodSeconds: 15
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10
@@ -69,12 +74,17 @@ spec:
             successThreshold: 1
             failureThreshold: 10
           volumeMounts:
-            - mountPath: /usr/share/nginx/html
-              name: contents-vol
-              readOnly: true
-            - mountPath: /etc/nginx
-              readOnly: true
-              name: nginx-conf-vol
+          - mountPath: /usr/share/nginx/html
+            name: contents-vol
+            readOnly: true
+          - mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+            readOnly: true
+            name: nginx-conf-vol
+          - mountPath: /etc/nginx/conf.d/default.conf
+            subPath: default.conf
+            readOnly: true
+            name: nginx-conf-default-vol
         - name: fe-contents-cloner
           image: t3goto/contents-cloner:0.1
           resources:

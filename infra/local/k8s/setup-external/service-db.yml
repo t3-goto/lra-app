@@ -4,10 +4,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: db
-  namespace: lra-local
+  name: db-svc
+  namespace: external-service
+  labels:
+    app: db-svc
 spec:
   ports:
-  - port: 3306
+  - name: db-port
+    port: 3306
+    targetPort: 3306
+    protocol: TCP
   selector:
     app: db

@@ -1,18 +1,18 @@
 #################################
 # ResourceQuota（application）
 #################################
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: quota
-  namespace: lra-local
-spec:
-  hard:
-    requests.cpu: "2"
-    requests.memory: "3Gi"
-    limits.cpu: "2"
-    limits.memory: "3Gi"
----
+# apiVersion: v1
+# kind: ResourceQuota
+# metadata:
+#   name: quota
+#   namespace: lra-local
+# spec:
+#   hard:
+#     requests.cpu: "32"
+#     requests.memory: "64Gi"
+#     limits.cpu: "32"
+#     limits.memory: "64Gi"
+# ---
 #################################
 # ResourceQuota（system）
 #################################
