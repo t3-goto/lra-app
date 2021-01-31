@@ -1,0 +1,13 @@
+#################################
+# Kustomization (overlays)
+#################################
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- ./namespace.yml
+- ./config-map.yml
+- ./secret.yml
+
+namespace: ext-a

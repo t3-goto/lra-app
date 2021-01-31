@@ -1,0 +1,12 @@
+#################################
+# Kustomization (base)
+#################################
+resources:
+- ./cluster-role.yml
+- ./daemon-set.yml
+- ./limit-range.yml
+- ./resource-quota.yml
+- ./service-account.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

@@ -47,7 +47,7 @@ async function bootstrap() {
   const logger = app.get(DefaultLogger);
   logger.setType('BOOT');
   await app.listen(() => {
-    logger.info('gRPC server is listening.');
+    logger.info('gRPC server is starting.');
   });
 }
 bootstrap();

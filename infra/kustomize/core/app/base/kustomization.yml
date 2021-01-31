@@ -1,0 +1,10 @@
+#################################
+# Kustomization (base)
+#################################
+resources:
+- ./network-policy.yml
+- ./limit-range.yml
+- ./resource-quota.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

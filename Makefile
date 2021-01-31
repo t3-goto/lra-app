@@ -1,44 +1,35 @@
-build-local:
-	cd ./infra/local/docker && docker-compose build
-
 up-local:
-	cd ./infra/local/docker && docker-compose up -d
-
-up-local-dev:
 	cd ./infra/local/docker && docker-compose up -d db-server cache-server
 
 down-local:
 	cd ./infra/local/docker && docker-compose down
 
-down-local-rm:
-	cd ./infra/local/docker && docker-compose down --rmi all
-
 seed-local:
 	cd ./infra/local/db/scripts && ./init-mysql.sh
 
-up-local-k8s:
-	cd ./infra/local/k8s && kubectl apply -f ./setup/namespace.yml && kubectl apply -f ./setup -R
+kustomize-build-dev-apl:
+	cd ./infra/kustomize && kustomize build ./fe/overlays/dev > ./fe/manifests/dev.yml && kustomize build ./be/overlays/dev > ./be/manifests/dev.yml && kustomize build ./bff/overlays/dev > ./bff/manifests/dev.yml
 
-down-local-k8s:
-	cd ./infra/local/k8s && kubectl delete -f ./setup/namespace.yml
+kustomize-build-dev-core:
+	cd ./infra/kustomize/core && kustomize build ./app/overlays/dev > ./app/manifests/dev.yml && kustomize build ./ext/overlays/dev > ./ext/manifests/dev.yml && kustomize build ./istio/overlays/dev > ./istio/manifests/dev.yml && kustomize build ./sys/overlays/dev > ./sys/manifests/dev.yml  && kustomize build ./vendor/overlays/dev > ./vendor/manifests/dev.yml 
 
-up-local-k8s-external:
-	cd ./infra/local/k8s && kubectl apply -f ./setup-external/namespace.yml && kubectl apply -f ./setup-external -R
+up-dev-core:
+	cd ./infra/kustomize/core && kubectl apply -f ./app/manifests/dev.yml && kubectl apply -f ./sys/manifests/dev.yml && kubectl apply -f ./ext/manifests/dev.yml && kubectl apply -f ./istio/manifests/dev.yml && kubectl apply -f ./vendor/manifests/dev.yml
 
-down-local-k8s-external:
-	cd ./infra/local/k8s && kubectl delete -f ./setup-external/namespace.yml
+down-dev-core:
+	cd ./infra/kustomize/core && kubectl delete -f ./app/manifests/dev.yml && kubectl delete -f ./sys/manifests/dev.yml && kubectl delete -f ./ext/manifests/dev.yml && kubectl delete -f ./istio/manifests/dev.yml && kubectl delete -f ./vendor/manifests/dev.yml
 
-up-local-k8s-istio:
-	cd ./infra/local/k8s && kubectl apply -f ./setup-istio/namespace.yml && kubectl apply -f ./setup-istio -R
+up-dev:
+	cd ./cicd && skaffold run -p dev
 
-down-local-k8s-istio:
-	cd ./infra/local/k8s && kubectl delete -f ./setup-istio/namespace.yml
+up-dev-watch:
+	cd ./cicd && skaffold dev -p dev
 
-up-local-k8s-vendor:
-	cd ./infra/local/k8s && kubectl apply -f ./setup-vendor -R
+down-dev:
+	cd ./cicd && skaffold delete -p dev
 
-down-local-k8s-vendor:
-	cd ./infra/local/k8s && kubectl delete -f ./setup-vendor -R
+build-dev:
+	cd ./cicd && skaffold build -p dev
 
 up-istio-oeprator:
 	istioctl operator init

@@ -1,0 +1,9 @@
+#################################
+# Kustomization (base)
+#################################
+resources:
+- ./istio-operator.yml
+- ./ingress-gateway.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

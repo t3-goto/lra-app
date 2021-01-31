@@ -1,0 +1,38 @@
+#################################
+# ConfigMap (BE Application Server)
+#################################
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: be-ap-config
+  namespace: dummy
+data:
+  NODE_ENV: production
+  GRPC_SV_PAKAGE: rpc
+  GRPC_SV_HOST: "0.0.0.0"
+  GRPC_SV_PORT: "9011"
+  GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto
+  GRPC_CL_GEOCODING_PAKAGE: rpc
+  GRPC_CL_GEOCODING_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_GEOCODING_PORT: "9011"
+  GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+  GRPC_CL_RESTAURANTS_PAKAGE: rpc
+  GRPC_CL_RESTAURANTS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_RESTAURANTS_PORT: "9011"
+  GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+  GRPC_CL_USERS_PAKAGE: rpc
+  GRPC_CL_USERS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_USERS_PORT: "9011"
+  GRPC_CL_USERS_PROTOS: users.proto
+  DB_TYPE: mysql
+  DB_HOST: db-svc.ext-a.svc.cluster.local
+  DB_PORT: "3306"
+  DB_DATABASE: lradb
+  REDIS_HOST: cache-svc.ext-a.svc.cluster.local
+  REDIS_PORT: "6379"
+  REDIS_TTL: "1000"
+  HTTP_TIMEOUT: "5000"
+  HTTP_MAX_REDIRECTS: "5"
+  HTTP_URL_GNAVI: https://api.gnavi.co.jp/RestSearchAPI/v3/
+  HTTP_URL_GOOGLE_GEOCODING: https://maps.googleapis.com/maps/api/geocode/json
+  JWT_EXPIRES_IN: "3600"

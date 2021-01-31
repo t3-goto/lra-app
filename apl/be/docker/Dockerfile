@@ -1,30 +1,28 @@
-# base image
+################################
+# Build Stage
+#################################
+FROM node:12.20-alpine3.10 as build-env
+
+WORKDIR /app
+
+COPY ./package.json yarn.lock /app/
+RUN yarn install
+
+COPY . /app
+RUN yarn build && yarn install --production --cache /tmp/empty-cache && rm -rf /tmp/empty-cache
+
+################################
+# Runtime Stage
+#################################
 FROM node:12.20-alpine3.10
 
-# make directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# copy package.json and package-lock.json
-COPY package*.json ./
-
-# install modules
-RUN npm install --production
-
-# copy config files
-COPY config ./config
-
-# copy codegen files
-COPY codegen ./codegen
-
-# copy proto files
-COPY protos ./protos
-
-# copy dist files
-COPY dist ./dist
-
-# expose
 EXPOSE 9011
 
-# execute
-# CMD ["node", "./dist/main.js"]
+COPY --from=build-env /app/dist /app/dist
+COPY --from=build-env /app/node_modules /app/node_modules
+COPY --from=build-env /app/codegen /app/codegen
+COPY --from=build-env /app/protos /app/protos
+
 ENTRYPOINT ["node", "./dist/main.js"]

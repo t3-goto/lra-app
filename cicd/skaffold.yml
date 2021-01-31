@@ -1,0 +1,43 @@
+apiVersion: skaffold/v2beta11
+kind: Config
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      gitCommit: {}
+    artifacts:
+    - image: t3goto/fe-web
+      context: ../apl/fe
+      docker:
+        dockerfile: ./docker/Dockerfile
+    - image: t3goto/be-ap
+      context: ../apl/be
+      docker:
+        dockerfile: ./docker/Dockerfile
+    - image: t3goto/bff-ap
+      context: ../apl/bff
+      docker:
+        dockerfile: ./docker/Dockerfile
+    local:
+      useBuildkit: true
+      push: false
+      concurrency: 1
+  test:
+  - image: t3goto/fe-web
+    structureTests:
+    - "./test/dev-fe-web-structure-test.yml"
+  - image: t3goto/be-ap
+    structureTests:
+    - "./test/dev-be-ap-structure-test.yml"
+  - image: t3goto/bff-ap
+    structureTests:
+    - "./test/dev-bff-ap-structure-test.yml"
+  deploy:
+    kubeContext: docker-desktop
+    logs:
+      prefix: auto
+    kustomize:
+      paths:
+      - "../infra/kustomize/fe/overlays/dev"
+      - "../infra/kustomize/be/overlays/dev"
+      - "../infra/kustomize/bff/overlays/dev"

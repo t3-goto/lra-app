@@ -1,0 +1,53 @@
+#################################
+# Kustomization (overlays)
+#################################
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- config-map.yml
+- secret.yml
+
+namespace: app-a
+
+replicas:
+- name: bff-ap
+  count: 1
+
+patchesJson6902:
+- target:
+    group: networking.istio.io
+    kind: VirtualService
+    name: bff-ap-vs-gw
+    version: v1beta1
+  patch: |-
+    - op: replace
+      path: /spec/hosts/0
+      value: "lratg.com"
+    - op: replace
+      path: /spec/http/0/route/0/destination/host
+      value: "bff-ap-svc.app-a.svc.cluster.local"
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: VirtualService
+    name: bff-ap-vs-mesh
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/hosts/0
+      value: "bff-ap-svc.app-a.svc.cluster.local"
+    - op: replace
+      path: /spec/http/0/route/0/destination/host
+      value: "bff-ap-svc.app-a.svc.cluster.local"
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: DestinationRule
+    name: bff-ap-dr
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/host
+      value: "bff-ap-svc.app-a.svc.cluster.local"
