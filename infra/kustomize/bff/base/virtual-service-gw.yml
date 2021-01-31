@@ -1,0 +1,22 @@
+#################################
+# VirtualService (Ingress Gateway)
+#################################
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bff-ap-vs-gw
+  namespace: dummy
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - istio-system/ingress-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: dummy
+        port:
+          number: 9001

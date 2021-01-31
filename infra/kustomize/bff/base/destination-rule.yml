@@ -1,0 +1,10 @@
+#################################
+# DestinationRule
+#################################
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: bff-ap-dr
+  namespace: dummy
+spec:
+  host: dummy

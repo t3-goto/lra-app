@@ -1,0 +1,31 @@
+#################################
+# Deployment (Cache Server)
+#################################
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: dummy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - image: redis:latest
+        name: cache
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6379

@@ -1,0 +1,53 @@
+#################################
+# Kustomization (overlays)
+#################################
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- config-map.yml
+- secret.yml
+
+namespace: app-a
+
+replicas:
+- name: fe-web
+  count: 1
+
+patchesJson6902:
+- target:
+    group: networking.istio.io
+    kind: VirtualService
+    name: fe-web-vs-gw
+    version: v1beta1
+  patch: |-
+    - op: replace
+      path: /spec/hosts/0
+      value: "lratg.com"
+    - op: replace
+      path: /spec/http/0/route/0/destination/host
+      value: "fe-web-svc.app-a.svc.cluster.local"
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: VirtualService
+    name: fe-web-vs-mesh
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/hosts/0
+      value: "fe-web-svc.app-a.svc.cluster.local"
+    - op: replace
+      path: /spec/http/0/route/0/destination/host
+      value: "fe-web-svc.app-a.svc.cluster.local"
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: DestinationRule
+    name: fe-web-dr
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/host
+      value: "fe-web-svc.app-a.svc.cluster.local"

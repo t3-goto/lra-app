@@ -1,101 +1,101 @@
 version: '3'
 
 services:
-    fe-web:
-        build:
-            dockerfile: ./docker/Dockerfile
-            context: ../../../apl/fe/
-        image: t3goto/fe-web:0.1
-        ports:
-            - 8001:8001
-        depends_on:
-            - bff-ap
-        environment:
-            NODE_ENV: production
-            BFF_BASE_URL: http://bff-ap/api/v1
-    bff-ap:
-        build:
-            dockerfile: ./docker/Dockerfile
-            context: ../../../apl/bff/
-        image: t3goto/bff-ap:0.1
-        ports:
-            - "9001:9001"
-        depends_on:
-            - db
-            - cache
-        environment:
-            NODE_ENV: production
-            HTTP_SV_PORT: 9001
-            GRPC_CL_GEOCODING_PAKAGE: rpc
-            GRPC_CL_GEOCODING_HOST: backend-server
-            GRPC_CL_GEOCODING_PORT: 9011
-            GRPC_CL_GEOCODING_PROTOS: geocoding.proto
-            GRPC_CL_RESTAURANTS_PAKAGE: rpc
-            GRPC_CL_RESTAURANTS_HOST: backend-server
-            GRPC_CL_RESTAURANTS_PORT: 9011
-            GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
-            GRPC_CL_USERS_PAKAGE: rpc
-            GRPC_CL_USERS_HOST: backend-server
-            GRPC_CL_USERS_PORT: 9011
-            GRPC_CL_USERS_PROTOS: users.proto
-            DB_TYPE: mysql
-            DB_HOST: db
-            DB_PORT: 3306
-            DB_USERNAME: lra
-            DB_PASSWORD: lra
-            DB_DATABASE: lradb
-            REDIS_HOST: cache
-            REDIS_PORT: 6379
-            REDIS_TTL: 1000
-            HTTP_TIMEOUT: 5000
-            HTTP_MAX_REDIRECTS: 5
-            JWT_EXPIRES_IN: 3600
-            JWT_SECRET: ${JWT_SECRET}
-    be-ap:
-        build:
-            dockerfile: ./docker/Dockerfile
-            context: ../../../apl/be/
-        image: t3goto/be-ap:0.1
-        ports:
-            - "9011:9011"
-        depends_on:
-            - db
-            - cache
-        environment:
-            NODE_ENV: production
-            GRPC_SV_PAKAGE: rpc
-            GRPC_SV_HOST: 0.0.0.0
-            GRPC_SV_PORT: 9011
-            GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto
-            GRPC_CL_GEOCODING_PAKAGE: rpc
-            GRPC_CL_GEOCODING_HOST: backend-server
-            GRPC_CL_GEOCODING_PORT: 9011
-            GRPC_CL_GEOCODING_PROTOS: geocoding.proto
-            GRPC_CL_RESTAURANTS_PAKAGE: rpc
-            GRPC_CL_RESTAURANTS_HOST: backend-server
-            GRPC_CL_RESTAURANTS_PORT: 9011
-            GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
-            GRPC_CL_USERS_PAKAGE: rpc
-            GRPC_CL_USERS_HOST: backend-server
-            GRPC_CL_USERS_PORT: 9011
-            GRPC_CL_USERS_PROTOS: users.proto
-            DB_TYPE: mysql
-            DB_HOST: db
-            DB_PORT: 3306
-            DB_USERNAME: lra
-            DB_PASSWORD: lra
-            DB_DATABASE: lradb
-            REDIS_HOST: cache
-            REDIS_PORT: 6379
-            REDIS_TTL: 1000
-            HTTP_TIMEOUT: 5000
-            HTTP_MAX_REDIRECTS: 5
-            HTTP_URL_GNAVI: https://api.gnavi.co.jp/RestSearchAPI/v3/
-            HTTP_URL_GOOGLE_GEOCODING: https://maps.googleapis.com/maps/api/geocode/json
-            JWT_EXPIRES_IN: 3600
-            JWT_SECRET: ${JWT_SECRET}
-            ACCESS_KEY_GNAVI: ${ACCESS_KEY_GNAVI}
-            ACCESS_KEY_GOOGLE: ${ACCESS_KEY_GOOGLE}
+    # fe-web:
+    #     build:
+    #         dockerfile: ./docker/Dockerfile
+    #         context: ../../../apl/fe/
+    #     image: t3goto/fe-web:0.1
+    #     ports:
+    #         - 8001:8001
+    #     depends_on:
+    #         - bff-ap
+    #     environment:
+    #         NODE_ENV: production
+    #         BFF_BASE_URL: http://bff-ap/api/v1
+    # bff-ap:
+    #     build:
+    #         dockerfile: ./docker/Dockerfile
+    #         context: ../../../apl/bff/
+    #     image: t3goto/bff-ap:0.1
+    #     ports:
+    #         - "9001:9001"
+    #     depends_on:
+    #         - db
+    #         - cache
+    #     environment:
+    #         NODE_ENV: production
+    #         HTTP_SV_PORT: 9001
+    #         GRPC_CL_GEOCODING_PAKAGE: rpc
+    #         GRPC_CL_GEOCODING_HOST: backend-server
+    #         GRPC_CL_GEOCODING_PORT: 9011
+    #         GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+    #         GRPC_CL_RESTAURANTS_PAKAGE: rpc
+    #         GRPC_CL_RESTAURANTS_HOST: backend-server
+    #         GRPC_CL_RESTAURANTS_PORT: 9011
+    #         GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+    #         GRPC_CL_USERS_PAKAGE: rpc
+    #         GRPC_CL_USERS_HOST: backend-server
+    #         GRPC_CL_USERS_PORT: 9011
+    #         GRPC_CL_USERS_PROTOS: users.proto
+    #         DB_TYPE: mysql
+    #         DB_HOST: db
+    #         DB_PORT: 3306
+    #         DB_USERNAME: lra
+    #         DB_PASSWORD: lra
+    #         DB_DATABASE: lradb
+    #         REDIS_HOST: cache
+    #         REDIS_PORT: 6379
+    #         REDIS_TTL: 1000
+    #         HTTP_TIMEOUT: 5000
+    #         HTTP_MAX_REDIRECTS: 5
+    #         JWT_EXPIRES_IN: 3600
+    #         JWT_SECRET: ${JWT_SECRET}
+    # be-ap:
+    #     build:
+    #         dockerfile: ./docker/Dockerfile
+    #         context: ../../../apl/be/
+    #     image: t3goto/be-ap:0.1
+    #     ports:
+    #         - "9011:9011"
+    #     depends_on:
+    #         - db
+    #         - cache
+    #     environment:
+    #         NODE_ENV: production
+    #         GRPC_SV_PAKAGE: rpc
+    #         GRPC_SV_HOST: 0.0.0.0
+    #         GRPC_SV_PORT: 9011
+    #         GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto
+    #         GRPC_CL_GEOCODING_PAKAGE: rpc
+    #         GRPC_CL_GEOCODING_HOST: backend-server
+    #         GRPC_CL_GEOCODING_PORT: 9011
+    #         GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+    #         GRPC_CL_RESTAURANTS_PAKAGE: rpc
+    #         GRPC_CL_RESTAURANTS_HOST: backend-server
+    #         GRPC_CL_RESTAURANTS_PORT: 9011
+    #         GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+    #         GRPC_CL_USERS_PAKAGE: rpc
+    #         GRPC_CL_USERS_HOST: backend-server
+    #         GRPC_CL_USERS_PORT: 9011
+    #         GRPC_CL_USERS_PROTOS: users.proto
+    #         DB_TYPE: mysql
+    #         DB_HOST: db
+    #         DB_PORT: 3306
+    #         DB_USERNAME: lra
+    #         DB_PASSWORD: lra
+    #         DB_DATABASE: lradb
+    #         REDIS_HOST: cache
+    #         REDIS_PORT: 6379
+    #         REDIS_TTL: 1000
+    #         HTTP_TIMEOUT: 5000
+    #         HTTP_MAX_REDIRECTS: 5
+    #         HTTP_URL_GNAVI: https://api.gnavi.co.jp/RestSearchAPI/v3/
+    #         HTTP_URL_GOOGLE_GEOCODING: https://maps.googleapis.com/maps/api/geocode/json
+    #         JWT_EXPIRES_IN: 3600
+    #         JWT_SECRET: ${JWT_SECRET}
+    #         ACCESS_KEY_GNAVI: ${ACCESS_KEY_GNAVI}
+    #         ACCESS_KEY_GOOGLE: ${ACCESS_KEY_GOOGLE}
     db:
         image: mysql:5
         restart: always

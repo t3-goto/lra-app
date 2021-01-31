@@ -1,0 +1,12 @@
+schemaVersion: 2.0.0
+
+fileExistenceTests:
+  - name: 'index.html'
+    path: '/usr/share/nginx/html/index.html'
+    shouldExist: true
+  - name: '50x.html'
+    path: '/usr/share/nginx/html/50x.html'
+    shouldExist: true
+  - name: 'nginx binary'
+    path: '/usr/sbin/nginx'
+    shouldExist: true

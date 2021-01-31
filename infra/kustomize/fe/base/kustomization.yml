@@ -1,0 +1,12 @@
+#################################
+# Kustomization (base)
+#################################
+resources:
+- deployment.yml
+- destination-rule.yml
+- service.yml
+- virtual-service-gw.yml
+- virtual-service-mesh.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

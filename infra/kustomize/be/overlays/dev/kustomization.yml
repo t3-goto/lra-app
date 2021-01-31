@@ -1,0 +1,41 @@
+#################################
+# Kustomization (overlays)
+#################################
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- config-map.yml
+- secret.yml
+
+namespace: app-a
+
+replicas:
+- name: be-ap
+  count: 1
+
+patchesJson6902:
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: VirtualService
+    name: be-ap-vs-mesh
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/hosts/0
+      value: "be-ap-svc.app-a.svc.cluster.local"
+    - op: replace
+      path: /spec/http/0/route/0/destination/host
+      value: "be-ap-svc.app-a.svc.cluster.local"
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: DestinationRule
+    name: be-ap-dr
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/host
+      value: "be-ap-svc.app-a.svc.cluster.local"

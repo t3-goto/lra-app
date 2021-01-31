@@ -1,0 +1,27 @@
+#################################
+# Kustomization (overlays)
+#################################
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+- ../../base
+- ./namespace.yml
+- ./secret.yml
+
+namespace: istio-system
+
+patchesJson6902:
+- target:
+    group: networking.istio.io
+    version: v1beta1
+    kind: Gateway
+    name: ingress-gateway
+    namespace: dummy
+  patch: |-
+    - op: replace
+      path: /spec/servers/0/hosts/0
+      value: "lratg.com"
+    - op: replace
+      path: /spec/servers/1/hosts/0
+      value: "lratg.com"

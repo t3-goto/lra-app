@@ -1,0 +1,30 @@
+#################################
+# DaemonSet (Liberator)
+#################################
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: liberator
+  namespace: dummy
+spec:
+  selector:
+    matchLabels:
+      app: liberator
+  template:
+    metadata:
+      name: liberator
+      labels:
+        app: liberator
+    spec:
+      serviceAccountName: liberator
+      containers:
+        - name: liberator
+          image: t3goto/liberator:0.1
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              cpu: 100m
+              memory: 75Mi
+            requests:
+              cpu: 100m
+              memory: 75Mi

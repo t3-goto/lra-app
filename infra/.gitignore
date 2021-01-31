@@ -1,0 +1,12 @@
+# .env
+.env
+
+# db data
+local/db/data
+
+# secret.yml
+secret.*
+
+# certificate
+*.crt
+*.key

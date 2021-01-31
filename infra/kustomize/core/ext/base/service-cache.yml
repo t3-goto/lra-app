@@ -1,0 +1,18 @@
+#################################
+# Service (Cache Server)
+#################################
+apiVersion: v1
+kind: Service
+metadata:
+  name: cache-svc
+  namespace: dummy
+  labels:
+    app: cache-svc
+spec:
+  ports:
+  - name: cache-port
+    port: 6379
+    targetPort: 6379
+    protocol: TCP
+  selector:
+    app: cache

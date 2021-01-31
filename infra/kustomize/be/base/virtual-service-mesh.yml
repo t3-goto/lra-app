@@ -1,0 +1,17 @@
+#################################
+# VirtualService
+#################################
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: be-ap-vs-mesh
+  namespace: dummy
+spec:
+  hosts:
+  - dummy
+  http:
+  - route:
+    - destination:
+        host: dummy
+        port:
+          number: 9011

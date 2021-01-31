@@ -1,7 +1,0 @@
-#################################
-# Namespace（istio-system）
-#################################
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: external-service
