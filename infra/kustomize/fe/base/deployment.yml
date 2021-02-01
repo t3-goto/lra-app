@@ -61,7 +61,7 @@ spec:
               path: /index.html
               port: 8001
               scheme: HTTP
-            initialDelaySeconds: 30
+            initialDelaySeconds: 0
             periodSeconds: 15
             timeoutSeconds: 1
             successThreshold: 1
@@ -69,11 +69,21 @@ spec:
           livenessProbe:
             exec:
               command: ["ls","/usr/share/nginx/html/50x.html"]
-            initialDelaySeconds: 30
+            initialDelaySeconds: 0
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10
+          startupProbe:
+            httpGet:
+              path: /index.html
+              port: 8001
+              scheme: HTTP
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 100
           volumeMounts:
           # - mountPath: /usr/share/nginx/html
           #   name: contents-vol
