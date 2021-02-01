@@ -46,7 +46,7 @@ spec:
             httpGet:
               path: /api/v1/health/readiness
               port: 9001
-            initialDelaySeconds: 30
+            initialDelaySeconds: 0
             periodSeconds: 15
             timeoutSeconds: 1
             successThreshold: 1
@@ -54,8 +54,17 @@ spec:
           livenessProbe:
             exec:
               command: ["ls","/usr/local/bin/node"]
-            initialDelaySeconds: 30
+            initialDelaySeconds: 0
             periodSeconds: 5
             timeoutSeconds: 1
             successThreshold: 1
             failureThreshold: 10
+          startupProbe:
+            httpGet:
+              path: /api/v1/health/readiness
+              port: 9001
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 100
