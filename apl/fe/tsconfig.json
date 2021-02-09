@@ -14,8 +14,6 @@
     "sourceMap": true,
     // dist:出力先ディレクトリの設定
     "outDir": "./dist/",
-    // js許可
-    "allowJs": true,
     // strict:型定義のチェック厳格化
     "strict": true,
     // moduleResolution:モジュールシステムの解決方法（node,npmを利用してモジュール解決）
