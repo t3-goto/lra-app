@@ -1,7 +1,7 @@
 #################################
-# Namespace（external-service）
+# Namespace (istio-system)
 #################################
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ext-a
+  name: istio-system

@@ -1,7 +1,9 @@
 #################################
-# Namespace（external-service）
+# Namespace（application）
 #################################
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ext-a
+  name: app-a
+  labels:
+    istio-injection: enabled

@@ -15,15 +15,15 @@ import {
   updateLoginUsername,
 } from '../actions';
 import {
-  authHttpClient,
-  usersHttpClient,
+  createAuthHttpClient,
+  createUsersHttpClient,
   PostAuthApiRequestSchema,
   PostAuthApiResponseSchema,
   PostUsersApiRequestSchema,
   PostUsersApiResponseSchema,
 } from '../services/http-cliient';
 import { RootState } from '../reducers';
-
+import { config } from '../config';
 /**
  * Handle The Action Type of REQUEST_LOGIN.
  */
@@ -42,6 +42,7 @@ export function* handleRequestLogin() {
       payload: PostAuthApiResponseSchema;
       error: any;
     };
+    const authHttpClient = createAuthHttpClient(config.BFF_BASE_URL);
     const { payload, error }: returnType = yield call(
       authHttpClient.post,
       postAuthApiRequestSchema
@@ -84,6 +85,7 @@ export function* handleRequestRegister() {
       payload: PostUsersApiResponseSchema;
       error: any;
     };
+    const usersHttpClient = createUsersHttpClient(config.BFF_BASE_URL);
     const { payload, error }: returnType = yield call(
       usersHttpClient.post,
       postUsersApiRequestSchema

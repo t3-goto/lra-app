@@ -1,0 +1,213 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: LraAppRdsStack
+
+Parameters:
+  BaseName:
+    Type: String
+    Default: LraApp
+
+  Region:
+    Type: String
+    Default: ap-northeast-1
+
+  AvailabilityZoneA:
+    Type: String
+    Default: ap-northeast-1a
+
+  AvailabilityZoneC:
+    Type: String
+    Default: ap-northeast-1c
+
+  AvailabilityZoneD:
+    Type: String
+    Default: ap-northeast-1d
+
+  VPCCidrBlock:
+    Type: String
+    Default: 192.168.0.0/16
+
+  PublicSubnetACidrBlock:
+    Type: String
+    Default: 192.168.0.0/24
+
+  PublicSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.1.0/24
+
+  PublicSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.2.0/24
+
+  PrivateSubnetACidrBlock:
+    Type: String
+    Default: 192.168.16.0/24
+
+  PrivateSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.17.0/24
+
+  PrivateSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.18.0/24
+
+  OperationSubnetACidrBlock:
+    Type: String
+    Default: 192.168.32.0/24
+
+  OperationSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.33.0/24
+
+  OperationSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.34.0/24
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  DBSubnetGroup:
+    Type: String
+
+  OperationServerSecurityGroup:
+    Type: String
+
+Resources:
+  RdsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for RDS
+      VpcId: !Ref VPC
+
+  RdsSecurityGroupIngressFromPublicSubnetACidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref PublicSubnetACidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromPublicSubnetCCidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref PublicSubnetCCidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromPublicSubnetDCidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref PublicSubnetDCidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromOperationSubnetACidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref OperationSubnetACidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromOperationSubnetCCidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref OperationSubnetCCidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromOperationSubnetDCidrBlock:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      CidrIp: !Ref OperationSubnetDCidrBlock
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  RdsSecurityGroupIngressFromOperationServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroupIngress
+    Properties:
+      GroupId: !Ref RdsSecurityGroup
+      SourceSecurityGroupId: !Ref OperationServerSecurityGroup
+      IpProtocol: tcp
+      FromPort: 3306
+      ToPort: 3306
+
+  DBInstance:
+    Type: "AWS::RDS::DBInstance"
+    Properties:
+      DBInstanceIdentifier: lradb
+      Engine: mysql
+      EngineVersion: 5.7
+      DBInstanceClass: db.t2.micro
+      AllocatedStorage: 20
+      StorageType: gp2
+      DBName: lradb
+      MasterUsername: !Join ['', ['{{resolve:secretsmanager:', !Ref RdsMasterSecret, ':SecretString:username}}' ]]
+      MasterUserPassword: !Join ['', ['{{resolve:secretsmanager:', !Ref RdsMasterSecret, ':SecretString:password}}' ]]
+      DBSubnetGroupName: !Ref DBSubnetGroup
+      PubliclyAccessible: false
+      MultiAZ: false
+      PreferredBackupWindow: 18:00-18:30
+      PreferredMaintenanceWindow: sat:19:00-sat:19:30
+      AutoMinorVersionUpgrade: false
+      DBParameterGroupName: !Ref DBParameterGroup
+      VPCSecurityGroups:
+      - !Ref RdsSecurityGroup
+      CopyTagsToSnapshot: true
+      BackupRetentionPeriod: 7
+      DeletionProtection: false
+
+  RdsMasterSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "dbadmin"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\'''
+      Name: RdsMasterSecret
+
+  RdsUserSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      GenerateSecretString:
+        SecretStringTemplate: '{"username": "dbuser"}'
+        GenerateStringKey: 'password'
+        PasswordLength: 16
+        ExcludeCharacters: '"@/\''{}#%&*<>[]^`|'
+      Name: RdsUserSecret
+
+  RdsSecretAttachment:
+    Type: AWS::SecretsManager::SecretTargetAttachment
+    Properties:
+      SecretId: !Ref RdsMasterSecret
+      TargetId: !Ref DBInstance
+      TargetType: AWS::RDS::DBInstance
+
+  DBParameterGroup:
+    Type: AWS::RDS::DBParameterGroup
+    Properties:
+      Family: mysql5.7
+      Description: Parameter Group for MySQL5.7
+
+Outputs:
+  RDSEndpoint:
+    Value: !GetAtt DBInstance.Endpoint.Address
+
+  RdsMasterSecret:
+    Value: !Ref RdsMasterSecret
+
+  RdsUserSecret:
+    Value: !Ref RdsUserSecret
+
+  RdsSecurityGroup:
+    Value: !Ref RdsSecurityGroup

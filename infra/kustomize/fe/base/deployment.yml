@@ -39,6 +39,12 @@ spec:
           items:
             - key: default.conf
               path: default.conf
+      - name: contents-config-vol
+        configMap:
+          name: fe-web-config
+          items:
+            - key: config.json
+              path: config.json
       containers:
         - name: fe-web
           # image: nginx:1.18-alpine
@@ -50,7 +56,8 @@ spec:
             limits:
               cpu: 150m
               memory: 150Mi
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
+          # imagePullPolicy: IfNotPresent
           envFrom:
           - configMapRef:
               name: fe-web-config
@@ -96,6 +103,10 @@ spec:
             subPath: default.conf
             readOnly: true
             name: nginx-conf-default-vol
+          - mountPath: /usr/share/nginx/html/config.json
+            subPath: config.json
+            readOnly: true
+            name: contents-config-vol
         # - name: fe-contents-cloner
         #   image: t3goto/contents-cloner:0.1
         #   resources:

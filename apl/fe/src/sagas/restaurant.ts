@@ -12,10 +12,11 @@ import {
 import { RootState } from '../reducers';
 import { Restaurant } from '../interfaces';
 import {
-  restaurantsHttpClient,
+  createRestaurantsHttpClient,
   GetRestaurantsApiRequestSchema,
   GetRestaurantsApiResponseSchema,
 } from '../services/http-cliient';
+import { config } from '../config';
 
 /**
  * Handle The Action Type of REQUEST_RESTAURANT.
@@ -32,6 +33,9 @@ export function* handleRequestRestaurant() {
       payload: GetRestaurantsApiResponseSchema;
       error: any;
     };
+    const restaurantsHttpClient = createRestaurantsHttpClient(
+      config.BFF_BASE_URL
+    );
     const { payload, error }: returnType = yield call(
       restaurantsHttpClient.getAllByQuery,
       getRestaurantsApiRequestSchema
@@ -75,6 +79,9 @@ export function* handleRequestSearch() {
       payload: GetRestaurantsApiResponseSchema;
       error: any;
     };
+    const restaurantsHttpClient = createRestaurantsHttpClient(
+      config.BFF_BASE_URL
+    );
     const { payload, error }: returnType = yield call(
       restaurantsHttpClient.getAllByQuery,
       getRestaurantsApiRequestSchema

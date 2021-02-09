@@ -7,6 +7,7 @@ import { configureStore } from './configureStore';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import './assets/styles/index.scss';
+import ConfigLoader from './ConfigLoader';
 
 const history = createBrowserHistory();
 const store = configureStore(history);
@@ -19,7 +20,7 @@ const Component: React.FC = () => {
     <React.StrictMode>
       <Provider store={store}>
         <ConnectedRouter history={history}>
-          <App />
+          <ConfigLoader ready={() => <App />} />;
         </ConnectedRouter>
       </Provider>
     </React.StrictMode>

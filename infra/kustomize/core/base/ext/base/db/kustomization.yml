@@ -1,0 +1,9 @@
+#################################
+# Kustomization (base)
+#################################
+resources:
+- ./deployment.yml
+- ./service.yml
+
+generatorOptions:
+  disableNameSuffixHash: true

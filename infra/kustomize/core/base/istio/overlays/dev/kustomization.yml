@@ -11,17 +11,5 @@ resources:
 
 namespace: istio-system
 
-patchesJson6902:
-- target:
-    group: networking.istio.io
-    version: v1beta1
-    kind: Gateway
-    name: ingress-gateway
-    namespace: dummy
-  patch: |-
-    - op: replace
-      path: /spec/servers/0/hosts/0
-      value: "lratg.com"
-    - op: replace
-      path: /spec/servers/1/hosts/0
-      value: "lratg.com"
+patchesStrategicMerge:
+- ingress-gateway-patch.yml

@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const resolve = require('resolve');
 const PnpWebpackPlugin = require('pnp-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin');
 const TerserPlugin = require('terser-webpack-plugin');
@@ -36,7 +37,7 @@ const imageInlineSizeLimit = parseInt(
   10
 );
 const useTypeScript = fs.existsSync(paths.appTsConfig);
-
+const configJsonRegex = /config\.json$/;
 const cssRegex = /\.css$/;
 const cssModuleRegex = /\.module\.css$/;
 const sassRegex = /\.(scss|sass)$/;
@@ -465,6 +466,17 @@ module.exports = (webpackEnv) => {
               },
             }
           : undefined),
+      }),
+      // _______________________________________________
+      // CopyWebpackPluginの有効化（config.jsonのコピー※7.0.0は不具合あり）
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: 'src/assets/config/config.json',
+            to: 'config.json',
+            toType: 'file',
+          },
+        ],
       }),
       // _______________________________________________
       // InclineChunkHtmlPluginの有効化（HtmlWebpackPluginと連携しscriptをインライン化）
