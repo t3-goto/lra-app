@@ -1,0 +1,138 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: LraAppOperationStack
+
+Parameters:
+  BaseName:
+    Type: String
+    Default: LraApp
+
+  Region:
+    Type: String
+    Default: ap-northeast-1
+
+  AvailabilityZoneA:
+    Type: String
+    Default: ap-northeast-1a
+
+  AvailabilityZoneC:
+    Type: String
+    Default: ap-northeast-1c
+
+  AvailabilityZoneD:
+    Type: String
+    Default: ap-northeast-1d
+
+  OperationSubnetACidrBlock:
+    Type: String
+    Default: 192.168.32.0/24
+
+  OperationSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.33.0/24
+
+  OperationSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.34.0/24
+
+  OperationServerInstanceType:
+    Type: String
+    Default: t2.micro
+
+  OperationServerImageId:
+    Type: String
+    Default: ami-00d101850e971728d
+
+  OperationServerVolumeSize:
+    Type: Number
+    Default: 8
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+
+  OperationSubnetA:
+    Type: String
+
+Resources:
+  OperationServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group for Operation
+      VpcId: !Ref VPC
+
+  OperationServerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${BaseName}OperationServerRole
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+            - sts:AssumeRole
+
+  OperationServerInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: /
+      Roles:
+      - !Ref OperationServerRole
+
+  OperationServerEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  OperationServerEIPAssociation:
+    Type: AWS::EC2::EIPAssociation
+    Properties:
+      AllocationId: !GetAtt OperationServerEIP.AllocationId
+      InstanceId: !Ref OperationServerInstance
+
+  OperationServerInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref OperationServerInstanceType
+      ImageId: !Ref OperationServerImageId
+      BlockDeviceMappings:
+      - DeviceName: /dev/xvda
+        Ebs:
+          VolumeType: gp2
+          VolumeSize: 8
+          DeleteOnTermination: true
+      NetworkInterfaces:
+      - SubnetId: !Ref OperationSubnetA
+        AssociatePublicIpAddress: false
+        GroupSet:
+        - !Ref OperationServerSecurityGroup
+        DeviceIndex: 0
+        DeleteOnTermination: true
+      DisableApiTermination: false
+      IamInstanceProfile: !Ref OperationServerInstanceProfile
+      UserData:
+        Fn::Base64:
+          !Sub |
+          #!/bin/bash
+          set -o xtrace
+          yum install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm
+          /opt/aws/bin/cfn-signal --exit-code $? \
+                   --stack  ${AWS::StackName} \
+                   --resource NodeGroup  \
+                   --region ${AWS::Region}
+          sudo rpm -Uvh https://dev.mysql.com/get/mysql80-community-release-el7-1.noarch.rpm
+          sudo yum install -y mysql-community-client.x86_64
+
+Outputs:
+  OperationServerSecurityGroup:
+    Value: !Ref OperationServerSecurityGroup
+
+  OperationServerEIP:
+    Value: !Ref OperationServerEIP
+
+  OperationServerInstance:
+    Value: !Ref OperationServerInstance

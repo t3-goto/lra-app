@@ -10,20 +10,20 @@ spec:
   selector:
     istio: ingressgateway
   servers:
-  - port:
-      number: 80
-      name: http
-      protocol: HTTP
-    tls:
-      httpsRedirect: true
-    hosts:
-    - lratg.com
-  - port:
-      number: 443
-      name: https
-      protocol: HTTPS
-    tls:
-      mode: SIMPLE
-      credentialName: ingress-gateway-credential
-    hosts:
-    - lratg.com
+  # - port:
+  #     number: 80
+  #     name: http
+  #     protocol: HTTP
+  #   tls:
+  #     httpsRedirect: true
+  #   hosts:
+  #   - dummy
+  # - port:
+  #     number: 443
+  #     name: https
+  #     protocol: HTTPS
+  #   tls:
+  #     mode: SIMPLE
+  #     credentialName: ingress-gateway-credential
+  #   hosts:
+  #   - dummy

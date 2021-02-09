@@ -1,0 +1,312 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: LraAppVpcStack
+
+Parameters:
+  BaseName:
+    Type: String
+    Default: LraApp
+
+  Region:
+    Type: String
+    Default: ap-northeast-1
+
+  AvailabilityZoneA:
+    Type: String
+    Default: ap-northeast-1a
+
+  AvailabilityZoneC:
+    Type: String
+    Default: ap-northeast-1c
+
+  AvailabilityZoneD:
+    Type: String
+    Default: ap-northeast-1d
+
+  VPCCidrBlock:
+    Type: String
+    Default: 192.168.0.0/16
+
+  PublicSubnetACidrBlock:
+    Type: String
+    Default: 192.168.0.0/24
+
+  PublicSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.1.0/24
+
+  PublicSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.2.0/24
+
+  PrivateSubnetACidrBlock:
+    Type: String
+    Default: 192.168.16.0/24
+
+  PrivateSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.17.0/24
+
+  PrivateSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.18.0/24
+
+  OperationSubnetACidrBlock:
+    Type: String
+    Default: 192.168.32.0/24
+
+  OperationSubnetCCidrBlock:
+    Type: String
+    Default: 192.168.33.0/24
+
+  OperationSubnetDCidrBlock:
+    Type: String
+    Default: 192.168.34.0/24
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VPCCidrBlock
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}VPC
+
+  PublicSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: !Ref PublicSubnetACidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PublicSubnetA
+
+  PublicSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: !Ref PublicSubnetCCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PublicSubnetC
+
+  PublicSubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneD
+      CidrBlock: !Ref PublicSubnetDCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PublicSubnetD
+
+  PrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: !Ref PrivateSubnetACidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PrivateSubnetA
+
+  PrivateSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: !Ref PrivateSubnetCCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PrivateSubnetC
+
+  PrivateSubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneD
+      CidrBlock: !Ref PrivateSubnetDCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: false
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PrivateSubnetD
+
+  OperationSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneA
+      CidrBlock: !Ref OperationSubnetACidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}OperationSubnetA
+
+  OperationSubnetC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneC
+      CidrBlock: !Ref OperationSubnetCCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}OperationSubnetC
+
+  OperationSubnetD:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Ref AvailabilityZoneD
+      CidrBlock: !Ref OperationSubnetDCidrBlock
+      VpcId: !Ref VPC
+      MapPublicIpOnLaunch: true
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}OperationSubnetD
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}InternetGateway
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+
+  PublicSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}PublicSubnetRouteTable
+
+  PublicSubnetDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetA
+      RouteTableId: !Ref PublicSubnetRouteTable
+
+  PublicSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetC
+      RouteTableId: !Ref PublicSubnetRouteTable
+
+  PublicSubnetDRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetD
+      RouteTableId: !Ref PublicSubnetRouteTable
+
+  OperationSubnetRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+      - Key: Name
+        Value: !Sub ${BaseName}OperationSubnetRouteTable
+
+  OperationSubnetDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref OperationSubnetRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  OperationSubnetARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref OperationSubnetA
+      RouteTableId: !Ref OperationSubnetRouteTable
+
+  OperationSubnetCRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref OperationSubnetC
+      RouteTableId: !Ref OperationSubnetRouteTable
+
+  OperationSubnetDRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref OperationSubnetD
+      RouteTableId: !Ref OperationSubnetRouteTable
+
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: !Sub ${BaseName}DBSubnetGroup
+      DBSubnetGroupDescription: "DB Subnet Group"
+      SubnetIds:
+      - !Ref PrivateSubnetA
+      - !Ref PrivateSubnetC
+      - !Ref PrivateSubnetD
+
+Outputs:
+  VPC:
+    Value: !Ref VPC
+
+  PublicSubnetA:
+    Value: !Ref PublicSubnetA
+
+  PublicSubnetC:
+    Value: !Ref PublicSubnetC
+
+  PublicSubnetD:
+    Value: !Ref PublicSubnetD
+
+  PrivateSubnetA:
+    Value: !Ref PrivateSubnetA
+
+  PrivateSubnetC:
+    Value: !Ref PrivateSubnetC
+
+  PrivateSubnetD:
+    Value: !Ref PrivateSubnetD
+
+  OperationSubnetA:
+    Value: !Ref OperationSubnetA
+
+  OperationSubnetC:
+    Value: !Ref OperationSubnetC
+
+  OperationSubnetD:
+    Value: !Ref OperationSubnetD
+
+  PublicSubnets:
+    Value: !Join [ ",", [ !Ref PublicSubnetA, !Ref PublicSubnetC, !Ref PublicSubnetD ] ]
+
+  PrivateSubnets:
+    Value: !Join [ ",", [ !Ref PrivateSubnetA, !Ref PrivateSubnetC, !Ref PrivateSubnetD ] ]
+
+  OperationSubnets:
+    Value: !Join [ ",", [ !Ref OperationSubnetA, !Ref OperationSubnetC, !Ref OperationSubnetD ] ]
+
+  PublicSubnetRouteTable:
+    Value: !Ref PublicSubnetRouteTable
+
+  OperationSubnetRouteTable:
+    Value: !Ref OperationSubnetRouteTable
+
+  DBSubnetGroup:
+    Value: !Ref DBSubnetGroup
+
