@@ -38,7 +38,20 @@ jobs:
         root: ~/project/apl/fe
         paths:
         - node_modules/*
-
+  build:
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SOURCE_REPO: https://github.com/t3-goto/lra-app
+      SOURCE_BRANCH: develop
+      SOURCE_DIR: apl/fe
+    steps:
+    - sparse-checkout
+    - attach_workspace:
+        at: ~/project/apl/fe
+    - run:
+        name: Yarn build
+        command: cd ${SOURCE_DIR} && yarn build
     # - slack/notify:
     #     event: fail
     #     template: basic_fail_1
@@ -46,7 +59,11 @@ jobs:
     #     event: pass
     #     template: success_tagged_deploy_1
 workflows:
-  build_and_deploy:
+  version: 2
+  main:
     jobs:
     - install_deps
+    - build:
+        requires:
+          - install_deps
         # context: SLACK_INTEGRATION
