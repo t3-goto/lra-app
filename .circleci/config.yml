@@ -19,7 +19,6 @@ jobs:
         git pull origin ${CONTENTS_SOURCE_BRANCH}
     - slack/notify:
         event: fail
-        mentions: '@EngineeringTeam'
         template: basic_fail_1
     - slack/notify:
         event: pass
