@@ -1,6 +1,7 @@
 version: 2.1
-# orbs:
-#   slack: circleci/slack@4.2.1
+orbs:
+  slack: circleci/slack@4.2.1
+
 commands:
   sparse-checkout:
     description: 'Sparse checkout for sub directories.'
@@ -13,6 +14,7 @@ commands:
           git remote add origin ${SOURCE_REPO}.git
           echo ${SOURCE_DIR} >.git/info/sparse-checkout
           git pull origin ${SOURCE_BRANCH}
+
 jobs:
   install_deps:
     docker:
@@ -74,12 +76,19 @@ jobs:
     - run:
         name: Yarn build
         command: cd ${SOURCE_DIR} && yarn build
-    # - slack/notify:
-    #     event: fail
-    #     template: basic_fail_1
-    # - slack/notify:
-    #     event: pass
-    #     template: success_tagged_deploy_1
+
+  notify:
+    docker:
+    - image: cimg/node:12.20
+    steps:
+    - run: echo "notify slack."
+    - slack/notify:
+        event: fail
+        template: basic_fail_1
+    - slack/notify:
+        event: pass
+        template: success_tagged_deploy_1
+
 workflows:
   version: 2
   main:
@@ -91,4 +100,8 @@ workflows:
     - build:
         requires:
           - install_deps
-        # context: SLACK_INTEGRATION
+    - notify:
+        requires:
+          - lint_and_test
+          - build
+        context: SLACK_INTEGRATION
