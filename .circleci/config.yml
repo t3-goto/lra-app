@@ -25,7 +25,8 @@ jobs:
     - sparse-checkout
     - restore_cache:
         keys:
-        - v1-dependencies-{{ checksum "apl/fe/yarn.lock"}}
+        - v1-dependencies-{{ .Branch }}-{{ checksum "apl/fe/yarn.lock"}}
+        - v1-dependencies-{{ .Branch }}
         - v1-dependencies-
     - run:
         name: Yarn Install
