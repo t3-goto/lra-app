@@ -1,30 +1,52 @@
 version: 2.1
-orbs:
-  slack: circleci/slack@4.2.1
-jobs:
-  build:
-    docker:
-    - image: cimg/node:lts
-    environment:
-      CONTENTS_SOURCE_URL: https://github.com/t3-goto/lra-app
-      CONTENTS_SOURCE_BRANCH: develop
-      CONTENTS_SOURCE_DIR: apl/fe
+# orbs:
+#   slack: circleci/slack@4.2.1
+commands:
+  sparse-checkout:
+    description: 'Sparse checkout for sub directories.'
     steps:
-    # - checkout
-    - run: |
-        git init
-        git config core.sparsecheckout true
-        git remote add origin ${CONTENTS_SOURCE_URL}.git
-        echo ${CONTENTS_SOURCE_DIR} >.git/info/sparse-checkout
-        git pull origin ${CONTENTS_SOURCE_BRANCH}
-    - slack/notify:
-        event: fail
-        template: basic_fail_1
-    - slack/notify:
-        event: pass
-        template: success_tagged_deploy_1
+    - run:
+        name: Sparse Checkout
+        command: |
+          git init
+          git config core.sparsecheckout true
+          git remote add origin ${SOURCE_REPO}.git
+          echo ${SOURCE_DIR} >.git/info/sparse-checkout
+          git pull origin ${SOURCE_BRANCH}
+jobs:
+  install_deps:
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SOURCE_REPO: https://github.com/t3-goto/lra-app
+      SOURCE_BRANCH: develop
+      SOURCE_DIR: apl/fe
+    steps:
+    - sparse-checkout
+    - restore_cache:
+        keys:
+        - v1-dependencies-{{ checksum "yarn.lock"}}
+        - v1-dependencies-
+    - run:
+        name: Yarn Install
+        command: cd ${SOURCE_DIR} && yarn install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v1-dependencies-{{ checksum "yarn.lock"}}
+    - persist_to_workspace:
+        root: ~/project
+        paths:
+        - node_modules/*
+
+    # - slack/notify:
+    #     event: fail
+    #     template: basic_fail_1
+    # - slack/notify:
+    #     event: pass
+    #     template: success_tagged_deploy_1
 workflows:
-  build_and_notify:
+  build_and_deploy:
     jobs:
-    - build:
-        context: SLACK_INTEGRATION
+    - install_deps
+        # context: SLACK_INTEGRATION
