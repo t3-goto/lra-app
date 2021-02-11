@@ -59,6 +59,8 @@ jobs:
     - run:
         name: Lint
         command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
+    - store_test_results:
+        path: apl/fe/reports
     - store_artifacts:
         path: apl/fe/reports
 
