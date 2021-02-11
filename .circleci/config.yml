@@ -91,9 +91,9 @@ jobs:
     - run:
         name: Set registry url
         command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
-    - run:
-        name: Docker pull.
-        command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker pull.
+    #     command: docker pull ${REGISTORY_URL}:latest
     - run:
         name: Docker build
         command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
