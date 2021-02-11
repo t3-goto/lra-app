@@ -19,7 +19,7 @@ jobs:
     - image: cimg/node:12.20
     environment:
       SOURCE_REPO: https://github.com/t3-goto/lra-app
-      SOURCE_BRANCH: develop
+      SOURCE_BRANCH: feature/mod-circleci
       SOURCE_DIR: apl/fe
     steps:
     - sparse-checkout
