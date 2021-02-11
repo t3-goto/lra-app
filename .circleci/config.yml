@@ -37,7 +37,8 @@ jobs:
     - persist_to_workspace:
         root: ~/project/apl/fe
         paths:
-        - node_modules/*
+        - apl/fe/node_modules/*
+
   lint_and_test:
     docker:
     - image: cimg/node:12.20
