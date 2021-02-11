@@ -45,7 +45,7 @@ jobs:
         - node_modules
         key: v1-dependencies-{{ checksum "yarn.lock"}}
     - persist_to_workspace:
-        root: ~/project/apl/fe
+        root: ./
         paths:
         - node_modules/*
 
@@ -55,7 +55,7 @@ jobs:
     steps:
     - sparse-checkout
     - attach_workspace:
-        at: ~/project/apl/fe
+        at: ./
     - run:
         name: Make Report Directory
         command: mkdir reports
@@ -73,7 +73,7 @@ jobs:
     steps:
     - sparse-checkout
     - attach_workspace:
-        at: ~/project/apl/fe
+        at: ./
     - run:
         name: Yarn build
         command: yarn build
@@ -92,9 +92,9 @@ jobs:
     - run:
         name: Set registry url
         command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
-    # - run:
-    #     name: Docker pull.
-    #     command: docker pull ${REGISTORY_URL}:latest
+    - run:
+        name: Docker pull.
+        command: docker pull ${REGISTORY_URL}:latest
     - run:
         name: Docker build
         command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
