@@ -54,7 +54,7 @@ jobs:
         command: cd ${SOURCE_DIR} && mkdir reports
     - run:
         name: Lint
-        command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports
+        command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
     - store_artifacts:
         path: apl/fe/reports
 
