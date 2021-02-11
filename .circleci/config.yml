@@ -1,7 +1,30 @@
 version: 2.1
+orbs:
+  slack: circleci/slack@4.2.1
 jobs:
   build:
     docker:
     - image: cimg/node:lts
+    environment:
+      CONTENTS_SOURCE_URL: https://github.com/t3-goto/lra-app
+      CONTENTS_SOURCE_BRANCH: develop
+      CONTENTS_SOURCE_DIR: apl/fe
     steps:
-    - run: echo "hello world"
+    # - checkout
+    - run: |
+        git init
+        git config core.sparsecheckout true
+        git remote add origin ${CONTENTS_SOURCE_URL}.git
+        echo ${CONTENTS_SOURCE_DIR} >.git/info/sparse-checkout
+        git pull origin ${CONTENTS_SOURCE_BRANCH}
+    - slack/notify:
+        when: on_success
+        message: build success.
+    - slack/notify:
+        when: on_fail
+        message: build fail.
+workflows:
+  build_and_notify:
+    jobs:
+    - build:
+        context: SLACK_INTEGRATION
