@@ -25,7 +25,7 @@ jobs:
     - sparse-checkout
     - restore_cache:
         keys:
-        - v1-dependencies-{{ checksum "${SOURCE_DIR}/yarn.lock"}}
+        - v1-dependencies-{{ checksum "apl/fe/yarn.lock"}}
         - v1-dependencies-
     - run:
         name: Yarn Install
@@ -33,9 +33,9 @@ jobs:
     - save_cache:
         paths:
         - node_modules
-        key: v1-dependencies-{{ checksum "${SOURCE_DIR}/yarn.lock"}}
+        key: v1-dependencies-{{ checksum "apl/fe/yarn.lock"}}
     - persist_to_workspace:
-        root: ~/project/${SOURCE_DIR}
+        root: ~/project/apl/fe
         paths:
         - node_modules/*
 
