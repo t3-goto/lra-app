@@ -5,15 +5,11 @@ orbs:
 commands:
   sparse-checkout:
     description: 'Sparse checkout for sub directories.'
-    parameters:
-      path:
-        type: string
-        default: ~/project
     steps:
     - run:
         name: Sparse Checkout
         command: |
-          cd <<parameter.path>>
+          cd ~/project
           git init
           git config core.sparsecheckout true
           git remote add origin ${SOURCE_REPO}.git
@@ -29,8 +25,7 @@ jobs:
       SOURCE_BRANCH: feature/mod-circleci
       SOURCE_DIR: apl/fe
     steps:
-    - sparse-checkout:
-        path: ~/project
+    - sparse-checkout
     - restore_cache:
         keys:
         - v1-dependencies-{{ .Branch }}-{{ checksum "apl/fe/yarn.lock"}}
@@ -56,8 +51,7 @@ jobs:
       SOURCE_BRANCH: develop
       SOURCE_DIR: apl/fe
     steps:
-    - sparse-checkout:
-        path: ~/project
+    - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
@@ -79,8 +73,7 @@ jobs:
       SOURCE_BRANCH: develop
       SOURCE_DIR: apl/fe
     steps:
-    - sparse-checkout:
-        path: ~/project
+    - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
@@ -100,7 +93,6 @@ jobs:
         template: success_tagged_deploy_1
 
 workflows:
-  version: 2
   main:
     jobs:
     - install_deps
