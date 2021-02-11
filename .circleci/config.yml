@@ -2,6 +2,16 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.2.1
 
+executors:
+  default:
+    working_directory: ~/project/apl/fe
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SOURCE_REPO: https://github.com/t3-goto/lra-app
+      SOURCE_BRANCH: feature/mod-circleci
+      SOURCE_DIR: apl/fe
+
 commands:
   sparse-checkout:
     description: 'Sparse checkout for sub directories.'
@@ -18,25 +28,30 @@ commands:
 
 jobs:
   install_deps:
-    docker:
-    - image: cimg/node:12.20
-    environment:
-      SOURCE_REPO: https://github.com/t3-goto/lra-app
-      SOURCE_BRANCH: feature/mod-circleci
-      SOURCE_DIR: apl/fe
+    # docker:
+    # - image: cimg/node:12.20
+    executor:
+      name: default
+    # environment:
+    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
+    #   SOURCE_BRANCH: feature/mod-circleci
+    #   SOURCE_DIR: apl/fe
     steps:
     - sparse-checkout
     - restore_cache:
         keys:
-        - v1-dependencies-{{ .Branch }}-{{ checksum "apl/fe/yarn.lock"}}
+        # - v1-dependencies-{{ .Branch }}-{{ checksum "apl/fe/yarn.lock"}}
+        - v1-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
         - v1-dependencies-{{ .Branch }}
         - v1-dependencies-
     - run:
         name: Yarn Install
-        command: cd ${SOURCE_DIR} && yarn install
+        # command: cd ${SOURCE_DIR} && yarn install
+        command: yarn install
     - save_cache:
         paths:
-        - apl/fe/node_modules
+        # - apl/fe/node_modules
+        - node_modules
         key: v1-dependencies-{{ checksum "apl/fe/yarn.lock"}}
     - persist_to_workspace:
         root: ~/project/apl/fe
@@ -44,41 +59,50 @@ jobs:
         - node_modules/*
 
   lint_and_test:
-    docker:
-    - image: cimg/node:12.20
-    environment:
-      SOURCE_REPO: https://github.com/t3-goto/lra-app
-      SOURCE_BRANCH: develop
-      SOURCE_DIR: apl/fe
+    executor:
+      name: default
+    # docker:
+    # - image: cimg/node:12.20
+    # environment:
+    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
+    #   SOURCE_BRANCH: develop
+    #   SOURCE_DIR: apl/fe
     steps:
     - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
         name: Make Report Directory
-        command: cd ${SOURCE_DIR} && mkdir reports
+        # command: cd ${SOURCE_DIR} && mkdir reports
+        command: mkdir reports
     - run:
         name: Lint
-        command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
+        # command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
+        command: npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
     - store_test_results:
-        path: apl/fe/reports
+        # path: apl/fe/reports
+        path: reports
     - store_artifacts:
-        path: apl/fe/reports
+        path: reports
+        # path: apl/fe/reports
 
   build:
-    docker:
-    - image: cimg/node:12.20
-    environment:
-      SOURCE_REPO: https://github.com/t3-goto/lra-app
-      SOURCE_BRANCH: develop
-      SOURCE_DIR: apl/fe
+    executor:
+      name: default
+    # docker:
+    # - image: cimg/node:12.20
+    # environment:
+    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
+    #   SOURCE_BRANCH: develop
+    #   SOURCE_DIR: apl/fe
     steps:
     - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
         name: Yarn build
-        command: cd ${SOURCE_DIR} && yarn build
+        # command: cd ${SOURCE_DIR} && yarn build
+        command: yarn build
 
   notify:
     docker:
