@@ -18,11 +18,12 @@ jobs:
         echo ${CONTENTS_SOURCE_DIR} >.git/info/sparse-checkout
         git pull origin ${CONTENTS_SOURCE_BRANCH}
     - slack/notify:
-        when: on_success
-        message: build success.
+        event: fail
+        mentions: '@EngineeringTeam'
+        template: basic_fail_1
     - slack/notify:
-        when: on_fail
-        message: build fail.
+        event: pass
+        template: success_tagged_deploy_1
 workflows:
   build_and_notify:
     jobs:
