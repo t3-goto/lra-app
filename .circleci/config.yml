@@ -3,7 +3,7 @@ orbs:
   slack: circleci/slack@4.2.1
 
 executors:
-  default:
+  fe-default:
     working_directory: ~/project/apl/fe
     docker:
     - image: cimg/node:12.20
@@ -28,82 +28,78 @@ commands:
 
 jobs:
   install_deps:
-    # docker:
-    # - image: cimg/node:12.20
     executor:
-      name: default
-    # environment:
-    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
-    #   SOURCE_BRANCH: feature/mod-circleci
-    #   SOURCE_DIR: apl/fe
+      name: fe-default
     steps:
     - sparse-checkout
     - restore_cache:
         keys:
-        # - v1-dependencies-{{ .Branch }}-{{ checksum "apl/fe/yarn.lock"}}
         - v1-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
         - v1-dependencies-{{ .Branch }}
         - v1-dependencies-
     - run:
         name: Yarn Install
-        # command: cd ${SOURCE_DIR} && yarn install
         command: yarn install
     - save_cache:
         paths:
-        # - apl/fe/node_modules
         - node_modules
-        # key: v1-dependencies-{{ checksum "apl/fe/yarn.lock"}}
         key: v1-dependencies-{{ checksum "yarn.lock"}}
     - persist_to_workspace:
         root: ~/project/apl/fe
         paths:
         - node_modules/*
 
-  lint_and_test:
+  lint:
     executor:
-      name: default
-    # docker:
-    # - image: cimg/node:12.20
-    # environment:
-    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
-    #   SOURCE_BRANCH: develop
-    #   SOURCE_DIR: apl/fe
+      name: fe-default
     steps:
     - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
         name: Make Report Directory
-        # command: cd ${SOURCE_DIR} && mkdir reports
         command: mkdir reports
     - run:
         name: Lint
-        # command: cd ${SOURCE_DIR} && npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
         command: npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
     - store_test_results:
-        # path: apl/fe/reports
         path: reports
     - store_artifacts:
         path: reports
-        # path: apl/fe/reports
 
   build:
     executor:
-      name: default
-    # docker:
-    # - image: cimg/node:12.20
-    # environment:
-    #   SOURCE_REPO: https://github.com/t3-goto/lra-app
-    #   SOURCE_BRANCH: develop
-    #   SOURCE_DIR: apl/fe
+      name: fe-default
     steps:
     - sparse-checkout
     - attach_workspace:
         at: ~/project/apl/fe
     - run:
         name: Yarn build
-        # command: cd ${SOURCE_DIR} && yarn build
         command: yarn build
+
+  build-image:
+    executor:
+      name: fe-default
+    steps:
+    - sparse-checkout
+    - setup_remote_docker:
+        docker_layer_caching: false
+    - run:
+        name: Docker login
+        command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    - run:
+        name: Set registry url
+        command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
+    - run:
+        name: Docker pull.
+        command: docker pull ${REGISTORY_URL}:latest
+    - run:
+        name: Docker build
+        command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
+    - run:
+        name: Docker push
+        command: docker push ${REGISTORY_URL}
 
   notify:
     docker:
@@ -121,14 +117,17 @@ workflows:
   main:
     jobs:
     - install_deps
-    - lint_and_test:
+    - lint:
         requires:
-          - install_deps
+        - install_deps
     - build:
         requires:
-          - install_deps
+        - install_deps
+    - build-image:
+        requires:
+        - install_deps
     - notify:
         requires:
-          - lint_and_test
-          - build
+        - lint
+        - build
         context: SLACK_INTEGRATION
