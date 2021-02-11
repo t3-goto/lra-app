@@ -126,6 +126,7 @@ workflows:
     - build-image:
         requires:
         - install_deps
+        context: DOCKER_HUB
     - notify:
         requires:
         - lint
