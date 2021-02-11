@@ -84,6 +84,7 @@ jobs:
     steps:
     - sparse-checkout
     - setup_remote_docker:
+        version: 19.03.13
         docker_layer_caching: false
     - run:
         name: Docker login
@@ -131,4 +132,5 @@ workflows:
         requires:
         - lint
         - build
+        - build-image
         context: SLACK_INTEGRATION
