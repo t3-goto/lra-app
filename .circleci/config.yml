@@ -3,7 +3,7 @@ orbs:
   slack: circleci/slack@4.2.1
 
 executors:
-  fe-default:
+  fe_default:
     working_directory: ~/project/apl/fe
     docker:
     - image: cimg/node:12.20
@@ -13,7 +13,7 @@ executors:
       SOURCE_DIR: apl/fe
 
 commands:
-  sparse-checkout:
+  sparse_checkout:
     description: 'Sparse checkout for sub directories.'
     steps:
     - run:
@@ -25,13 +25,9 @@ commands:
           git remote add origin ${SOURCE_REPO}.git
           echo ${SOURCE_DIR} >.git/info/sparse-checkout
           git pull origin ${SOURCE_BRANCH}
-
-jobs:
   install_deps:
-    executor:
-      name: fe-default
+    description: 'Install dependencies.'
     steps:
-    - sparse-checkout
     - restore_cache:
         keys:
         - v1-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
@@ -49,11 +45,19 @@ jobs:
         paths:
         - node_modules/*
 
-  lint:
+jobs:
+  fe_install_deps:
     executor:
-      name: fe-default
+      name: fe_default
     steps:
-    - sparse-checkout
+    - sparse_checkout
+    - install_deps
+
+  fe_lint:
+    executor:
+      name: fe_default
+    steps:
+    - sparse_checkout
     - attach_workspace:
         at: ./
     - run:
@@ -67,22 +71,22 @@ jobs:
     - store_artifacts:
         path: reports
 
-  build:
+  fe_build:
     executor:
-      name: fe-default
+      name: fe_default
     steps:
-    - sparse-checkout
+    - sparse_checkout
     - attach_workspace:
         at: ./
     - run:
         name: Yarn build
         command: yarn build
 
-  build-image:
+  fe_build-image:
     executor:
-      name: fe-default
+      name: fe_default
     steps:
-    - sparse-checkout
+    - sparse_checkout
     - setup_remote_docker:
         version: 19.03.13
         docker_layer_caching: false
@@ -115,22 +119,22 @@ jobs:
         template: success_tagged_deploy_1
 
 workflows:
-  main:
+  fe_main:
     jobs:
-    - install_deps
-    - lint:
+    - fe_install_deps
+    - fe_lint:
         requires:
-        - install_deps
-    - build:
+        - fe_install_deps
+    - fe_build:
         requires:
-        - install_deps
-    - build-image:
+        - fe_install_deps
+    - fe_build-image:
         requires:
-        - install_deps
+        - fe_install_deps
         context: DOCKER_HUB
     - notify:
         requires:
-        - lint
-        - build
-        - build-image
+        - fe_lint
+        - fe_build
+        - fe_build-image
         context: SLACK_INTEGRATION
