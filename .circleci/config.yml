@@ -425,5 +425,4 @@ workflows:
 
   test_main:
     jobs:
-    - git_diff:
-        e: fe_default
+    - git_diff
