@@ -258,7 +258,14 @@ commands:
           echo ${CIRCLE_PROJECT_REPONAME}
           if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
             echo "apl/fe has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            # curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d '
+            {
+              "parameters": {
+              "run_fe_build": true,
+              "run_main": false
+            }
+            ' https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
           else
             echo "apl/fe has not been changed"
           fi
