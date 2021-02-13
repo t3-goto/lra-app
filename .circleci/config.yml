@@ -52,8 +52,8 @@ commands:
     - restore_cache:
         keys:
         - v1-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
-        # - v1-dependencies-{{ .Branch }}
-        # - v1-dependencies-
+        - v1-dependencies-{{ .Branch }}
+        - v1-dependencies-
     - run:
         name: Yarn Install
         command: yarn install
@@ -95,16 +95,22 @@ commands:
         version: 19.03.13
         docker_layer_caching: false
     - run:
-        name: Docker build
+        name: Docker setup
         command: |
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          DOCKER_BUILDKIT=1
+          echo "export DOCKER_BUILDKIT=1" >> $BASH_ENV
           echo ${DOCKER_BUILDKIT}
-          REGISTORY_URL=${DOCKER_USER}/${SYSTEM}
+          echo "export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}" >> $BASH_ENV
           echo ${REGISTORY_URL}
+    - run:
+        name: Docker build
+        command: |
           docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
           docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
           wait
+    - run:
+        name: Docker push
+        command: |
           docker push {REGISTORY_URL}:latest &
           docker push {REGISTORY_URL}:build-env &
           wait
