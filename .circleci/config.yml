@@ -1,7 +1,443 @@
 version: 2.1
-jobs:
-  build:
+orbs:
+  slack: circleci/slack@4.2.1
+
+parameters:
+  run_main:
+    type: boolean
+    default: true
+  run_fe_build:
+    type: boolean
+    default: false
+  run_bff_build:
+    type: boolean
+    default: false
+  run_be_build:
+    type: boolean
+    default: false
+
+executors:
+  fe_default:
+    working_directory: ~/project/apl/fe
     docker:
-    - image: cimg/node:lts
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: fe-web
+      SOURCE_DIR: apl/fe
+
+  bff_default:
+    working_directory: ~/project/apl/bff
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: bff-ap
+      SOURCE_DIR: apl/bff
+
+  be_default:
+    working_directory: ~/project/apl/be
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: be-ap
+      SOURCE_DIR: apl/be
+
+commands:
+  sparse_checkout:
+    description: 'Sparse checkout for sub directories.'
     steps:
-    - run: echo "hello world"
+    - run:
+        name: Sparse checkout
+        command: |
+          echo "REPO_URL: https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git"
+          echo "SOURCE_DIR: ${SOURCE_DIR}"
+          echo "CIRCLE_BRANCH: ${CIRCLE_BRANCH}"
+          cd ~/project
+          git init
+          git config core.sparsecheckout true
+          git remote add origin https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
+          echo ${SOURCE_DIR} >.git/info/sparse-checkout
+          git pull origin ${CIRCLE_BRANCH}
+
+  # install_deps:
+  #   description: 'Install dependencies.'
+  #   parameters:
+  #     system:
+  #       type: enum
+  #       enum: ["fe-web", "be-ffp", "be-ap"]
+  #   steps:
+  #   - when:
+  #       condition:
+  #         equal: [<< parameter.system >>, "fe-web"]
+  #       steps:
+  #       - restore_cache:
+  #           keys:
+  #           - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
+  #           - v1-dependencies-fe-web-{{ .Branch }}
+  #           - v1-dependencies-fe-web-
+  #       - run:
+  #           name: Yarn install
+  #           command: yarn install
+  #       - save_cache:
+  #           paths:
+  #           - node_modules
+  #           key: v1-dependencies-fe-web-{{ checksum "yarn.lock"}}
+  #       - persist_to_workspace:
+  #           root: ./
+  #           paths:
+  #           - node_modules/*
+  #   - when:
+  #       condition:
+  #         equal: [<< parameter.system >>, "bff-ap"]
+  #       steps:
+  #       - restore_cache:
+  #           keys:
+  #           - v1-dependencies-bff-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+  #           - v1-dependencies-bff-ap-{{ .Branch }}
+  #           - v1-dependencies-bff-ap-
+  #       - run:
+  #           name: Yarn install
+  #           command: yarn install
+  #       - save_cache:
+  #           paths:
+  #           - node_modules
+  #           key: v1-dependencies-bff-ap-{{ checksum "yarn.lock"}}
+  #       - persist_to_workspace:
+  #           root: ./
+  #           paths:
+  #           - node_modules/*
+  #   - when:
+  #       condition:
+  #         equal: [<< parameter.system >>, "be-ap"]
+  #       steps:
+  #       - restore_cache:
+  #           keys:
+  #           - v1-dependencies-be-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+  #           - v1-dependencies-be-ap-{{ .Branch }}
+  #           - v1-dependencies-be-ap-
+  #       - run:
+  #           name: Yarn install
+  #           command: yarn install
+  #       - save_cache:
+  #           paths:
+  #           - node_modules
+  #           key: v1-dependencies-be-ap-{{ checksum "yarn.lock"}}
+  #       - persist_to_workspace:
+  #           root: ./
+  #           paths:
+  #           - node_modules/*
+
+  fe_install_deps:
+    description: 'Install dependencies for fe-web.'
+    steps:
+    - restore_cache:
+        keys:
+        - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        - v1-dependencies-fe-web-{{ .Branch }}
+        - v1-dependencies-fe-web-
+    - run:
+        name: Yarn install
+        command: yarn install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
+    - persist_to_workspace:
+        root: ./
+        paths:
+        - node_modules/*
+
+  bff_install_deps:
+    description: 'Install dependencies for bff-ap.'
+    steps:
+    - restore_cache:
+        keys:
+        - v1-dependencies-bff-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        - v1-dependencies-bff-ap-{{ .Branch }}
+        - v1-dependencies-bff-ap-
+    - run:
+        name: Yarn install
+        command: yarn install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v1-dependencies-bff-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+    - persist_to_workspace:
+        root: ./
+        paths:
+        - node_modules/*
+
+  be_install_deps:
+    description: 'Install dependencies for be-ap.'
+    steps:
+    - restore_cache:
+        keys:
+        - v1-dependencies-be-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        - v1-dependencies-be-ap-{{ .Branch }}
+        - v1-dependencies-be-ap-
+    - run:
+        name: Yarn install
+        command: yarn install
+    - save_cache:
+        paths:
+        - node_modules
+        key: v1-dependencies-be-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
+    - persist_to_workspace:
+        root: ./
+        paths:
+        - node_modules/*
+
+  eslint:
+    description: 'Eslint.'
+    steps:
+    - attach_workspace:
+        at: ./
+    - run:
+        name: Make report directory
+        command: mkdir reports
+    - run:
+        name: Lint
+        command: npx eslint ./src --ext .ts,tsx --format junit --output-file ./reports/eslint/eslint.xml
+    - store_test_results:
+        path: reports
+    - store_artifacts:
+        path: reports
+
+  build:
+    description: 'Yarn build'
+    steps:
+    - attach_workspace:
+        at: ./
+    - run:
+        name: Yarn build
+        command: yarn build
+
+  docker_build:
+    description: 'Docker build'
+    steps:
+    - setup_remote_docker:
+        version: 19.03.13
+        docker_layer_caching: false
+    - run:
+        name: Docker login and setup
+        command: |
+          # Set BASH_ENV
+          echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
+          echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+          # echo 'export IMAGE_TAG=latest' >> $ BASH_ENV
+          echo 'export IMAGE_TAG=${CIRCLE_SHA1}' >> $ BASH_ENV
+          # Login
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    - run:
+        name: Docker build
+        command: |
+          # Build main
+          docker build -t ${REGISTORY_URL}:${CIRCLE_SHA1} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          # Build build-env in parallel
+          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
+          wait
+    - run:
+        name: Docker push
+        command: |
+          # Push all in parallel
+          docker push ${REGISTORY_URL}:${CIRCLE_SHA1} &
+          docker push ${REGISTORY_URL}:build-env &
+          wait
+
+  trigger_build_workflow:
+    description: 'Git diff and Trigger build workflow'
+    steps:
+    - checkout
+    - run:
+        name: Git diff
+        command: |
+          echo ${CIRCLE_PROJECT_USERNAME}
+          echo ${CIRCLE_PROJECT_REPONAME}
+          if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
+            echo "apl/fe has been changed"
+            echo "export BUILD_FE=true" >> $BASH_ENV
+          else
+            echo "apl/fe has not been changed"
+            echo "export BUILD_FE=false" >> $BASH_ENV
+          fi
+          if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
+            echo "apl/bff has been changed"
+            echo "export BUILD_BFF=true" >> $BASH_ENV
+          else
+            echo "apl/bff has not been changed"
+            echo "export BUILD_BFF=false" >> $BASH_ENV
+          fi
+          if bash ./.circleci/scripts/is_changed.sh "apl/be"; then
+            echo "apl/be has been changed"
+            echo "export BUILD_BE=true" >> $BASH_ENV
+          else
+            echo "apl/be has not been changed"
+            echo "export BUILD_BE=false" >> $BASH_ENV
+          fi
+    - run:
+        name: Trigger workflow
+        command: |
+          printf '
+            {
+              "branch": "%s",
+              "parameters": {
+                "run_main": false,
+                "run_fe_build": %s,
+                "run_bff_build": %s,
+                "run_be_build": %s
+              }
+            }
+          ' ${CIRCLE_BRANCH} ${BUILD_FE} ${BUILD_BFF} ${BUILD_BE} | jq > trigger.json
+          cat trigger.json
+          curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+
+jobs:
+  fe_install_deps:
+    executor:
+      name: fe_default
+    steps:
+    - sparse_checkout
+    - fe_install_deps
+    # - install_deps:
+    #     system: "fe-web"
+
+  bff_install_deps:
+    executor:
+      name: bff_default
+    steps:
+    - sparse_checkout
+    - bff_install_deps
+    # - install_deps:
+    #     system: "bff-ap"
+
+  be_install_deps:
+    executor:
+      name: be_default
+    steps:
+    - sparse_checkout
+    - be_install_deps
+    # - install_deps:
+    #     system: "be-ap"
+
+  lint:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - sparse_checkout
+    - eslint
+
+  build:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - sparse_checkout
+    - build
+
+  build_image:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - sparse_checkout
+    - docker_build
+
+  notify:
+    docker:
+    - image: cimg/node:12.20
+    steps:
+    - run: echo "notify slack."
+    - slack/notify:
+        event: fail
+        template: basic_fail_1
+    - slack/notify:
+        event: pass
+        template: success_tagged_deploy_1
+
+  trigger_build_workflow:
+    docker:
+    - image: cimg/node:12.20
+    steps:
+    - trigger_build_workflow
+
+workflows:
+  main:
+    when: << pipeline.parameters.run_main >>
+    jobs:
+    - trigger_build_workflow:
+        context: CIRCLE
+
+  fe_build:
+    when: << pipeline.parameters.run_fe_build >>
+    jobs:
+    - fe_install_deps
+    - lint:
+        e: fe_default
+        requires:
+        - fe_install_deps
+    - build:
+        e: fe_default
+        requires:
+        - fe_install_deps
+    - build_image:
+        e: fe_default
+        requires:
+        - fe_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
+
+  bff_build:
+    when: << pipeline.parameters.run_bff_build >>
+    jobs:
+    - bff_install_deps
+    - lint:
+        e: bff_default
+        requires:
+        - bff_install_deps
+    - build:
+        e: bff_default
+        requires:
+        - bff_install_deps
+    - build_image:
+        e: bff_default
+        requires:
+        - bff_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
+
+  be_build:
+    when: << pipeline.parameters.run_be_build >>
+    jobs:
+    - be_install_deps
+    - lint:
+        e: be_default
+        requires:
+        - be_install_deps
+    - build:
+        e: be_default
+        requires:
+        - be_install_deps
+    - build_image:
+        e: be_default
+        requires:
+        - be_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
