@@ -290,7 +290,7 @@ commands:
                 "run_main": false
               }
             }
-          ' ${CIRCLE_BRANCH},${BUILD_FE},${BUILD_BFF},${BUILD_BE} | jq > trigger.json
+          ' ${CIRCLE_BRANCH},${BUILD_FE},${BUILD_BFF},${BUILD_BE}
           curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
 jobs:
