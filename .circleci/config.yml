@@ -183,6 +183,8 @@ jobs:
           echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
           echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
           docker build -t ${REGISTORY_URL} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
+          wait
           docker push {REGISTORY_URL}:latest &
           docker push {REGISTORY_URL}:build-env &
           wait
