@@ -258,19 +258,19 @@ commands:
           echo ${CIRCLE_PROJECT_REPONAME}
           if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
             echo "apl/fe has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
           else
             echo "apl/fe has not been changed"
           fi
           if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
             echo "apl/bff has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @.circleci/trigger_bff_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_bff_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
           else
             echo "apl/bff has not been changed"
           fi
           if bash ./.circleci/scripts/is_changed.sh "apl/be"; then
             echo "apl/be has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @.circleci/trigger_be_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_be_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
           else
             echo "apl/be has not been changed"
           fi
@@ -398,7 +398,7 @@ workflows:
         context: SLACK_INTEGRATION
 
   be_build:
-    when: << pipeline.parameters.run_bff_build >>
+    when: << pipeline.parameters.run_be_build >>
     jobs:
     - be_install_deps
     - lint:
