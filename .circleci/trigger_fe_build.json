@@ -1,6 +1,0 @@
-{
-  "parameters": {
-    "run_fe_build": true,
-    "run_main": false
-  }
-}

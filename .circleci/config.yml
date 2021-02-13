@@ -283,10 +283,10 @@ commands:
             {
               "branch": "%s",
               "parameters": {
+                "run_main": false,
                 "run_fe_build": %s,
                 "run_bff_build": %s,
-                "run_be_build": %s,
-                "run_main": false
+                "run_be_build": %s
               }
             }
           ' ${CIRCLE_BRANCH} ${BUILD_FE} ${BUILD_BFF} ${BUILD_BE} | jq > trigger.json
@@ -367,6 +367,12 @@ jobs:
     - trigger_build_workflow
 
 workflows:
+  main:
+    when: << pipeline.parameters.run_main >>
+    jobs:
+    - trigger_build_workflow:
+        context: CIRCLE
+
   fe_build:
     when: << pipeline.parameters.run_fe_build >>
     jobs:
@@ -438,9 +444,3 @@ workflows:
         - build
         - build_image
         context: SLACK_INTEGRATION
-
-  main:
-    when: << pipeline.parameters.run_main >>
-    jobs:
-    - trigger_build_workflow:
-        context: CIRCLE
