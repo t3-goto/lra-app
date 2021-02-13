@@ -253,7 +253,7 @@ commands:
     - run:
         name: Git diff and Trigger build workflow
         command: |
-          echo ${CIRCLE_TOKEN}
+          echo "CIRCLE_TOKEN:${CIRCLE_TOKEN}"
           echo ${CIRCLE_PROJECT_USERNAME}
           echo ${CIRCLE_PROJECT_REPONAME}
           if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
