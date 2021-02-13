@@ -280,17 +280,17 @@ commands:
     - run:
         name: Trigger workflow
         command: |
-          echo '
+          printf '
             {
-              "branch": "'${CIRCLE_BRANCH}'",
+              "branch": "%s",
               "parameters": {
-                "run_fe_build": '${BUILD_FE}',
-                "run_bff_build": '${BUILD_BFF}',
-                "run_be_build": '${BUILD_BE}',
+                "run_fe_build": %s,
+                "run_bff_build": %s,
+                "run_be_build": %s,
                 "run_main": false
               }
             }
-          ' | jq > trigger.json
+          ' ${CIRCLE_BRANCH},${BUILD_FE},${BUILD_BFF},${BUILD_BE} | jq > trigger.json
           curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
 jobs:
