@@ -88,6 +88,26 @@ commands:
     - run:
         name: Yarn build
         command: yarn build
+  docker-build:
+    description: 'Docker build'
+    steps:
+    - setup_remote_docker:
+        version: 19.03.13
+        docker_layer_caching: false
+    - run:
+        name: Docker build
+        command: |
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          export DOCKER_BUILDKIT=1
+          echo ${DOCKER_BUILDKIT}
+          export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}
+          echo ${REGISTORY_URL}
+          docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
+          wait
+          docker push {REGISTORY_URL}:latest &
+          docker push {REGISTORY_URL}:build-env &
+          wait
 
 jobs:
   fe_install_deps:
@@ -158,108 +178,21 @@ jobs:
       name: fe_default
     steps:
     - sparse_checkout
-    - setup_remote_docker:
-        version: 19.03.13
-        docker_layer_caching: false
-    # - run:
-    #     name: Docker login
-    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    # - run:
-    #     name: Set registry url
-    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
-    # - run:
-    #     name: Docker pull.
-    #     command: docker pull ${REGISTORY_URL}:latest
-    # - run:
-    #     name: Docker build
-    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    # - run:
-    #     name: Docker push
-    #     command: docker push ${REGISTORY_URL}
-    - run:
-        name: Docker build
-        command: |
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          export DOCKER_BUILDKIT=1 | echo ${DOCKER_BUILDKIT}
-          export REGISTORY_URL=${DOCKER_USER}/${SYSTEM} | echo ${REGISTORY_URL}
-          docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
-          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
-          wait
-          docker push {REGISTORY_URL}:latest &
-          docker push {REGISTORY_URL}:build-env &
-          wait
+    - docker-build
 
   bff_build-image:
     executor:
       name: bff_default
     steps:
     - sparse_checkout
-    - setup_remote_docker:
-        version: 19.03.13
-        docker_layer_caching: false
-    # - run:
-    #     name: Docker login
-    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    # - run:
-    #     name: Set registry url
-    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/bff-ap' >> $BASH_ENV
-    # - run:
-    #     name: Docker pull.
-    #     command: docker pull ${REGISTORY_URL}:latest
-    # - run:
-    #     name: Docker build
-    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    # - run:
-    #     name: Docker push
-    #     command: docker push ${REGISTORY_URL}
-    - run:
-        name: Docker build
-        command: |
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          export DOCKER_BUILDKIT=1 | echo ${DOCKER_BUILDKIT}
-          export REGISTORY_URL=${DOCKER_USER}/${SYSTEM} | echo ${REGISTORY_URL}
-          docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
-          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
-          wait
-          docker push {REGISTORY_URL}:latest &
-          docker push {REGISTORY_URL}:build-env &
-          wait
+    - docker-build
 
   be_build-image:
     executor:
       name: be_default
     steps:
     - sparse_checkout
-    - setup_remote_docker:
-        version: 19.03.13
-        docker_layer_caching: false
-    # - run:
-    #     name: Docker login
-    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    # - run:
-    #     name: Set registry url
-    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/be-ap' >> $BASH_ENV
-    # - run:
-    #     name: Docker pull.
-    #     command: docker pull ${REGISTORY_URL}:latest
-    # - run:
-    #     name: Docker build
-    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    # - run:
-    #     name: Docker push
-    #     command: docker push ${REGISTORY_URL}
-    - run:
-        name: Docker build
-        command: |
-          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-          export DOCKER_BUILDKIT=1 | echo ${DOCKER_BUILDKIT}
-          export REGISTORY_URL=${DOCKER_USER}/${SYSTEM} | echo ${REGISTORY_URL}
-          docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
-          docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
-          wait
-          docker push {REGISTORY_URL}:latest &
-          docker push {REGISTORY_URL}:build-env &
-          wait
+    - docker-build
 
   notify:
     docker:
