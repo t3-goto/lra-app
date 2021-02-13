@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "run_fe_build": false,
+    "run_bff_build": false,
+    "run_be_build": false,
+    "run_main": false
+  }
+}

@@ -251,38 +251,47 @@ commands:
     steps:
     - checkout
     - run:
-        name: Git diff and Trigger build workflow
+        name: Git diff
         command: |
           echo "CIRCLE_TOKEN:${CIRCLE_TOKEN}"
           echo ${CIRCLE_PROJECT_USERNAME}
           echo ${CIRCLE_PROJECT_REPONAME}
           if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
             echo "apl/fe has been changed"
-            # curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d '
-            {
-              "branch": "feature/mod-circleci",
-              "parameters": {
-                "run_fe_build": true,
-                "run_main": false
-              }
-            }
-            ' https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            echo "export BUILD_FE=true" >> BASH_ENV
           else
             echo "apl/fe has not been changed"
+            echo "export BUILD_FE=false" >> BASH_ENV
           fi
           if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
             echo "apl/bff has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_bff_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            echo "export BUILD_BFF=true" >> BASH_ENV
           else
             echo "apl/bff has not been changed"
+            echo "export BUILD_BFF=false" >> BASH_ENV
           fi
           if bash ./.circleci/scripts/is_changed.sh "apl/be"; then
             echo "apl/be has been changed"
-            curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_be_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
+            echo "export BUILD_BE=true" >> BASH_ENV
           else
             echo "apl/be has not been changed"
+            echo "export BUILD_BE=false" >> BASH_ENV
           fi
+    - run:
+        name: Trigger workflow
+        command: |
+          echo '
+            {
+              "branch": "'${CIRCLE_BRANCH}'",
+              "parameters": {
+                "run_fe_build": '${BUILD_FE}',
+                "run_bff_build": '${BUILD_BFF}',
+                "run_be_build": '${BUILD_BE}',
+                "run_main": false
+              }
+            }
+          ' | jq > trigger.json
+          curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
 jobs:
   fe_install_deps:
