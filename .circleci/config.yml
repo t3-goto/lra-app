@@ -274,6 +274,11 @@ commands:
           else
             echo "apl/beに変更はなかったよ"
           fi
+          if is_changed ".circleci/config.yml"; then
+            echo ".circleci/config.ymlに変更があったよ"
+          else
+            echo ".circleci/config.ymlに変更はなかったよ"
+          fi
 
 jobs:
   fe_install_deps:
