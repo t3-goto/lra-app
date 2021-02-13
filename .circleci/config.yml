@@ -237,9 +237,12 @@ commands:
     description: 'Git diff'
     steps:
     - run:
-        name: Setup
+        name: Setup CIRCLE_COMPARE_URL
         command: |
           echo 'export CIRCLE_COMPARE_URL=<< pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<< pipeline.git.revision>>' >> $BASH_ENV
+    - run:
+        name: Setup COMPARE_IDS
+        command: |
           echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL##*/}'
     - run:
         name: Compare
