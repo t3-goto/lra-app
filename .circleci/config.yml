@@ -99,21 +99,23 @@ commands:
         command: |
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
           echo "export DOCKER_BUILDKIT=1" >> $BASH_ENV
-          echo ${DOCKER_BUILDKIT}
           echo "export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}" >> $BASH_ENV
-          echo ${REGISTORY_URL}
     - run:
         name: Docker build
         command: |
           docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
           docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
           wait
+          echo ${DOCKER_BUILDKIT}
+          echo ${REGISTORY_URL}
     - run:
         name: Docker push
         command: |
           docker push {REGISTORY_URL}:latest &
           docker push {REGISTORY_URL}:build-env &
           wait
+          echo ${DOCKER_BUILDKIT}
+          echo ${REGISTORY_URL}
 
 jobs:
   fe_install_deps:
