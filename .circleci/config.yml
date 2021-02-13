@@ -243,7 +243,7 @@ commands:
     - run:
         name: Setup COMPARE_IDS
         command: |
-          echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL##*/}' >> $BASH_ENV
+          echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL}##*/' >> $BASH_ENV
     - run:
         name: Compare
         command: |
