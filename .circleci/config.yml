@@ -258,26 +258,35 @@ jobs:
     # - install_deps:
     #     system: "be-ap"
 
-  fe_lint:
-    executor:
-      name: fe_default
+  lint:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
     steps:
     - sparse_checkout
     - eslint
 
-  bff_lint:
-    executor:
-      name: bff_default
-    steps:
-    - sparse_checkout
-    - eslint
+  # fe_lint:
+  #   executor:
+  #     name: fe_default
+  #   steps:
+  #   - sparse_checkout
+  #   - eslint
 
-  be_lint:
-    executor:
-      name: be_default
-    steps:
-    - sparse_checkout
-    - eslint
+  # bff_lint:
+  #   executor:
+  #     name: bff_default
+  #   steps:
+  #   - sparse_checkout
+  #   - eslint
+
+  # be_lint:
+  #   executor:
+  #     name: be_default
+  #   steps:
+  #   - sparse_checkout
+  #   - eslint
 
   fe_build:
     executor:
@@ -299,6 +308,15 @@ jobs:
     steps:
     - sparse_checkout
     - build
+
+  # build-image:
+  #   parameters:
+  #     e:
+  #       type: executor
+  #   executor: << parameters.e >>
+  #   steps:
+  #   - sparse_checkout
+  #   - docker_build
 
   fe_build-image:
     executor:
@@ -337,9 +355,13 @@ workflows:
   fe_main:
     jobs:
     - fe_install_deps
-    - fe_lint:
+    - lint:
+        e: fe_default
         requires:
         - fe_install_deps
+    # - fe_lint:
+    #     requires:
+    #     - fe_install_deps
     - fe_build:
         requires:
         - fe_install_deps
@@ -349,7 +371,8 @@ workflows:
         context: DOCKER_HUB
     - notify:
         requires:
-        - fe_lint
+        - lint
+        # - fe_lint
         - fe_build
         - fe_build-image
         context: SLACK_INTEGRATION
@@ -357,9 +380,13 @@ workflows:
   bff_main:
     jobs:
     - bff_install_deps
-    - bff_lint:
+    - lint:
+        e: bff_default
         requires:
         - bff_install_deps
+    # - bff_lint:
+    #     requires:
+    #     - bff_install_deps
     - bff_build:
         requires:
         - bff_install_deps
@@ -369,7 +396,8 @@ workflows:
         context: DOCKER_HUB
     - notify:
         requires:
-        - bff_lint
+        - lint
+        # - bff_lint
         - bff_build
         - bff_build-image
         context: SLACK_INTEGRATION
@@ -377,9 +405,13 @@ workflows:
   be_main:
     jobs:
     - be_install_deps
-    - be_lint:
+    - lint:
+        e: be_default
         requires:
         - be_install_deps
+    # - be_lint:
+    #     requires:
+    #     - be_install_deps
     - be_build:
         requires:
         - be_install_deps
@@ -389,7 +421,8 @@ workflows:
         context: DOCKER_HUB
     - notify:
         requires:
-        - be_lint
+        - lint
+        # - be_lint
         - be_build
         - be_build-image
         context: SLACK_INTEGRATION
