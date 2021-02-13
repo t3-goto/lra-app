@@ -2,6 +2,20 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.2.1
 
+parameters:
+  run_main:
+    type: boolean
+    default: true
+  run_fe_build:
+    type: boolean
+    default: false
+  run_bff_build:
+    type: boolean
+    default: false
+  run_be_build:
+    type: boolean
+    default: false
+
 executors:
   fe_default:
     working_directory: ~/project/apl/fe
@@ -120,9 +134,8 @@ commands:
     steps:
     - restore_cache:
         keys:
-        # - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
-        # - v1-dependencies-fe-web-{{ .Branch }}
         - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        - v1-dependencies-fe-web-{{ .Branch }}
         - v1-dependencies-fe-web-
     - run:
         name: Yarn install
@@ -233,49 +246,30 @@ commands:
           docker push ${REGISTORY_URL}:build-env &
           wait
 
-  git_diff:
-    description: 'Git diff'
+  trigger_build_workflow:
+    description: 'Git diff and Trigger build workflow'
     steps:
     - checkout
-    # - run:
-    #     name: Setup CIRCLE_COMPARE_URL
-    #     command: |
-    #       echo 'export CIRCLE_COMPARE_URL=<< pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<< pipeline.git.revision>>' >> $BASH_ENV
-    # - run:
-    #     name: Setup COMPARE_IDS
-    #     command: |
-    #       echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL}##*/' >> $BASH_ENV
-    # - run:
-    #     name: Compare
-    #     command: |
-    #       echo ${CIRCLE_COMPARE_URL}
-    #       echo ${CIRCLE_IDS}
-    #       diff=`git diff --name-only ${COMPARE_IDS}`
-    #       echo ${diff}
     - run:
-        name: git diff
+        name: Git diff and Trigger build workflow
         command: |
-          pwd
-          ls -a
-          if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
-            echo "apl/bffに変更があったよ"
-          else
-            echo "apl/bffに変更はなかったよ"
-          fi
           if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
-            echo "apl/feに変更があったよ"
+            echo "apl/fe has been changed"
+            curl -u ${CIRCLE_TOKEN}: -x POST --header "Content-Type: application/json" -d @.circleci/trigger_fe_build.json
           else
-            echo "apl/feに変更はなかったよ"
+            echo "apl/fe has not been changed"
+          fi
+          if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
+            echo "apl/bff has been changed"
+            curl -u ${CIRCLE_TOKEN}: -x POST --header "Content-Type: application/json" -d @.circleci/trigger_bff_build.json
+          else
+            echo "apl/bff has not been changed"
           fi
           if bash ./.circleci/scripts/is_changed.sh "apl/be"; then
-            echo "apl/beに変更があったよ"
+            echo "apl/be has been changed"
+            curl -u ${CIRCLE_TOKEN}: -x POST --header "Content-Type: application/json" -d @.circleci/trigger_be_build.json
           else
-            echo "apl/beに変更はなかったよ"
-          fi
-          if bash ./.circleci/scripts/is_changed.sh ".circleci/config.yml"; then
-            echo ".circleci/config.ymlに変更があったよ"
-          else
-            echo ".circleci/config.ymlに変更はなかったよ"
+            echo "apl/be has not been changed"
           fi
 
 jobs:
@@ -345,82 +339,86 @@ jobs:
         event: pass
         template: success_tagged_deploy_1
 
-  git_diff:
+  trigger_build_workflow:
     docker:
     - image: cimg/node:12.20
     steps:
-    - git_diff
+    - trigger_build_workflow
 
 workflows:
-  # fe_main:
-  #   jobs:
-  #   - fe_install_deps
-  #   - lint:
-  #       e: fe_default
-  #       requires:
-  #       - fe_install_deps
-  #   - build:
-  #       e: fe_default
-  #       requires:
-  #       - fe_install_deps
-  #   - build_image:
-  #       e: fe_default
-  #       requires:
-  #       - fe_install_deps
-  #       context: DOCKER_HUB
-  #   - notify:
-  #       requires:
-  #       - lint
-  #       - build
-  #       - build_image
-  #       context: SLACK_INTEGRATION
-
-  # bff_main:
-  #   jobs:
-  #   - bff_install_deps
-  #   - lint:
-  #       e: bff_default
-  #       requires:
-  #       - bff_install_deps
-  #   - build:
-  #       e: bff_default
-  #       requires:
-  #       - bff_install_deps
-  #   - build_image:
-  #       e: bff_default
-  #       requires:
-  #       - bff_install_deps
-  #       context: DOCKER_HUB
-  #   - notify:
-  #       requires:
-  #       - lint
-  #       - build
-  #       - build_image
-  #       context: SLACK_INTEGRATION
-
-  # be_main:
-  #   jobs:
-  #   - be_install_deps
-  #   - lint:
-  #       e: be_default
-  #       requires:
-  #       - be_install_deps
-  #   - build:
-  #       e: be_default
-  #       requires:
-  #       - be_install_deps
-  #   - build_image:
-  #       e: be_default
-  #       requires:
-  #       - be_install_deps
-  #       context: DOCKER_HUB
-  #   - notify:
-  #       requires:
-  #       - lint
-  #       - build
-  #       - build_image
-  #       context: SLACK_INTEGRATION
-
-  test_main:
+  fe_build:
+    when: << pipeline.parameters.run_fe_build >>
     jobs:
-    - git_diff
+    - fe_install_deps
+    - lint:
+        e: fe_default
+        requires:
+        - fe_install_deps
+    - build:
+        e: fe_default
+        requires:
+        - fe_install_deps
+    - build_image:
+        e: fe_default
+        requires:
+        - fe_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
+
+  bff_build:
+    when: << pipeline.parameters.run_bff_build >>
+    jobs:
+    - bff_install_deps
+    - lint:
+        e: bff_default
+        requires:
+        - bff_install_deps
+    - build:
+        e: bff_default
+        requires:
+        - bff_install_deps
+    - build_image:
+        e: bff_default
+        requires:
+        - bff_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
+
+  be_build:
+    when: << pipeline.parameters.run_bff_build >>
+    jobs:
+    - be_install_deps
+    - lint:
+        e: be_default
+        requires:
+        - be_install_deps
+    - build:
+        e: be_default
+        requires:
+        - be_install_deps
+    - build_image:
+        e: be_default
+        requires:
+        - be_install_deps
+        context: DOCKER_HUB
+    - notify:
+        requires:
+        - lint
+        - build
+        - build_image
+        context: SLACK_INTEGRATION
+
+  main:
+    when: << pipeline.parameters.run_main >>
+    jobs:
+    - trigger_build_workflow

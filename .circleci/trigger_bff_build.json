@@ -1,0 +1,6 @@
+{
+  "parameters": {
+    "run_bff_build": true,
+    "run_main": false
+  }
+}
