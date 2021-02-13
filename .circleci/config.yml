@@ -255,10 +255,12 @@ commands:
     - run:
         name: Setup
         command: |
-          echo 'export PATH=$PATH:${CIRCLE_WORKING_DIRECTORY}/scripts' >> $BASH_ENV
+          echo 'export PATH=$PATH:${CIRCLE_WORKING_DIRECTORY}/.circleci/scripts' >> $BASH_ENV
     - run:
         name: git diff
         command: |
+          pwd
+          ls
           if is_changed "apl/bff"; then
             echo "apl/bffに変更があったよ"
           else
