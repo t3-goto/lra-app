@@ -236,7 +236,7 @@ commands:
   git_diff:
     description: 'Git diff'
     steps:
-    - sparse_checkout
+    - checkout
     # - run:
     #     name: Setup CIRCLE_COMPARE_URL
     #     command: |
@@ -259,22 +259,22 @@ commands:
     - run:
         name: git diff
         command: |
-          if ~/project/.circleci/is_changed "apl/bff"; then
+          if is_changed "apl/bff"; then
             echo "apl/bffに変更があったよ"
           else
             echo "apl/bffに変更はなかったよ"
           fi
-          if ~/project/.circleci/is_changed "apl/fe"; then
+          if is_changed "apl/fe"; then
             echo "apl/feに変更があったよ"
           else
             echo "apl/feに変更はなかったよ"
           fi
-          if ~/project/.circleci/is_changed "apl/be"; then
+          if is_changed "apl/be"; then
             echo "apl/beに変更があったよ"
           else
             echo "apl/beに変更はなかったよ"
           fi
-          if ~/project/.circleci/is_changed ".circleci/config.yml"; then
+          if is_changed ".circleci/config.yml"; then
             echo ".circleci/config.ymlに変更があったよ"
           else
             echo ".circleci/config.ymlに変更はなかったよ"
@@ -348,10 +348,8 @@ jobs:
         template: success_tagged_deploy_1
 
   git_diff:
-    parameters:
-      e:
-        type: executor
-    executor: << parameters.e >>
+    docker:
+    - image: cimg/node:12.20
     steps:
     - git_diff
 
