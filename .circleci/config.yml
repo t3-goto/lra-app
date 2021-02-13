@@ -8,6 +8,7 @@ executors:
     docker:
     - image: cimg/node:12.20
     environment:
+      SYSTEM: fe-web
       SOURCE_REPO: https://github.com/t3-goto/lra-app
       SOURCE_BRANCH: feature/mod-circleci
       SOURCE_DIR: apl/fe
@@ -17,6 +18,7 @@ executors:
     docker:
     - image: cimg/node:12.20
     environment:
+      SYSTEM: bff-ap
       SOURCE_REPO: https://github.com/t3-goto/lra-app
       SOURCE_BRANCH: feature/mod-circleci
       SOURCE_DIR: apl/bff
@@ -26,6 +28,7 @@ executors:
     docker:
     - image: cimg/node:12.20
     environment:
+      SYSTEM: be-ap
       SOURCE_REPO: https://github.com/t3-goto/lra-app
       SOURCE_BRANCH: feature/mod-circleci
       SOURCE_DIR: apl/be
@@ -158,45 +161,65 @@ jobs:
     - setup_remote_docker:
         version: 19.03.13
         docker_layer_caching: false
-    - run:
-        name: Docker login
-        command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    - run:
-        name: Set registry url
-        command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
-    - run:
-        name: Docker pull.
-        command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker login
+    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    # - run:
+    #     name: Set registry url
+    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/fe-web' >> $BASH_ENV
+    # - run:
+    #     name: Docker pull.
+    #     command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker build
+    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
+    # - run:
+    #     name: Docker push
+    #     command: docker push ${REGISTORY_URL}
     - run:
         name: Docker build
-        command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    - run:
-        name: Docker push
-        command: docker push ${REGISTORY_URL}
+        command: |
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
+          echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+          docker build -t ${REGISTORY_URL} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker push {REGISTORY_URL}:latest &
+          docker push {REGISTORY_URL}:build-env &
+          wait
 
   bff_build-image:
     executor:
-      name: fe_default
+      name: bff_default
     steps:
     - sparse_checkout
     - setup_remote_docker:
         version: 19.03.13
         docker_layer_caching: false
-    - run:
-        name: Docker login
-        command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    - run:
-        name: Set registry url
-        command: echo 'export REGISTORY_URL=${DOCKER_USER}/bff-ap' >> $BASH_ENV
-    - run:
-        name: Docker pull.
-        command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker login
+    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    # - run:
+    #     name: Set registry url
+    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/bff-ap' >> $BASH_ENV
+    # - run:
+    #     name: Docker pull.
+    #     command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker build
+    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
+    # - run:
+    #     name: Docker push
+    #     command: docker push ${REGISTORY_URL}
     - run:
         name: Docker build
-        command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    - run:
-        name: Docker push
-        command: docker push ${REGISTORY_URL}
+        command: |
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
+          echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+          docker build -t ${REGISTORY_URL} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker push {REGISTORY_URL}:latest &
+          docker push {REGISTORY_URL}:build-env &
+          wait
 
   be_build-image:
     executor:
@@ -206,21 +229,31 @@ jobs:
     - setup_remote_docker:
         version: 19.03.13
         docker_layer_caching: false
-    - run:
-        name: Docker login
-        command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
-    - run:
-        name: Set registry url
-        command: echo 'export REGISTORY_URL=${DOCKER_USER}/be-ap' >> $BASH_ENV
-    - run:
-        name: Docker pull.
-        command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker login
+    #     command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+    # - run:
+    #     name: Set registry url
+    #     command: echo 'export REGISTORY_URL=${DOCKER_USER}/be-ap' >> $BASH_ENV
+    # - run:
+    #     name: Docker pull.
+    #     command: docker pull ${REGISTORY_URL}:latest
+    # - run:
+    #     name: Docker build
+    #     command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
+    # - run:
+    #     name: Docker push
+    #     command: docker push ${REGISTORY_URL}
     - run:
         name: Docker build
-        command: docker build -t ${REGISTORY_URL} --cache-from ${REGISTORY_URL}:latest . -f ./docker/Dockerfile
-    - run:
-        name: Docker push
-        command: docker push ${REGISTORY_URL}
+        command: |
+          docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+          echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
+          echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+          docker build -t ${REGISTORY_URL} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker push {REGISTORY_URL}:latest &
+          docker push {REGISTORY_URL}:build-env &
+          wait
 
   notify:
     docker:
