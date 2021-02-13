@@ -129,7 +129,7 @@ commands:
     - save_cache:
         paths:
         - node_modules
-        key: v1-dependencies-fe-web-{{ checksum "yarn.lock"}}
+        key: v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
     - persist_to_workspace:
         root: ./
         paths:
@@ -149,7 +149,7 @@ commands:
     - save_cache:
         paths:
         - node_modules
-        key: v1-dependencies-bff-ap-{{ checksum "yarn.lock"}}
+        key: v1-dependencies-bff-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
     - persist_to_workspace:
         root: ./
         paths:
@@ -169,7 +169,7 @@ commands:
     - save_cache:
         paths:
         - node_modules
-        key: v1-dependencies-be-ap-{{ checksum "yarn.lock"}}
+        key: v1-dependencies-be-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
     - persist_to_workspace:
         root: ./
         paths:
@@ -267,77 +267,65 @@ jobs:
     - sparse_checkout
     - eslint
 
-  # fe_lint:
+  build:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - sparse_checkout
+    - build
+
+  # fe_build:
   #   executor:
   #     name: fe_default
   #   steps:
   #   - sparse_checkout
-  #   - eslint
+  #   - build
 
-  # bff_lint:
+  # bff_build:
   #   executor:
   #     name: bff_default
   #   steps:
   #   - sparse_checkout
-  #   - eslint
+  #   - build
 
-  # be_lint:
+  # be_build:
   #   executor:
   #     name: be_default
   #   steps:
   #   - sparse_checkout
-  #   - eslint
+  #   - build
 
-  fe_build:
-    executor:
-      name: fe_default
+  build-image:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
     steps:
     - sparse_checkout
-    - build
+    - docker_build
 
-  bff_build:
-    executor:
-      name: bff_default
-    steps:
-    - sparse_checkout
-    - build
-
-  be_build:
-    executor:
-      name: be_default
-    steps:
-    - sparse_checkout
-    - build
-
-  # build-image:
-  #   parameters:
-  #     e:
-  #       type: executor
-  #   executor: << parameters.e >>
+  # fe_build-image:
+  #   executor:
+  #     name: fe_default
   #   steps:
   #   - sparse_checkout
   #   - docker_build
 
-  fe_build-image:
-    executor:
-      name: fe_default
-    steps:
-    - sparse_checkout
-    - docker_build
+  # bff_build-image:
+  #   executor:
+  #     name: bff_default
+  #   steps:
+  #   - sparse_checkout
+  #   - docker_build
 
-  bff_build-image:
-    executor:
-      name: bff_default
-    steps:
-    - sparse_checkout
-    - docker_build
-
-  be_build-image:
-    executor:
-      name: be_default
-    steps:
-    - sparse_checkout
-    - docker_build
+  # be_build-image:
+  #   executor:
+  #     name: be_default
+  #   steps:
+  #   - sparse_checkout
+  #   - docker_build
 
   notify:
     docker:
@@ -359,22 +347,29 @@ workflows:
         e: fe_default
         requires:
         - fe_install_deps
-    # - fe_lint:
-    #     requires:
-    #     - fe_install_deps
-    - fe_build:
+    - build:
+        e: fe_default
         requires:
         - fe_install_deps
-    - fe_build-image:
+    # - fe_build:
+    #     requires:
+    #     - fe_install_deps
+    - build-image:
+        e: fe_default
         requires:
         - fe_install_deps
         context: DOCKER_HUB
+    # - fe_build-image:
+    #     requires:
+    #     - fe_install_deps
+    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
-        # - fe_lint
-        - fe_build
-        - fe_build-image
+        - build
+        # - fe_build
+        - build-image
+        # - fe_build-image
         context: SLACK_INTEGRATION
 
   bff_main:
@@ -384,22 +379,29 @@ workflows:
         e: bff_default
         requires:
         - bff_install_deps
-    # - bff_lint:
-    #     requires:
-    #     - bff_install_deps
-    - bff_build:
+    - build:
+        e: bff_default
         requires:
         - bff_install_deps
-    - bff_build-image:
+    # - bff_build:
+    #     requires:
+    #     - bff_install_deps
+    - build-image:
+        e: bff_default
         requires:
         - bff_install_deps
         context: DOCKER_HUB
+    # - bff_build-image:
+    #     requires:
+    #     - bff_install_deps
+    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
-        # - bff_lint
-        - bff_build
-        - bff_build-image
+        - build
+        # - bff_build
+        - build-image
+        # - bff_build-image
         context: SLACK_INTEGRATION
 
   be_main:
@@ -409,20 +411,27 @@ workflows:
         e: be_default
         requires:
         - be_install_deps
-    # - be_lint:
-    #     requires:
-    #     - be_install_deps
-    - be_build:
+    - build:
+        e: be_default
         requires:
         - be_install_deps
-    - be_build-image:
+    # - be_build:
+    #     requires:
+    #     - be_install_deps
+    - build-image:
+        e: be_default
         requires:
         - be_install_deps
         context: DOCKER_HUB
+    # - be_build-image:
+    #     requires:
+    #     - be_install_deps
+    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
-        # - be_lint
-        - be_build
-        - be_build-image
+        - build
+        # - be_build
+        - build-image
+        # - be_build-image
         context: SLACK_INTEGRATION
