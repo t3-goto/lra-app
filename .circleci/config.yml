@@ -236,21 +236,44 @@ commands:
   git_diff:
     description: 'Git diff'
     steps:
+    - sparse_checkout
+    # - run:
+    #     name: Setup CIRCLE_COMPARE_URL
+    #     command: |
+    #       echo 'export CIRCLE_COMPARE_URL=<< pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<< pipeline.git.revision>>' >> $BASH_ENV
+    # - run:
+    #     name: Setup COMPARE_IDS
+    #     command: |
+    #       echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL}##*/' >> $BASH_ENV
+    # - run:
+    #     name: Compare
+    #     command: |
+    #       echo ${CIRCLE_COMPARE_URL}
+    #       echo ${CIRCLE_IDS}
+    #       diff=`git diff --name-only ${COMPARE_IDS}`
+    #       echo ${diff}
     - run:
-        name: Setup CIRCLE_COMPARE_URL
+        name: Setup
         command: |
-          echo 'export CIRCLE_COMPARE_URL=<< pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<< pipeline.git.revision>>' >> $BASH_ENV
+          echo 'export PATH=$PATH:${CIRCLE_WORKING_DIRECTORY}/scripts' >> $BASH_ENV
     - run:
-        name: Setup COMPARE_IDS
+        name: git diff
         command: |
-          echo 'export COMPARE_IDS=${CIRCLE_COMPARE_URL}##*/' >> $BASH_ENV
-    - run:
-        name: Compare
-        command: |
-          echo ${CIRCLE_COMPARE_URL}
-          echo ${CIRCLE_IDS}
-          diff=`git diff --name-only ${COMPARE_IDS}`
-          echo ${diff}
+          if is_changed "apl/bff"; then
+            echo "apl/bffに変更があったよ"
+          else
+            echo "apl/bffに変更はなかったよ"
+          fi
+          if is_changed "apl/fe"; then
+            echo "apl/feに変更があったよ"
+          else
+            echo "apl/feに変更はなかったよ"
+          fi
+          if is_changed "apl/be"; then
+            echo "apl/beに変更があったよ"
+          else
+            echo "apl/beに変更はなかったよ"
+          fi
 
 jobs:
   fe_install_deps:
