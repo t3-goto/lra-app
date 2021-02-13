@@ -38,7 +38,7 @@ commands:
     description: 'Sparse checkout for sub directories.'
     steps:
     - run:
-        name: Sparse Checkout
+        name: Sparse checkout
         command: |
           cd ~/project
           git init
@@ -55,7 +55,7 @@ commands:
         - v1-dependencies-{{ .Branch }}
         - v1-dependencies-
     - run:
-        name: Yarn Install
+        name: Yarn install
         command: yarn install
     - save_cache:
         paths:
@@ -71,7 +71,7 @@ commands:
     - attach_workspace:
         at: ./
     - run:
-        name: Make Report Directory
+        name: Make report directory
         command: mkdir reports
     - run:
         name: Lint
@@ -95,7 +95,7 @@ commands:
         version: 19.03.13
         docker_layer_caching: false
     - run:
-        name: buil
+        name: Docker build
         command: |
           DOCKER_BUILDKIT=1
           REGISTORY_URL=${DOCKER_USER}/${SYSTEM}
