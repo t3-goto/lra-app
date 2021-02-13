@@ -244,7 +244,9 @@ commands:
     - run:
         name: Compare
         command: |
-          diff=$(git diff --name-only ${COMPARE_IDS})
+          echo ${CIRCLE_COMPARE_URL}
+          echo ${CIRCLE_IDS}
+          diff=`git diff --name-only ${COMPARE_IDS}`
           echo ${diff}
 
 jobs:
