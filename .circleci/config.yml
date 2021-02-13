@@ -261,7 +261,7 @@ commands:
             # curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @./.circleci/trigger_fe_build.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
             curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d '
             {
-              "branch": "${CIRCLE_BRANCH}",
+              "branch": "feature/mod-circleci",
               "parameters": {
                 "run_fe_build": true,
                 "run_main": false
