@@ -120,8 +120,9 @@ commands:
     steps:
     - restore_cache:
         keys:
+        # - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        # - v1-dependencies-fe-web-{{ .Branch }}
         - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
-        - v1-dependencies-fe-web-{{ .Branch }}
         - v1-dependencies-fe-web-
     - run:
         name: Yarn install
@@ -212,13 +213,15 @@ commands:
           # Set BASH_ENV
           echo 'export DOCKER_BUILDKIT=1' >> $BASH_ENV
           echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+          # echo 'export IMAGE_TAG=latest' >> $ BASH_ENV
+          echo 'export IMAGE_TAG=${CIRCLE_SHA1}' >> $ BASH_ENV
           # Login
           docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
     - run:
         name: Docker build
         command: |
           # Build main
-          docker build -t ${REGISTORY_URL}:latest --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
+          docker build -t ${REGISTORY_URL}:${CIRCLE_SHA1} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
           # Build build-env in parallel
           docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
           wait
@@ -226,7 +229,7 @@ commands:
         name: Docker push
         command: |
           # Push all in parallel
-          docker push ${REGISTORY_URL}:latest &
+          docker push ${REGISTORY_URL}:${CIRCLE_SHA1} &
           docker push ${REGISTORY_URL}:build-env &
           wait
 
@@ -276,27 +279,6 @@ jobs:
     - sparse_checkout
     - build
 
-  # fe_build:
-  #   executor:
-  #     name: fe_default
-  #   steps:
-  #   - sparse_checkout
-  #   - build
-
-  # bff_build:
-  #   executor:
-  #     name: bff_default
-  #   steps:
-  #   - sparse_checkout
-  #   - build
-
-  # be_build:
-  #   executor:
-  #     name: be_default
-  #   steps:
-  #   - sparse_checkout
-  #   - build
-
   build-image:
     parameters:
       e:
@@ -305,27 +287,6 @@ jobs:
     steps:
     - sparse_checkout
     - docker_build
-
-  # fe_build-image:
-  #   executor:
-  #     name: fe_default
-  #   steps:
-  #   - sparse_checkout
-  #   - docker_build
-
-  # bff_build-image:
-  #   executor:
-  #     name: bff_default
-  #   steps:
-  #   - sparse_checkout
-  #   - docker_build
-
-  # be_build-image:
-  #   executor:
-  #     name: be_default
-  #   steps:
-  #   - sparse_checkout
-  #   - docker_build
 
   notify:
     docker:
@@ -351,25 +312,16 @@ workflows:
         e: fe_default
         requires:
         - fe_install_deps
-    # - fe_build:
-    #     requires:
-    #     - fe_install_deps
     - build-image:
         e: fe_default
         requires:
         - fe_install_deps
         context: DOCKER_HUB
-    # - fe_build-image:
-    #     requires:
-    #     - fe_install_deps
-    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
         - build
-        # - fe_build
         - build-image
-        # - fe_build-image
         context: SLACK_INTEGRATION
 
   bff_main:
@@ -383,25 +335,16 @@ workflows:
         e: bff_default
         requires:
         - bff_install_deps
-    # - bff_build:
-    #     requires:
-    #     - bff_install_deps
     - build-image:
         e: bff_default
         requires:
         - bff_install_deps
         context: DOCKER_HUB
-    # - bff_build-image:
-    #     requires:
-    #     - bff_install_deps
-    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
         - build
-        # - bff_build
         - build-image
-        # - bff_build-image
         context: SLACK_INTEGRATION
 
   be_main:
@@ -415,23 +358,14 @@ workflows:
         e: be_default
         requires:
         - be_install_deps
-    # - be_build:
-    #     requires:
-    #     - be_install_deps
     - build-image:
         e: be_default
         requires:
         - be_install_deps
         context: DOCKER_HUB
-    # - be_build-image:
-    #     requires:
-    #     - be_install_deps
-    #     context: DOCKER_HUB
     - notify:
         requires:
         - lint
         - build
-        # - be_build
         - build-image
-        # - be_build-image
         context: SLACK_INTEGRATION
