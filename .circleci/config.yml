@@ -257,22 +257,22 @@ commands:
         command: |
           pwd
           ls -a
-          if ./.circleci/scripts/is_changed.sh "apl/bff"; then
+          if bash ./.circleci/scripts/is_changed.sh "apl/bff"; then
             echo "apl/bffに変更があったよ"
           else
             echo "apl/bffに変更はなかったよ"
           fi
-          if ./.circleci/scripts/is_changed.sh "apl/fe"; then
+          if bash ./.circleci/scripts/is_changed.sh "apl/fe"; then
             echo "apl/feに変更があったよ"
           else
             echo "apl/feに変更はなかったよ"
           fi
-          if ./.circleci/scripts/is_changed.sh "apl/be"; then
+          if bash ./.circleci/scripts/is_changed.sh "apl/be"; then
             echo "apl/beに変更があったよ"
           else
             echo "apl/beに変更はなかったよ"
           fi
-          if ./.circleci/scripts/is_changed.sh ".circleci/config.yml"; then
+          if bash ./.circleci/scripts/is_changed.sh ".circleci/config.yml"; then
             echo ".circleci/config.ymlに変更があったよ"
           else
             echo ".circleci/config.ymlに変更はなかったよ"
