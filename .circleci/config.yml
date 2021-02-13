@@ -424,4 +424,5 @@ workflows:
   main:
     when: << pipeline.parameters.run_main >>
     jobs:
-    - trigger_build_workflow
+    - trigger_build_workflow:
+        context: CIRCLE
