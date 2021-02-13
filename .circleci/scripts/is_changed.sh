@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ "${CIRCLE_BRANCH}" = "master" || "${CIRCLE_BRANCH}" = "develop"]; then
+if [ "${CIRCLE_BRANCH}" = "master" -o "${CIRCLE_BRANCH}" = "develop" ]; then
   DIFF_TARGET="HEAD^ HEAD"
 else
   DIFF_TARGET="origin/develop"

@@ -259,22 +259,22 @@ commands:
     - run:
         name: git diff
         command: |
-          if is_changed "apl/bff"; then
+          if ~/project/.circleci/is_changed "apl/bff"; then
             echo "apl/bffに変更があったよ"
           else
             echo "apl/bffに変更はなかったよ"
           fi
-          if is_changed "apl/fe"; then
+          if ~/project/.circleci/is_changed "apl/fe"; then
             echo "apl/feに変更があったよ"
           else
             echo "apl/feに変更はなかったよ"
           fi
-          if is_changed "apl/be"; then
+          if ~/project/.circleci/is_changed "apl/be"; then
             echo "apl/beに変更があったよ"
           else
             echo "apl/beに変更はなかったよ"
           fi
-          if is_changed ".circleci/config.yml"; then
+          if ~/project/.circleci/is_changed ".circleci/config.yml"; then
             echo ".circleci/config.ymlに変更があったよ"
           else
             echo ".circleci/config.ymlに変更はなかったよ"
