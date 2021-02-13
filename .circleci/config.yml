@@ -46,14 +46,15 @@ commands:
           git remote add origin ${SOURCE_REPO}.git
           echo ${SOURCE_DIR} >.git/info/sparse-checkout
           git pull origin ${SOURCE_BRANCH}
+
   install_deps:
     description: 'Install dependencies.'
     steps:
     - restore_cache:
         keys:
-        - v1-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
-        - v1-dependencies-{{ .Branch }}
-        - v1-dependencies-
+        - v2-dependencies-{{ .Branch }}-{{ checksum "yarn.lock"}}
+        - v2-dependencies-{{ .Branch }}
+        - v2-dependencies-
     - run:
         name: Yarn install
         command: yarn install
@@ -65,6 +66,7 @@ commands:
         root: ./
         paths:
         - node_modules/*
+
   eslint:
     description: 'Eslint.'
     steps:
@@ -80,6 +82,7 @@ commands:
         path: reports
     - store_artifacts:
         path: reports
+
   build:
     description: 'Yarn build'
     steps:
@@ -88,7 +91,8 @@ commands:
     - run:
         name: Yarn build
         command: yarn build
-  docker-build:
+
+  docker_build:
     description: 'Docker build'
     steps:
     - setup_remote_docker:
@@ -187,21 +191,21 @@ jobs:
       name: fe_default
     steps:
     - sparse_checkout
-    - docker-build
+    - docker_build
 
   bff_build-image:
     executor:
       name: bff_default
     steps:
     - sparse_checkout
-    - docker-build
+    - docker_build
 
   be_build-image:
     executor:
       name: be_default
     steps:
     - sparse_checkout
-    - docker-build
+    - docker_build
 
   notify:
     docker:
