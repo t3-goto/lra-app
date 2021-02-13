@@ -253,30 +253,26 @@ commands:
     #       diff=`git diff --name-only ${COMPARE_IDS}`
     #       echo ${diff}
     - run:
-        name: Setup
-        command: |
-          echo 'export PATH=$PATH:${CIRCLE_WORKING_DIRECTORY}/.circleci/scripts' >> $BASH_ENV
-    - run:
         name: git diff
         command: |
           pwd
-          ls
-          if is_changed "apl/bff"; then
+          ls -a
+          if ./.circleci/scripts/is_changed.sh "apl/bff"; then
             echo "apl/bffに変更があったよ"
           else
             echo "apl/bffに変更はなかったよ"
           fi
-          if is_changed "apl/fe"; then
+          if ./.circleci/scripts/is_changed.sh "apl/fe"; then
             echo "apl/feに変更があったよ"
           else
             echo "apl/feに変更はなかったよ"
           fi
-          if is_changed "apl/be"; then
+          if ./.circleci/scripts/is_changed.sh "apl/be"; then
             echo "apl/beに変更があったよ"
           else
             echo "apl/beに変更はなかったよ"
           fi
-          if is_changed ".circleci/config.yml"; then
+          if ./.circleci/scripts/is_changed.sh ".circleci/config.yml"; then
             echo ".circleci/config.ymlに変更があったよ"
           else
             echo ".circleci/config.ymlに変更はなかったよ"
