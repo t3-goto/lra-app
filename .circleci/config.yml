@@ -238,7 +238,7 @@ commands:
     steps:
     - run:
         name: Yarn build
-        command: echo << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..< pipeline.git.revision>>
+        command: echo << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..<< pipeline.git.revision>>
 
 jobs:
   fe_install_deps:
