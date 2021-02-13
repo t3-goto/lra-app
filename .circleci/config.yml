@@ -233,6 +233,13 @@ commands:
           docker push ${REGISTORY_URL}:build-env &
           wait
 
+  git_diff:
+    description: 'Git diff'
+    steps:
+    - run:
+        name: Yarn build
+        command: echo << pipeline.project.git_url >>/compare/<< pipeline.git.base_revision >>..< pipeline.git.revision>>
+
 jobs:
   fe_install_deps:
     executor:
@@ -279,7 +286,7 @@ jobs:
     - sparse_checkout
     - build
 
-  build-image:
+  build_image:
     parameters:
       e:
         type: executor
@@ -300,72 +307,85 @@ jobs:
         event: pass
         template: success_tagged_deploy_1
 
+  git_diff:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - git_diff
+
 workflows:
-  fe_main:
-    jobs:
-    - fe_install_deps
-    - lint:
-        e: fe_default
-        requires:
-        - fe_install_deps
-    - build:
-        e: fe_default
-        requires:
-        - fe_install_deps
-    - build-image:
-        e: fe_default
-        requires:
-        - fe_install_deps
-        context: DOCKER_HUB
-    - notify:
-        requires:
-        - lint
-        - build
-        - build-image
-        context: SLACK_INTEGRATION
+  # fe_main:
+  #   jobs:
+  #   - fe_install_deps
+  #   - lint:
+  #       e: fe_default
+  #       requires:
+  #       - fe_install_deps
+  #   - build:
+  #       e: fe_default
+  #       requires:
+  #       - fe_install_deps
+  #   - build_image:
+  #       e: fe_default
+  #       requires:
+  #       - fe_install_deps
+  #       context: DOCKER_HUB
+  #   - notify:
+  #       requires:
+  #       - lint
+  #       - build
+  #       - build_image
+  #       context: SLACK_INTEGRATION
 
-  bff_main:
-    jobs:
-    - bff_install_deps
-    - lint:
-        e: bff_default
-        requires:
-        - bff_install_deps
-    - build:
-        e: bff_default
-        requires:
-        - bff_install_deps
-    - build-image:
-        e: bff_default
-        requires:
-        - bff_install_deps
-        context: DOCKER_HUB
-    - notify:
-        requires:
-        - lint
-        - build
-        - build-image
-        context: SLACK_INTEGRATION
+  # bff_main:
+  #   jobs:
+  #   - bff_install_deps
+  #   - lint:
+  #       e: bff_default
+  #       requires:
+  #       - bff_install_deps
+  #   - build:
+  #       e: bff_default
+  #       requires:
+  #       - bff_install_deps
+  #   - build_image:
+  #       e: bff_default
+  #       requires:
+  #       - bff_install_deps
+  #       context: DOCKER_HUB
+  #   - notify:
+  #       requires:
+  #       - lint
+  #       - build
+  #       - build_image
+  #       context: SLACK_INTEGRATION
 
-  be_main:
+  # be_main:
+  #   jobs:
+  #   - be_install_deps
+  #   - lint:
+  #       e: be_default
+  #       requires:
+  #       - be_install_deps
+  #   - build:
+  #       e: be_default
+  #       requires:
+  #       - be_install_deps
+  #   - build_image:
+  #       e: be_default
+  #       requires:
+  #       - be_install_deps
+  #       context: DOCKER_HUB
+  #   - notify:
+  #       requires:
+  #       - lint
+  #       - build
+  #       - build_image
+  #       context: SLACK_INTEGRATION
+
+  test_main:
     jobs:
-    - be_install_deps
-    - lint:
-        e: be_default
-        requires:
-        - be_install_deps
-    - build:
-        e: be_default
-        requires:
-        - be_install_deps
-    - build-image:
-        e: be_default
-        requires:
-        - be_install_deps
-        context: DOCKER_HUB
-    - notify:
-        requires:
-        - lint
-        - build
-        - build-image
-        context: SLACK_INTEGRATION
+    - git_diff:
+        e: fe_default
