@@ -334,8 +334,8 @@ commands:
         name: Install kubectl
         command: |
           curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl
-          mv kubectl /usr/local/bin
-          chmod +x /usr/local/bin/kubectl
+          sudo mv kubectl /usr/local/bin
+          sudo chmod +x /usr/local/bin/kubectl
           kubectl version
 
   install_kustomize:
@@ -346,8 +346,8 @@ commands:
         command: |
           wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.9.2/kustomize_v3.9.2_linux_amd64.tar.gz
           tar xvzf kustomize_v3.9.2_linux_amd64.tar.gz
-          mv kustomize /usr/local/bin
-          chmod +x /usr/local/bin/kustomize
+          sudo mv kustomize /usr/local/bin
+          sudo chmod +x /usr/local/bin/kustomize
           kustomize version
 
   kustomize_build:
