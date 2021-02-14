@@ -15,9 +15,12 @@ parameters:
   run_be_build:
     type: boolean
     default: false
+  run_fe_deploy:
+    type: boolean
+    default: true
 
 executors:
-  fe_default:
+  apl_fe_default:
     working_directory: ~/project/apl/fe
     docker:
     - image: cimg/node:12.20
@@ -25,7 +28,7 @@ executors:
       SYSTEM: fe-web
       SOURCE_DIR: apl/fe
 
-  bff_default:
+  apl_bff_default:
     working_directory: ~/project/apl/bff
     docker:
     - image: cimg/node:12.20
@@ -33,13 +36,37 @@ executors:
       SYSTEM: bff-ap
       SOURCE_DIR: apl/bff
 
-  be_default:
+  apl_be_default:
     working_directory: ~/project/apl/be
     docker:
     - image: cimg/node:12.20
     environment:
       SYSTEM: be-ap
       SOURCE_DIR: apl/be
+
+  infra_fe_default:
+    working_directory: ~/project/infra
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: fe-web
+      MANIFESTS_DIR: kustomize/fe
+
+  infra_bff_default:
+    working_directory: ~/project/infra
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: bff-ap
+      MANIFESTS_DIR: kustomize/bff
+
+  infra_be_default:
+    working_directory: ~/project/infra
+    docker:
+    - image: cimg/node:12.20
+    environment:
+      SYSTEM: be-ap
+      MANIFESTS_DIR: kustomize/be
 
 commands:
   sparse_checkout:
@@ -290,10 +317,60 @@ commands:
           cat trigger.json
           curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
+  apt_get_update:
+    description: 'apt-get update and install wget.'
+    steps:
+    - run:
+        name: apt-get update
+        command: apt-get update
+    - run:
+        name: apt-get install
+        command: apt-get install -y wget
+
+  install_kubectl:
+    description: 'Install kubectl.'
+    steps:
+    - run:
+        name: Install kubectl
+        command: |
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl
+          mv kubectl /usr/local/bin
+          chmod +x /usr/local/bin/kubectl
+          kubectl version
+
+  install_kustomize:
+    description: 'Install kustomize.'
+    steps:
+    - run:
+        name: Install kustomize
+        command: |
+          wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.9.2/kustomize_v3.9.2_linux_amd64.tar.gz
+          tar xvzf kustomize_v3.9.2_linux_amd64.tar.gz
+          mv kustomize /usr/local/bin
+          chmod +x /usr/local/bin/kustomize
+          kustomize version
+
+  kustomize_build:
+    description: 'Kustomize build.'
+    steps:
+    - checkout
+    - run:
+        name: Setup
+        command: |
+          # Set BASH_ENV
+          echo 'export REGISTORY_URL=${DOCKER_USER}/${SYSTEM}' >> $BASH_ENV
+    - run:
+        name: Kustomize build
+        command: |
+          cd ${MANIFESTS_DIR}/overlays/prod
+          kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
+          kustomize build  . > ../../manifests/prod.yml
+          cat ./manifests/prod.yml
+
 jobs:
   fe_install_deps:
     executor:
-      name: fe_default
+      name: apl_fe_default
     steps:
     - sparse_checkout
     - fe_install_deps
@@ -302,7 +379,7 @@ jobs:
 
   bff_install_deps:
     executor:
-      name: bff_default
+      name: apl_bff_default
     steps:
     - sparse_checkout
     - bff_install_deps
@@ -311,7 +388,7 @@ jobs:
 
   be_install_deps:
     executor:
-      name: be_default
+      name: apl_be_default
     steps:
     - sparse_checkout
     - be_install_deps
@@ -363,6 +440,30 @@ jobs:
     steps:
     - trigger_build_workflow
 
+  install_k8s_tools:
+    docker:
+    - image: cimg/node:12.20
+    steps:
+    - apt_get_update
+    - install_kubectl
+    - install_kustomize
+    - persist_to_workspace:
+        root: /usr/local/bin/
+        paths:
+        - kubectl
+        - kustomize
+
+  generate_manifest:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - attach_workspace:
+        at: ./
+    - kustomize_build
+
+
 workflows:
   main:
     when: << pipeline.parameters.run_main >>
@@ -375,15 +476,15 @@ workflows:
     jobs:
     - fe_install_deps
     - lint:
-        e: fe_default
+        e: apl_fe_default
         requires:
         - fe_install_deps
     - build:
-        e: fe_default
+        e: apl_fe_default
         requires:
         - fe_install_deps
     - build_image:
-        e: fe_default
+        e: apl_fe_default
         requires:
         - fe_install_deps
         context: DOCKER_HUB
@@ -394,20 +495,30 @@ workflows:
         - build_image
         context: SLACK_INTEGRATION
 
+  fe_deploy:
+    when: << pipeline.parameters.run_fe_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_fe_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
   bff_build:
     when: << pipeline.parameters.run_bff_build >>
     jobs:
     - bff_install_deps
     - lint:
-        e: bff_default
+        e: apl_bff_default
         requires:
         - bff_install_deps
     - build:
-        e: bff_default
+        e: apl_bff_default
         requires:
         - bff_install_deps
     - build_image:
-        e: bff_default
+        e: apl_bff_default
         requires:
         - bff_install_deps
         context: DOCKER_HUB
@@ -423,15 +534,15 @@ workflows:
     jobs:
     - be_install_deps
     - lint:
-        e: be_default
+        e: apl_be_default
         requires:
         - be_install_deps
     - build:
-        e: be_default
+        e: apl_be_default
         requires:
         - be_install_deps
     - build_image:
-        e: be_default
+        e: apl_be_default
         requires:
         - be_install_deps
         context: DOCKER_HUB
