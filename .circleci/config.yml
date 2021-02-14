@@ -361,6 +361,7 @@ commands:
     - run:
         name: Kustomize build
         command: |
+          pwd
           cd ./${MANIFESTS_DIR}/overlays/prod
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
           kustomize build  . > ../../manifests/prod.yml
