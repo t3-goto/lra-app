@@ -54,3 +54,6 @@ up-istio-operator:
 
 down-istio-operator:
 	istioctl operator remove
+
+up-sealed-secret:
+	cd ./infra/sealed-secrets && ./scripts/init.sh

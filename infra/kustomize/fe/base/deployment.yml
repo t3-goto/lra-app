@@ -48,7 +48,7 @@ spec:
       containers:
         - name: fe-web
           # image: nginx:1.18-alpine
-          image: t3goto/fe-web:0.1
+          image: t3goto/fe-web:latest
           resources:
             requests:
               cpu: 100m

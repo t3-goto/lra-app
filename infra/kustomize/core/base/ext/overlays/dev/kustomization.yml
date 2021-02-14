@@ -9,6 +9,6 @@ resources:
 - ../../base/cache
 - ./namespace.yml
 - ./db/config-map.yml
-- ./db/secret.yml
+- ./db/sealed-secret.yml
 
 namespace: ext-a
