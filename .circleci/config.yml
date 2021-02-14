@@ -361,10 +361,10 @@ commands:
     - run:
         name: Kustomize build
         command: |
-          cd ${MANIFESTS_DIR}/overlays/prod
+          cd ./${MANIFESTS_DIR}/overlays/prod
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
           kustomize build  . > ../../manifests/prod.yml
-          cat ./manifests/prod.yml
+          cat ../../manifests/prod.yml
 
 jobs:
   fe_install_deps:
