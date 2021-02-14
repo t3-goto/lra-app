@@ -322,10 +322,10 @@ commands:
     steps:
     - run:
         name: apt-get update
-        command: apt-get update
+        command: sudo apt-get update
     - run:
         name: apt-get install
-        command: apt-get install -y wget
+        command: sudo apt-get install -y wget
 
   install_kubectl:
     description: 'Install kubectl.'
