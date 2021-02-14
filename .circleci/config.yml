@@ -353,7 +353,6 @@ commands:
   kustomize_build:
     description: 'Kustomize build.'
     steps:
-    - checkout
     - run:
         name: Setup
         command: |
@@ -459,6 +458,7 @@ jobs:
         type: executor
     executor: << parameters.e >>
     steps:
+    - checkout
     - attach_workspace:
         at: ./
     - kustomize_build
