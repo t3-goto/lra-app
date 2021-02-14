@@ -347,6 +347,28 @@ commands:
           sudo chmod +x /usr/local/bin/kustomize
           kustomize version
 
+  set_k8s_tools:
+    description: 'Set k8s tools.'
+    steps:
+    - persist_to_workspace:
+        root: /usr/local/bin/
+        paths:
+        - kubectl
+        - kustomize
+
+  get_k8s_tools:
+    description: 'Get k8s tools.'
+    steps:
+    - attach_workspace:
+        at: ./
+    - run:
+        name: Move k8s tools.
+        command: |
+          sudo mv kubectl /usr/local/bin
+          sudo chmod +x /usr/local/bin/kubectl
+          sudo mv kustomize /usr/local/bin
+          sudo chmod +x /usr/local/bin/kustomize
+
   kustomize_build:
     description: 'Kustomize build.'
     steps:
@@ -443,11 +465,7 @@ jobs:
     - apt_get_update
     - install_kubectl
     - install_kustomize
-    - persist_to_workspace:
-        root: /usr/local/bin/
-        paths:
-        - kubectl
-        - kustomize
+    - set_k8s_tools
 
   generate_manifest:
     parameters:
@@ -456,10 +474,8 @@ jobs:
     executor: << parameters.e >>
     steps:
     - checkout
-    - attach_workspace:
-        at: /usr/local/bin/
+    - get_k8s_tools
     - kustomize_build
-
 
 workflows:
   main:
