@@ -1,0 +1,177 @@
+apiVersion: v1
+data:
+  DB_DATABASE: lradb
+  DB_HOST: lradb.cs7qvmefeas0.ap-northeast-1.rds.amazonaws.com
+  DB_PORT: "3306"
+  DB_TYPE: mysql
+  GRPC_CL_GEOCODING_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_GEOCODING_PAKAGE: rpc
+  GRPC_CL_GEOCODING_PORT: "9011"
+  GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+  GRPC_CL_RESTAURANTS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_RESTAURANTS_PAKAGE: rpc
+  GRPC_CL_RESTAURANTS_PORT: "9011"
+  GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+  GRPC_CL_USERS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_USERS_PAKAGE: rpc
+  GRPC_CL_USERS_PORT: "9011"
+  GRPC_CL_USERS_PROTOS: users.proto
+  HTTP_MAX_REDIRECTS: "5"
+  HTTP_SV_PORT: "9001"
+  HTTP_TIMEOUT: "5000"
+  JWT_EXPIRES_IN: "3600"
+  NODE_ENV: production
+  REDIS_HOST: cache-svc.ext-a.svc.cluster.local
+  REDIS_PORT: "6379"
+  REDIS_TTL: "1000"
+kind: ConfigMap
+metadata:
+  name: bff-ap-config
+  namespace: app-a
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: bff-ap-svc
+  name: bff-ap-svc
+  namespace: app-a
+spec:
+  ports:
+  - name: bff-ap-port
+    port: 9001
+    protocol: TCP
+    targetPort: 9001
+  selector:
+    app: bff-ap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bff-ap
+  namespace: app-a
+spec:
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bff-ap
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: bff-ap
+      name: bff-ap
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: bff-ap-config
+        - secretRef:
+            name: bff-ap-secret
+        image: t3goto/bff-ap:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - ls
+            - /usr/local/bin/node
+          failureThreshold: 10
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: bff-ap
+        ports:
+        - containerPort: 9001
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /api/v1/health/readiness
+            port: 9001
+          initialDelaySeconds: 0
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 150m
+            memory: 150Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        startupProbe:
+          failureThreshold: 100
+          httpGet:
+            path: /api/v1/health/readiness
+            port: 9001
+          initialDelaySeconds: 0
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: bff-ap-secret
+  namespace: app-a
+spec:
+  encryptedData:
+    DB_PASSWORD: AgBX2wTwN8DOBcQO5DYJHXIrUL2A/fNbqkPC/+mcNhR4/8YXBN0E8errXUlEYBAAjdB9OOFJa8gsw/JWmI2eY+XEPZHHco0NioMQJ/VzOJm84xwpreMe8NBZzveqST82l/YaznNzPZ3jTwT6MGOanD0xmxq4+sktIBJQO0Nw99owjwCdgbTC0eYTp4jFRkr3IkwscWg7kWwb8lrZhhWMStljIST8q+KLnRn3GCu3UHy9EJjqJk6AN7cbfWxzWHIbMTxPIA1IE8xgDCDiEXKcVl7oeYpbeF+chPqq46HkFLybe1BeLbz39+tXtPsPJHFUaI+4Tjx3t+HRLcozQzIwZgSIdAiZvkPHq3oThZKjZRPuIQI4Gfisrjyj3WVTHAXw2m7AyLNXbCm+0qefEylSJfC5Uy3FIaEvEnIyIXOlyLdCqcYfQrsMaM6ftR/kDdSqp7x/rwDOGi+ZtEwJqdpW0BPifXgKpHU6sX6poYDTLnsMKAyZqmmqrNQHy4yHr3dlg9hzDUEhEjjK2MH52K69zNe0+/BDQjd3WtIWRNmieybP3CDJdL4u+oBVzyow9FoHdmCr4Kushhj4/3LVVtyBBOBLlXGQuw4TSQtwpfktt+50uG6V8Wwk8Du4BIjVNzdckUO+3LZ2yocuRCOBwlRVKvch/mpky35KkchxzmXY0P4B0Rgrgwo6qalOKq6087BmPAEwHrZAjezNo41x79ZlT+hk
+    DB_USERNAME: AgBz+rCrgiQmQbIcHyf0rRJR6rwOzRAEutgAmWpcM/YdQ2W1xk/YkuRdnjUaDeTwm0Xl9FMWM/48AQN3aPasfWTJdhuB4RrMLxDAH922RYQX3VaOBoxrKI3FVAkMNZdIBRrxiZSiFbp8gSMlIpTsH5u0Pp8tP8TtJbjM4FublPqEJLStWq4klbnac/MEJ7ZI8F1SRQQ9QhvD5e9Osc0J6TQE4u+ogKW9j4Uay5hgqiOi4E2S0t2WrOWzCNIsfRQbcuCJA9bPZvZ/dBJumw/M4BpGq1cjC8bDZ4gg7LoGFfG20OxoXEm44Xibce9Mi3Yst4zLfAvNL118YJctt82LBZYMC3bnYw9oXmSGIR5HbkyGcgxWB5t9BP7ozliDP4gAeRycvhhFRGeeMW5KXH7EVkNEmRbT+7eXFU6s7kRVvN59URRCKAbGyg5EcD1FOmjbvlOMq8vxmsL7mNPxvG7u4OKUNzXsG5hyoYVQa12qJVAnE3+K5HGhRbDOmSEHVPKM07/a+PCkg1F9cmnip9nNBa4ZabwxbkeHoJtRUajZ3g3muAXXQ2gex0iaRiOFcajAllx2UunuyqozR+pjrYWdWf96zki/5wS2KjF0A0Q+wukyC/cvPORzeUAnpkuw+q6BQH93ydOtMh4GUSNnYa2I9Yj8OoYKnQJ2IcWvQlsoS1e+29zuZRyrZAsbuuJqpYSpQRwWdQzPofw=
+    JWT_SECRET: AgCUTYhrfXfFj/BkzN7zAZEukSEHU+P+GqPk68OZj9BySmUA48R1fb5k5kej1LyMdpvPqD1mMnNInh1pJLVd8vnePYxuafcJzFx3eT7xvNrERLy3lzf2qkUwTibOmHMij+9GeglDdOQbmgYDKHHsTJVDcozaIbhISf0maObTwQ5G6rVthYrLVz1AmpDvnK58X9X0x1WA8DZuSWdE+IAjaQzf+1dJiOMaxs2JAB23ptw2gAKwrgh2C+760l0LvrqmegVVnER2dR8JHpAzHOhVSjESc8BhzNu8GzbH+j3Dq2rgCNLCswsNJtS1cXiceDARYrAftNLu6K3o0SegJ7Eq5/V18nLPzfVnqJK7P82lsS4bRxniDikJXo2ewjFzZPRdbIgxlLpxV3BK5s0mgw9d9ogOwEk8aYmIlLSmzMR4Q1Z6VKYaWgPNQWHLEgUTm4IZP5s3Z9F7UNzUOim0vE77yYU6GbzKr9Cxnkj3uGHkX07NmsEpG1ilsEKruPD7BcKsV+yApQ8ugXiU0IOkO+eWXKB1+dku6yDlz5a9PMTe/mZKNBKaf6rOx+QZq1XFyU/os721L7Yma0MfrpiBxke3EX9ti3XgCBJxfnMSeQYd62Aas56hETj0lC/qa90f84BmVzkelITtr+IQrw8cCPLYAOSHIjNBHuqeP+9c+ulNqvX0nMZ5NQe52OEk/kkmLEsWa5GD7Jn3K9cD0Sk5RNuziH1b
+  template:
+    metadata:
+      creationTimestamp: null
+      name: bff-ap-secret
+      namespace: app-a
+    type: Opaque
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: bff-ap-dr
+  namespace: app-a
+spec:
+  host: bff-ap-svc.app-a.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bff-ap-vs-gw
+  namespace: app-a
+spec:
+  gateways:
+  - istio-system/ingress-gateway
+  hosts:
+  - www.lratg.com
+  http:
+  - match:
+    - uri:
+        prefix: /api
+    route:
+    - destination:
+        host: bff-ap-svc.app-a.svc.cluster.local
+        port:
+          number: 9001
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bff-ap-vs-mesh
+  namespace: app-a
+spec:
+  hosts:
+  - bff-ap-svc.app-a.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: bff-ap-svc.app-a.svc.cluster.local
+        port:
+          number: 9001

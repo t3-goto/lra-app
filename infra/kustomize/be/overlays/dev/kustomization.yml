@@ -7,7 +7,7 @@ kind: Kustomization
 resources:
 - ../../base
 - config-map.yml
-- secret.yml
+- sealed-secret.yml
 
 namespace: app-a
 

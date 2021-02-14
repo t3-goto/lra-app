@@ -1,0 +1,810 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: app-a
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ext-a
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: istio-system
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kubernetes-dashboard
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sys-a
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota
+  namespace: sys-a
+spec:
+  hard:
+    limits.cpu: "0.5"
+    limits.memory: 1Gi
+    requests.cpu: "0.5"
+    requests.memory: 1Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: liberator
+  namespace: sys-a
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+rules:
+- apiGroups:
+  - ""
+  resourceNames:
+  - kubernetes-dashboard-key-holder
+  - kubernetes-dashboard-certs
+  - kubernetes-dashboard-csrf
+  resources:
+  - secrets
+  verbs:
+  - get
+  - update
+  - delete
+- apiGroups:
+  - ""
+  resourceNames:
+  - kubernetes-dashboard-settings
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - update
+- apiGroups:
+  - ""
+  resourceNames:
+  - heapster
+  - dashboard-metrics-scraper
+  resources:
+  - services
+  verbs:
+  - proxy
+- apiGroups:
+  - ""
+  resourceNames:
+  - heapster
+  - 'http:heapster:'
+  - 'https:heapster:'
+  - dashboard-metrics-scraper
+  - http:dashboard-metrics-scraper
+  resources:
+  - services/proxy
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+rules:
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nodes
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - list
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    k8s-app: metrics-server
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: system:aggregated-metrics-reader
+rules:
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: system:metrics-server
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - nodes
+  - nodes/stats
+  - namespaces
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server-auth-reader
+  namespace: kube-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: extension-apiserver-authentication-reader
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: kubernetes-dashboard
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-dashboard
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kubernetes-dashboard
+subjects:
+- kind: ServiceAccount
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server:system:auth-delegator
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nodes
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nodes
+subjects:
+- kind: ServiceAccount
+  name: liberator
+  namespace: sys-a
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: system:metrics-server
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:metrics-server
+subjects:
+- kind: ServiceAccount
+  name: metrics-server
+  namespace: kube-system
+---
+apiVersion: v1
+data:
+  MYSQL_DATABASE: lradb
+  TZ: Asia/Tokyo
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: ext-a
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-settings
+  namespace: kubernetes-dashboard
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-certs
+  namespace: kubernetes-dashboard
+type: Opaque
+---
+apiVersion: v1
+data:
+  csrf: ""
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-csrf
+  namespace: kubernetes-dashboard
+type: Opaque
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard-key-holder
+  namespace: kubernetes-dashboard
+type: Opaque
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cache-svc
+  name: cache-svc
+  namespace: ext-a
+spec:
+  ports:
+  - name: cache-port
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: db-svc
+  name: db-svc
+  namespace: ext-a
+spec:
+  ports:
+  - name: db-port
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: db
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server
+  namespace: kube-system
+spec:
+  ports:
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: https
+  selector:
+    k8s-app: metrics-server
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: dashboard-metrics-scraper
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+  - port: 8000
+    targetPort: 8000
+  selector:
+    k8s-app: dashboard-metrics-scraper
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  ports:
+  - port: 443
+    targetPort: 8443
+  selector:
+    k8s-app: kubernetes-dashboard
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: app-a
+spec:
+  limits:
+  - default:
+      cpu: 200m
+      memory: 200Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 100Mi
+    type: Container
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: sys-a
+spec:
+  limits:
+  - default:
+      cpu: 200m
+      memory: 200Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 100Mi
+    type: Container
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: ext-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - image: redis:latest
+        imagePullPolicy: IfNotPresent
+        name: cache
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: ext-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: db-config
+        - secretRef:
+            name: db-secret
+        image: mysql:5
+        imagePullPolicy: IfNotPresent
+        name: db
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            cpu: 150m
+            memory: 300Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: local-db-data-v
+        - mountPath: /docker-entrypoint-initdb.d
+          name: local-db-sql-v
+        - mountPath: /etc/mysql/conf.d/my.cnf
+          name: local-db-conf-v
+      volumes:
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/data
+        name: local-db-data-v
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/sql
+        name: local-db-sql-v
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/conf/my.cnf
+        name: local-db-conf-v
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: metrics-server
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      k8s-app: metrics-server
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        k8s-app: metrics-server
+    spec:
+      containers:
+      - args:
+        - --cert-dir=/tmp
+        - --secure-port=4443
+        - --kubelet-insecure-tls
+        - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
+        - --kubelet-use-node-status-port
+        image: k8s.gcr.io/metrics-server/metrics-server:v0.4.1
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /livez
+            port: https
+            scheme: HTTPS
+          periodSeconds: 10
+        name: metrics-server
+        ports:
+        - containerPort: 4443
+          name: https
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /readyz
+            port: https
+            scheme: HTTPS
+          periodSeconds: 10
+        securityContext:
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-dir
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: system-cluster-critical
+      serviceAccountName: metrics-server
+      volumes:
+      - emptyDir: {}
+        name: tmp-dir
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: dashboard-metrics-scraper
+  name: dashboard-metrics-scraper
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: dashboard-metrics-scraper
+  template:
+    metadata:
+      annotations:
+        seccomp.security.alpha.kubernetes.io/pod: runtime/default
+      labels:
+        k8s-app: dashboard-metrics-scraper
+    spec:
+      containers:
+      - image: kubernetesui/metrics-scraper:v1.0.6
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        name: dashboard-metrics-scraper
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 2001
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-volume
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: kubernetes-dashboard
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      volumes:
+      - emptyDir: {}
+        name: tmp-volume
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    k8s-app: kubernetes-dashboard
+  name: kubernetes-dashboard
+  namespace: kubernetes-dashboard
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      k8s-app: kubernetes-dashboard
+  template:
+    metadata:
+      labels:
+        k8s-app: kubernetes-dashboard
+    spec:
+      containers:
+      - args:
+        - --auto-generate-certificates
+        - --namespace=kubernetes-dashboard
+        image: kubernetesui/dashboard:v2.1.0
+        imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8443
+            scheme: HTTPS
+          initialDelaySeconds: 30
+          timeoutSeconds: 30
+        name: kubernetes-dashboard
+        ports:
+        - containerPort: 8443
+          protocol: TCP
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsGroup: 2001
+          runAsUser: 1001
+        volumeMounts:
+        - mountPath: /certs
+          name: kubernetes-dashboard-certs
+        - mountPath: /tmp
+          name: tmp-volume
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: kubernetes-dashboard
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+      volumes:
+      - name: kubernetes-dashboard-certs
+        secret:
+          secretName: kubernetes-dashboard-certs
+      - emptyDir: {}
+        name: tmp-volume
+---
+apiVersion: apiregistration.k8s.io/v1
+kind: APIService
+metadata:
+  labels:
+    k8s-app: metrics-server
+  name: v1beta1.metrics.k8s.io
+spec:
+  group: metrics.k8s.io
+  groupPriorityMinimum: 100
+  insecureSkipTLSVerify: true
+  service:
+    name: metrics-server
+    namespace: kube-system
+  version: v1beta1
+  versionPriority: 100
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: liberator
+  namespace: sys-a
+spec:
+  selector:
+    matchLabels:
+      app: liberator
+  template:
+    metadata:
+      labels:
+        app: liberator
+      name: liberator
+    spec:
+      containers:
+      - image: t3goto/liberator:0.1
+        imagePullPolicy: IfNotPresent
+        name: liberator
+        resources:
+          limits:
+            cpu: 100m
+            memory: 75Mi
+          requests:
+            cpu: 100m
+            memory: 75Mi
+      serviceAccountName: liberator
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: db-secret
+  namespace: ext-a
+spec:
+  encryptedData:
+    MYSQL_PASSWORD: AgCWfu9NLG+vU0rBuYNO22aFyWiMzPztsQ43V/6bScwZffatbYMuOg6YMK8rppFj3IH67hOsyTFuo5V65TV4vts3hoH+nD+WtF6VQCe3nd14ysf+ycAUXm9iTdL4LWsuTDQqpCrPjoAhjhgaZA5gLlJzn/AfqMlMTKcozLbsdtFaKpMHN3+sSM21WXoS6G5L6hNLj3vHRTdmL59YX6F3UXvEnRs4A17HcM+7wmNANUwa/ha15rndhTr0UrOKgel8IOD5Kl1UHnCRqUlgsLCmF7BVAWkiL8x+xjsRR3NqMssh2zSrfZLBoyKWJVyZPycwYixscE61fvOeLbSXnJ0lmymPPcCT5gyoDst8wUQ1htnIjwXWIEvG8fWgnQSVda7C/sgtReteiwzmqVly5W6jvSOZ6B63Jfe/ml8rwCOGS/RBpPhDwQmYz3B+ocTmt0jRKlcRyF0tyrlzPR0SOgnm234HB5w/BpqNc3QnSfZGSHx0jJbezXrRzXEkHvA+Je0sT4vC1MKENqcOquo7dx5Szuju3bZtoEq7lKDX1vSmUe8QaHFZWk36DCJY0ra9W17FPkPKgIoKUjZ8dgRrQRk4eMuqq5WU6nAAnEtmbzR5ipyu5AWgtJvRt78fCHoBHtWw0qsLV5wbxwxnBa6acd6XgE7eloqcTv7sqnMWBAh0lGVsJNEgF2/Wvp99zFYBM8QOmaucSag=
+    MYSQL_ROOT_PASSWORD: AgAlM355zDk7TN/W7sxV6hEUyS8wADs9JghzMtaecvgc6lENXwJ9IzlZZ/+eK6V8faF7iHOZW0eehR40oLq00yR2PHAj913Jr8pKId5cy+EgY/Lswqm6Kpzdoj4V/+MXrOgqRwHTXiV45x2Hdzza8oYC1rrQGOVopqh2apmOe2Qm6gX+zkgaeFN4Y0RgGTlflEsSXNHCxTrHMqQgsFo6ghWJhpSwsTF4yhiTK4oc9UN+gVILaZKTkNUoAuJHJf2rjdfhWyWT89bGoYt1VZPb1G5edWY5RTNPFDIjsD19LTs9L6QeuRLQQqtul7FqG+WS4zrdjJZ8xNcTwjbFKRo//abNWC/alRdW+rqTaXgxURVsNg0VMIH+rb/hqZf/rw265kK7Ul/GGj/vK8KHdrCSlMxnKo1TUo9zIQLA6Vme+lv07rPysAQr2Uh1+MAiV1yty8aADIUosj5iOFqXxUXrwTW6XeVV7Rxqa17h2IppljH9OCz4J5avFFYpxb1p8qvIpHlxaYqs0Q2yoQKHkawnpN7HwAyq0MyAJAVQrnk4/HubfeDqyzjtf1j4HOq2TNkE2IH4v0wqpyK+zx3Xvo0W8aUlbkybfQnRvEdFhrLYGXX0eOIAf0PAA5Oj48ckQG3JpiDHCIaEzGRH0SYwAoQluXqxBgj42rss4F2s6yJ/fIbgUtX0+QPBLdLpRtoysVLMrvlF5A6V
+    MYSQL_USER: AgA1YvZULVSXqbOi8FyQmiiNjjZQ9dixUiCYoGuBM7ym+Xn8XxVTjK9adF1HviQkmSkaCyEEunHfyRyCzbW4IGdxqZE8/YlbP8RC8rk8jigE8QvvFh/oZURALLI/D85lZEd/jNhQ6IS9qjm0zjeIdvwOw1fu42ucgzJ3Lp+uYyTNwgnra2nYGYz0T4L4KpS6WZOdzGqG2UgvIrQg06PExnROlHnNK+lTN7LgYkm64+XwwsDHUMVE1Z5JN9WUzW0XB9yPvVVe50XiNvwbpPo31nbq12Ji/TiVe8As9yq/GW3fQKQix82UEDpi4UbxfApsufyuFZOwJIjNJZZcjfFfKRMMJ7D8yLhGsfXW3GqDRfgH6UJEaiuwSheG4muyGwl6sQMs/7hVHVvJPJTQAg12jqPZWOwrc5HJl3oBZKdNOnRyiotnpisLUfC/t6Y8ynivHzYn/Jc9p3rL2xIvdlCkW1NkNgHWLsXFXtJ0xCf8A4SMdVjyygIwTyefroMJfhJGxZpTNbCS6FD/rng9sQc1X0mogxPW+ws6a80/dvHwrikaC81trzepLyRx08t6EdxPq6YEXOvHcHMF7AlLTnjMaIxpSHvRe4HFJ9VB/xHJu3iQIkjxe7USo4Jh/UN81GRMsgVo/7cHVl8wjbp07u34ncJiGeJai0IjbhrPZWFQVIASjhZ85V8dHFJ6sHnbqemlxfIyrAQ=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: db-secret
+      namespace: ext-a
+    type: Opaque
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: ingress-gateway-credential
+  namespace: istio-system
+spec:
+  encryptedData:
+    tls.crt: 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
+    tls.key: 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
+  template:
+    metadata:
+      creationTimestamp: null
+      name: ingress-gateway-credential
+      namespace: istio-system
+    type: kubernetes.io/tls
+---
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  name: istiocontrolplane
+  namespace: istio-system
+spec:
+  profile: default
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: ingress-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - lratg.com
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+    tls:
+      httpsRedirect: true
+  - hosts:
+    - lratg.com
+    port:
+      name: https
+      number: 443
+      protocol: HTTPS
+    tls:
+      credentialName: ingress-gateway-credential
+      mode: SIMPLE
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-from-other-namespaces
+  namespace: app-a
+spec:
+  ingress:
+  - from:
+    - podSelector: {}
+  podSelector:
+    matchLabels: null
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: expose-external
+  namespace: app-a
+spec:
+  ingress:
+  - from: []
+  podSelector:
+    matchLabels:
+      app: expose

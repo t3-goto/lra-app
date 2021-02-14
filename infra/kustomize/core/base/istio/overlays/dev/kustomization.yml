@@ -7,7 +7,7 @@ kind: Kustomization
 resources:
 - ../../base
 - ./namespace.yml
-- ./secret.yml
+- ./sealed-secret.yml
 
 namespace: istio-system
 

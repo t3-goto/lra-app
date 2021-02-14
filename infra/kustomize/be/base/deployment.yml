@@ -26,7 +26,7 @@ spec:
     spec:
       containers:
         - name: be-ap
-          image: t3goto/be-ap:0.1
+          image: t3goto/be-ap:latest
           resources:
             requests:
               cpu: 100m
