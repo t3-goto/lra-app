@@ -45,28 +45,25 @@ executors:
       SOURCE_DIR: apl/be
 
   infra_fe_default:
-    working_directory: ~/project/infra
     docker:
     - image: cimg/node:12.20
     environment:
       SYSTEM: fe-web
-      MANIFESTS_DIR: kustomize/fe
+      MANIFESTS_DIR: infra/kustomize/fe
 
   infra_bff_default:
-    working_directory: ~/project/infra
     docker:
     - image: cimg/node:12.20
     environment:
       SYSTEM: bff-ap
-      MANIFESTS_DIR: kustomize/bff
+      MANIFESTS_DIR: infra/kustomize/bff
 
   infra_be_default:
-    working_directory: ~/project/infra
     docker:
     - image: cimg/node:12.20
     environment:
       SYSTEM: be-ap
-      MANIFESTS_DIR: kustomize/be
+      MANIFESTS_DIR: infra/kustomize/be
 
 commands:
   sparse_checkout:
@@ -361,9 +358,7 @@ commands:
     - run:
         name: Kustomize build
         command: |
-          pwd
-          ls
-          cd ./${MANIFESTS_DIR}/overlays/prod
+          cd ${MANIFESTS_DIR}/overlays/prod
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
           kustomize build  . > ../../manifests/prod.yml
           cat ../../manifests/prod.yml
@@ -462,7 +457,7 @@ jobs:
     steps:
     - checkout
     - attach_workspace:
-        at: ./
+        at: /usr/local/bin/
     - kustomize_build
 
 
