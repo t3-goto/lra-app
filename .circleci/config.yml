@@ -18,6 +18,12 @@ parameters:
   run_fe_deploy:
     type: boolean
     default: true
+  run_bff_deploy:
+    type: boolean
+    default: true
+  run_be_deploy:
+    type: boolean
+    default: true
 
 executors:
   apl_fe_default:
@@ -514,6 +520,26 @@ workflows:
     - install_k8s_tools
     - generate_manifest:
         e: infra_fe_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
+  bff_deploy:
+    when: << pipeline.parameters.run_bff_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_bff_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
+  be_deploy:
+    when: << pipeline.parameters.run_be_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_be_default
         requires:
         - install_k8s_tools
         context: DOCKER_HUB
