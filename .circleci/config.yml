@@ -362,7 +362,6 @@ commands:
           curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
           unzip awscliv2.zip
           sudo ./aws/install
-          which aws
           aws --version
 
   set_k8s_tools:
@@ -373,6 +372,7 @@ commands:
         paths:
         - kubectl
         - kustomize
+        - aws
 
   get_k8s_tools:
     description: 'Get k8s tools.'
@@ -386,6 +386,11 @@ commands:
           sudo chmod +x /usr/local/bin/kubectl
           sudo mv kustomize /usr/local/bin
           sudo chmod +x /usr/local/bin/kustomize
+          sudo mv aws /usr/local/bin
+          sudo chmod +x /usr/local/bin/aws
+          kubectl version
+          kustomize version
+          aws --version
 
   k8s_build_and_deploy:
     description: 'Kustomize build.'
