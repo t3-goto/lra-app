@@ -386,11 +386,11 @@ commands:
           sudo chmod +x /usr/local/bin/kubectl
           sudo mv kustomize /usr/local/bin
           sudo chmod +x /usr/local/bin/kustomize
-          sudo mv aws /usr/local/bin
-          sudo chmod +x /usr/local/bin/aws
+          # sudo mv aws /usr/local/bin
+          # sudo chmod +x /usr/local/bin/aws
           kubectl version
           kustomize version
-          aws --version
+          # aws --version
 
   k8s_build_and_deploy:
     description: 'Kustomize build.'
