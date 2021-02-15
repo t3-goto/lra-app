@@ -388,7 +388,7 @@ commands:
           sudo chmod +x /usr/local/bin/kustomize
           # sudo mv aws /usr/local/bin
           # sudo chmod +x /usr/local/bin/aws
-          kubectl version
+          kubectl version --client
           kustomize version
           # aws --version
 
