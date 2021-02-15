@@ -388,8 +388,12 @@ commands:
         command: |
           cd ${MANIFESTS_DIR}/overlays/prod
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
-          kustomize build  . > ../../manifests/prod.yml
-          cat ../../manifests/prod.yml
+          kustomize build  . > ../../manifests/${SYSTEM}.yml
+          cat ../../manifests/${SYSTEM}.yml
+    - persist_to_workspace:
+        root: ${MANIFESTS_DIR}/manifests/
+        paths:
+        - ${SYSTEM}.yml
 
 jobs:
   fe_install_deps:
@@ -514,36 +518,6 @@ workflows:
         - build_image
         context: SLACK_INTEGRATION
 
-  fe_deploy:
-    when: << pipeline.parameters.run_fe_deploy >>
-    jobs:
-    - install_k8s_tools
-    - generate_manifest:
-        e: infra_fe_default
-        requires:
-        - install_k8s_tools
-        context: DOCKER_HUB
-
-  bff_deploy:
-    when: << pipeline.parameters.run_bff_deploy >>
-    jobs:
-    - install_k8s_tools
-    - generate_manifest:
-        e: infra_bff_default
-        requires:
-        - install_k8s_tools
-        context: DOCKER_HUB
-
-  be_deploy:
-    when: << pipeline.parameters.run_be_deploy >>
-    jobs:
-    - install_k8s_tools
-    - generate_manifest:
-        e: infra_be_default
-        requires:
-        - install_k8s_tools
-        context: DOCKER_HUB
-
   bff_build:
     when: << pipeline.parameters.run_bff_build >>
     jobs:
@@ -591,3 +565,34 @@ workflows:
         - build
         - build_image
         context: SLACK_INTEGRATION
+
+  fe_deploy:
+    when: << pipeline.parameters.run_fe_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_fe_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
+  bff_deploy:
+    when: << pipeline.parameters.run_bff_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_bff_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
+  be_deploy:
+    when: << pipeline.parameters.run_be_deploy >>
+    jobs:
+    - install_k8s_tools
+    - generate_manifest:
+        e: infra_be_default
+        requires:
+        - install_k8s_tools
+        context: DOCKER_HUB
+
