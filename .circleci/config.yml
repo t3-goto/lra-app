@@ -353,6 +353,18 @@ commands:
           sudo chmod +x /usr/local/bin/kustomize
           kustomize version
 
+  install_awscli:
+    description: 'Install awscli.'
+    steps:
+    - run:
+        name: Install awscli
+        command: |
+          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+          unzip awscliv2.zip
+          sudo ./aws/install
+          which aws
+          aws --version
+
   set_k8s_tools:
     description: 'Set k8s tools.'
     steps:
@@ -375,7 +387,7 @@ commands:
           sudo mv kustomize /usr/local/bin
           sudo chmod +x /usr/local/bin/kustomize
 
-  kustomize_build:
+  k8s_build_and_deploy:
     description: 'Kustomize build.'
     steps:
     - run:
@@ -388,12 +400,8 @@ commands:
         command: |
           cd ${MANIFESTS_DIR}/overlays/prod
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
-          kustomize build  . > ../../manifests/${SYSTEM}.yml
-          cat ../../manifests/${SYSTEM}.yml
-    - persist_to_workspace:
-        root: ${MANIFESTS_DIR}/manifests/
-        paths:
-        - ${SYSTEM}.yml
+          kustomize build  . > ../../manifests/prod.yml
+          cat ../../manifests/prod.yml
 
 jobs:
   fe_install_deps:
@@ -475,9 +483,10 @@ jobs:
     - apt_get_update
     - install_kubectl
     - install_kustomize
+    - install_awscli
     - set_k8s_tools
 
-  generate_manifest:
+  k8s_build_and_deploy:
     parameters:
       e:
         type: executor
@@ -485,7 +494,7 @@ jobs:
     steps:
     - checkout
     - get_k8s_tools
-    - kustomize_build
+    - k8s_build_and_deploy
 
 workflows:
   main:
@@ -570,7 +579,7 @@ workflows:
     when: << pipeline.parameters.run_fe_deploy >>
     jobs:
     - install_k8s_tools
-    - generate_manifest:
+    - k8s_build_and_deploy:
         e: infra_fe_default
         requires:
         - install_k8s_tools
@@ -580,7 +589,7 @@ workflows:
     when: << pipeline.parameters.run_bff_deploy >>
     jobs:
     - install_k8s_tools
-    - generate_manifest:
+    - k8s_build_and_deploy:
         e: infra_bff_default
         requires:
         - install_k8s_tools
@@ -590,7 +599,7 @@ workflows:
     when: << pipeline.parameters.run_be_deploy >>
     jobs:
     - install_k8s_tools
-    - generate_manifest:
+    - k8s_build_and_deploy:
         e: infra_be_default
         requires:
         - install_k8s_tools
