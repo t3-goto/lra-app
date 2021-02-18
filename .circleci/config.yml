@@ -364,6 +364,7 @@ commands:
           aws --version
           aws eks update-kubeconfig --name ${AWS_EKS_CLUSTER_NAME}
           kubectl config get-contexts
+          kubectl get all -A
 
 jobs:
   fe_install_deps:
