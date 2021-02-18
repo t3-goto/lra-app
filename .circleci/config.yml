@@ -358,12 +358,13 @@ commands:
         name: Setup
         command: |
           # Set BASH_ENV
-          cat ${MANIFESTS_DIR}/manifests/prod.yml
+          # cat ${MANIFESTS_DIR}/manifests/prod.yml
           kubectl version --client
           kustomize version
           aws --version
-          aws eks update-kubeconfig --name ${CLUSTER_NAME}
-          kubectl config get-contexts
+          aws configure
+          # aws eks update-kubeconfig --name ${CLUSTER_NAME}
+          # kubectl config get-contexts
 
 jobs:
   fe_install_deps:
