@@ -362,9 +362,8 @@ commands:
           kubectl version --client
           kustomize version
           aws --version
-          aws configure
-          # aws eks update-kubeconfig --name ${CLUSTER_NAME}
-          # kubectl config get-contexts
+          aws eks update-kubeconfig --name ${AWS_EKS_CLUSTER_NAME}
+          kubectl config get-contexts
 
 jobs:
   fe_install_deps:
