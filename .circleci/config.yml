@@ -362,6 +362,8 @@ commands:
           kubectl version --client
           kustomize version
           aws --version
+          aws eks update-kubeconfig --name ${CLUSTER_NAME}
+          kubectl config get-contexts
 
 jobs:
   fe_install_deps:
@@ -540,6 +542,7 @@ workflows:
         context: DOCKER_HUB
     - k8s_deploy_prod:
         e: infra_fe_default
+        context: EKS
         requires:
         - k8s_build_prod
 
