@@ -326,79 +326,7 @@ commands:
           cat trigger.json
           curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
-  # apt_get_update:
-  #   description: 'apt-get update and install wget.'
-  #   steps:
-  #   - run:
-  #       name: apt-get update
-  #       command: sudo apt-get update
-  #   - run:
-  #       name: apt-get install
-  #       command: sudo apt-get install -y wget
-
-  # install_kubectl:
-  #   description: 'Install kubectl.'
-  #   steps:
-  #   - run:
-  #       name: Install kubectl
-  #       command: |
-  #         curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl
-  #         sudo mv kubectl /usr/local/bin
-  #         sudo chmod +x /usr/local/bin/kubectl
-  #         kubectl version --client
-
-  # install_kustomize:
-  #   description: 'Install kustomize.'
-  #   steps:
-  #   - run:
-  #       name: Install kustomize
-  #       command: |
-  #         wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.9.2/kustomize_v3.9.2_linux_amd64.tar.gz
-  #         tar xvzf kustomize_v3.9.2_linux_amd64.tar.gz
-  #         sudo mv kustomize /usr/local/bin
-  #         sudo chmod +x /usr/local/bin/kustomize
-  #         kustomize version
-
-  # install_awscli:
-  #   description: 'Install awscli.'
-  #   steps:
-  #   - run:
-  #       name: Install awscli
-  #       command: |
-  #         curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-  #         unzip awscliv2.zip
-  #         sudo ./aws/install
-  #         aws --version
-
-  # set_k8s_tools:
-  #   description: 'Set k8s tools.'
-  #   steps:
-  #   - persist_to_workspace:
-  #       root: /usr/local/bin/
-  #       paths:
-  #       - kubectl
-  #       - kustomize
-  #       - aws
-
-  # get_k8s_tools:
-  #   description: 'Get k8s tools.'
-  #   steps:
-  #   - attach_workspace:
-  #       at: ./
-  #   - run:
-  #       name: Move k8s tools.
-  #       command: |
-  #         sudo mv kubectl /usr/local/bin
-  #         sudo chmod +x /usr/local/bin/kubectl
-  #         sudo mv kustomize /usr/local/bin
-  #         sudo chmod +x /usr/local/bin/kustomize
-  #         sudo mv aws /usr/local/bin
-  #         sudo chmod +x /usr/local/bin/aws
-  #         kubectl version --client
-  #         kustomize version
-  #         aws --version
-
-  k8s_build_and_deploy:
+  k8s_build_prod:
     description: 'Kustomize build.'
     steps:
     - run:
@@ -416,6 +344,24 @@ commands:
           kustomize edit set image ${REGISTORY_URL}:${CIRCLE_SHA1}
           kustomize build  . > ../../manifests/prod.yml
           cat ../../manifests/prod.yml
+    - persist_to_workspace:
+        root: ./
+        paths:
+        - infra/kustomize
+
+  k8s_deploy_prod:
+    description: 'Kustomize deploy'
+    steps:
+    - attach_workspace:
+        at: ./
+    - run:
+        name: Setup
+        command: |
+          # Set BASH_ENV
+          cat ${MANIFESTS_DIR}/manifests/prod.yml
+          kubectl version --client
+          kustomize version
+          aws --version
 
 jobs:
   fe_install_deps:
@@ -490,25 +436,22 @@ jobs:
     steps:
     - trigger_build_workflow
 
-  # install_k8s_tools:
-  #   docker:
-  #   - image: cimg/node:12.20
-  #   steps:
-  #   - apt_get_update
-  #   - install_kubectl
-  #   - install_kustomize
-  #   - install_awscli
-  #   - set_k8s_tools
-
-  k8s_build_and_deploy:
+  k8s_build_prod:
     parameters:
       e:
         type: executor
     executor: << parameters.e >>
     steps:
     - checkout
-    # - get_k8s_tools
-    - k8s_build_and_deploy
+    - k8s_build_prod
+
+  k8s_deploy_prod:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - k8s_deploy_prod
 
 workflows:
   main:
@@ -592,18 +535,19 @@ workflows:
   fe_deploy:
     when: << pipeline.parameters.run_fe_deploy >>
     jobs:
-    # - install_k8s_tools
-    - k8s_build_and_deploy:
+    - k8s_build_prod:
         e: infra_fe_default
-        # requires:
-        # - install_k8s_tools
         context: DOCKER_HUB
+    - k8s_deploy_prod:
+        e: infra_fe_default
+        requires:
+        - k8s_build_prod
 
   # bff_deploy:
   #   when: << pipeline.parameters.run_bff_deploy >>
   #   jobs:
   #   - install_k8s_tools
-  #   - k8s_build_and_deploy:
+  #   - k8s_build_prod_and_deploy:
   #       e: infra_bff_default
   #       requires:
   #       - install_k8s_tools
@@ -613,7 +557,7 @@ workflows:
   #   when: << pipeline.parameters.run_be_deploy >>
   #   jobs:
   #   - install_k8s_tools
-  #   - k8s_build_and_deploy:
+  #   - k8s_build_prod_and_deploy:
   #       e: infra_be_default
   #       requires:
   #       - install_k8s_tools
