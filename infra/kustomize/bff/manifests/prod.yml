@@ -103,8 +103,8 @@ spec:
             cpu: 150m
             memory: 150Mi
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 10m
+            memory: 10Mi
         startupProbe:
           failureThreshold: 100
           httpGet:
