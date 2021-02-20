@@ -1,27 +1,35 @@
-import { Controller, Get } from '@nestjs/common';
-import { HealthCheckService, HealthCheck } from '@nestjs/terminus';
-import { CustomHealthIndicator } from './CustomHealthIndicator';
+import { Controller } from '@nestjs/common';
+import { GrpcMethod } from '@nestjs/microservices';
+import { Metadata, ServerUnaryCall } from 'grpc';
+import { HealthCheckRequest, HealthCheckResponse } from './interfaces';
 
-@Controller('health')
+@Controller()
 export class HealthController {
-  constructor(
-    private health: HealthCheckService,
-    private customHealthIndicator: CustomHealthIndicator
-  ) {}
-
-  @Get('liveness')
-  @HealthCheck()
-  liveness() {
-    return this.health.check([
-      () => this.customHealthIndicator.isHealthy('healt check'),
-    ]);
+  /**
+   * gRPC: Health.Check
+   */
+  @GrpcMethod('Health', 'Check')
+  public async healthCheck(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<HealthCheckResponse> {
+    return HealthCheckResponse.create({
+      status: HealthCheckResponse.ServingStatus.SERVING,
+    });
   }
 
-  @Get('readiness')
-  @HealthCheck()
-  readiness() {
-    return this.health.check([
-      () => this.customHealthIndicator.isHealthy('healt check'),
-    ]);
+  /**
+   * gRPC: Health.Watch
+   */
+  @GrpcMethod('Health', 'Watch')
+  public async healthWatch(
+    request: HealthCheckRequest,
+    metadata: Metadata,
+    call: ServerUnaryCall<any>
+  ): Promise<HealthCheckResponse> {
+    return HealthCheckResponse.create({
+      status: HealthCheckResponse.ServingStatus.SERVING,
+    });
   }
 }

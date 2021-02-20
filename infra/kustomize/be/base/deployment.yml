@@ -43,8 +43,8 @@ spec:
           ports:
             - containerPort: 9011
           readinessProbe:
-            tcpSocket:
-              port: 9011
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:9011"]
             initialDelaySeconds: 0
             periodSeconds: 15
             timeoutSeconds: 1
@@ -59,8 +59,8 @@ spec:
             successThreshold: 1
             failureThreshold: 10
           startupProbe:
-            tcpSocket:
-              port: 9011
+            exec:
+              command: ["/bin/grpc_health_probe", "-addr=:9011"]
             initialDelaySeconds: 0
             periodSeconds: 3
             timeoutSeconds: 1

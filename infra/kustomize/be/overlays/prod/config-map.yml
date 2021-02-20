@@ -8,10 +8,10 @@ metadata:
   namespace: dummy
 data:
   NODE_ENV: production
-  GRPC_SV_PAKAGE: rpc
+  GRPC_SV_PAKAGES: rpc,grpc.health.v1
   GRPC_SV_HOST: "0.0.0.0"
   GRPC_SV_PORT: "9011"
-  GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto
+  GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto,health.proto
   GRPC_CL_GEOCODING_PAKAGE: rpc
   GRPC_CL_GEOCODING_HOST: be-ap-svc.app-a.svc.cluster.local
   GRPC_CL_GEOCODING_PORT: "9011"

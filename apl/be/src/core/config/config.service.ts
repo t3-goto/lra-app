@@ -148,11 +148,12 @@ export class ConfigService {
   get grpcServerOptions(): GrpcOptions {
     const protoDir = path.join(__dirname, '../../..', 'protos');
     const protoPath = this.getArray('GRPC_SV_PROTOS');
+    const packages = this.getArray('GRPC_SV_PAKAGES');
     const url = `${this.get('GRPC_SV_HOST')}:${this.get('GRPC_SV_PORT')}`;
     return {
       transport: Transport.GRPC,
       options: {
-        package: this.get('GRPC_SV_PAKAGE'),
+        package: packages,
         protoPath,
         url,
         loader: {
