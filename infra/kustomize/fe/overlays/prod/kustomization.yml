@@ -12,7 +12,7 @@ namespace: app-a
 
 replicas:
 - name: fe-web
-  count: 2
+  count: 1
 
 patchesJson6902:
 - target:

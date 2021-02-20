@@ -17,13 +17,13 @@ parameters:
     default: false
   run_fe_deploy:
     type: boolean
-    default: true
+    default: false
   run_bff_deploy:
     type: boolean
-    default: true
+    default: false
   run_be_deploy:
     type: boolean
-    default: true
+    default: false
 
 executors:
   apl_fe_default:
@@ -51,8 +51,6 @@ executors:
       SOURCE_DIR: apl/be
 
   infra_fe_default:
-    # docker:
-    # - image: cimg/node:12.20
     docker:
     - image: t3goto/eks-deployer:1.0
     environment:
@@ -60,8 +58,6 @@ executors:
       MANIFESTS_DIR: infra/kustomize/fe
 
   infra_bff_default:
-    # docker:
-    # - image: cimg/node:12.20
     docker:
     - image: t3goto/eks-deployer:1.0
     environment:
@@ -69,8 +65,6 @@ executors:
       MANIFESTS_DIR: infra/kustomize/bff
 
   infra_be_default:
-    # docker:
-    # - image: cimg/node:12.20
     docker:
     - image: t3goto/eks-deployer:1.0
     environment:
@@ -310,7 +304,7 @@ commands:
             echo "export BUILD_BE=false" >> $BASH_ENV
           fi
     - run:
-        name: Trigger workflow
+        name: Trigger build workflow
         command: |
           printf '
             {
@@ -369,6 +363,51 @@ commands:
         name: k8s deploy
         command:
           kubectl apply -f ${MANIFESTS_DIR}/manifests/prod.yml
+
+  trigger_deploy_workflow:
+    description: 'Trigger deploy workflow'
+    steps:
+    - run:
+        name: Check System
+        command: |
+          echo ${SYSTEM}
+          if [ ${SYSTEM} = "fe-web" ]; then
+            echo "deploy fe-web"
+            echo "export DEPLOY_FE=true" >> $BASH_ENV
+          else
+            echo "not depoy fe-web"
+            echo "export DEPLOY_FE=false" >> $BASH_ENV
+          fi
+          if [ ${SYSTEM} = "bff-ap" ]; then
+            echo "deploy bff-ap"
+            echo "export DEPLOY_BFF=true" >> $BASH_ENV
+          else
+            echo "not depoy bff-ap"
+            echo "export DEPLOY_BFF=false" >> $BASH_ENV
+          fi
+          if [ ${SYSTEM} = "be-ap" ]; then
+            echo "deploy be-ap"
+            echo "export DEPLOY_BE=true" >> $BASH_ENV
+          else
+            echo "not depoy be-ap"
+            echo "export DEPLOY_BE=false" >> $BASH_ENV
+          fi
+    - run:
+        name: Trigger deploy workflow
+        command: |
+          printf '
+            {
+              "branch": "%s",
+              "parameters": {
+                "run_main": false,
+                "run_fe_deploy": %s,
+                "run_bff_deploy": %s,
+                "run_be_deploy": %s
+              }
+            }
+          ' ${CIRCLE_BRANCH} ${DEPLOY_FE} ${DEPLOY_BFF} ${DEPLOY_BE} | jq > trigger.json
+          cat trigger.json
+          curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
 jobs:
   fe_install_deps:
@@ -484,12 +523,19 @@ workflows:
         requires:
         - fe_install_deps
         context: DOCKER_HUB
-    - notify:
+    - trigger_deploy_workflow:
+        e: apl_fe_default
         requires:
         - lint
         - build
         - build_image
-        context: SLACK_INTEGRATION
+        context: CIRCLE
+    # - notify:
+    #     requires:
+    #     - lint
+    #     - build
+    #     - build_image
+    #     context: SLACK_INTEGRATION
 
   bff_build:
     when: << pipeline.parameters.run_bff_build >>
@@ -508,12 +554,12 @@ workflows:
         requires:
         - bff_install_deps
         context: DOCKER_HUB
-    - notify:
-        requires:
-        - lint
-        - build
-        - build_image
-        context: SLACK_INTEGRATION
+    # - notify:
+    #     requires:
+    #     - lint
+    #     - build
+    #     - build_image
+    #     context: SLACK_INTEGRATION
 
   be_build:
     when: << pipeline.parameters.run_be_build >>
@@ -532,12 +578,12 @@ workflows:
         requires:
         - be_install_deps
         context: DOCKER_HUB
-    - notify:
-        requires:
-        - lint
-        - build
-        - build_image
-        context: SLACK_INTEGRATION
+    # - notify:
+    #     requires:
+    #     - lint
+    #     - build
+    #     - build_image
+    #     context: SLACK_INTEGRATION
 
   fe_deploy:
     when: << pipeline.parameters.run_fe_deploy >>
