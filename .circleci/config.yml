@@ -550,6 +550,10 @@ workflows:
         requires:
         - fe_install_deps
         context: DOCKER_HUB
+        filters:
+          branches:
+            only:
+            - develop
     - trigger_deploy_workflow:
         e: apl_fe_default
         requires:
@@ -557,6 +561,10 @@ workflows:
         - build
         - build_image
         context: CIRCLE
+        filters:
+          branches:
+            only:
+            - develop
 
   # Workflow: build (bff-ap)
   bff_build:
@@ -576,6 +584,10 @@ workflows:
         requires:
         - bff_install_deps
         context: DOCKER_HUB
+        filters:
+          branches:
+            only:
+            - develop
     - trigger_deploy_workflow:
         e: apl_bff_default
         requires:
@@ -583,6 +595,10 @@ workflows:
         - build
         - build_image
         context: CIRCLE
+        filters:
+          branches:
+            only:
+            - develop
 
   # Workflow: build (be-ap)
   be_build:
@@ -602,6 +618,10 @@ workflows:
         requires:
         - be_install_deps
         context: DOCKER_HUB
+        filters:
+          branches:
+            only:
+            - develop
     - trigger_deploy_workflow:
         e: apl_be_default
         requires:
@@ -609,6 +629,10 @@ workflows:
         - build
         - build_image
         context: CIRCLE
+        filters:
+          branches:
+            only:
+            - develop
 
   # Workflow: deploy (fe-web)
   fe_deploy:
