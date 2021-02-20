@@ -2,6 +2,9 @@ version: 2.1
 orbs:
   slack: circleci/slack@4.2.1
 
+#################################
+# Parameters
+#################################
 parameters:
   run_main:
     type: boolean
@@ -25,6 +28,9 @@ parameters:
     type: boolean
     default: false
 
+#################################
+# Executors
+#################################
 executors:
   apl_fe_default:
     working_directory: ~/project/apl/fe
@@ -71,6 +77,9 @@ executors:
       SYSTEM: be-ap
       MANIFESTS_DIR: infra/kustomize/be
 
+#################################
+# Commands
+#################################
 commands:
   sparse_checkout:
     description: 'Sparse checkout for sub directories.'
@@ -261,6 +270,7 @@ commands:
         name: Docker build
         command: |
           # Build main
+          echo "IMAGE_INFO: ${REGISTORY_URL}:${CIRCLE_SHA1}"
           docker build -t ${REGISTORY_URL}:${CIRCLE_SHA1} --cache-from=${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile
           # Build build-env in parallel
           docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
@@ -269,6 +279,7 @@ commands:
         name: Docker push
         command: |
           # Push all in parallel
+          echo "IMAGE_INFO: ${REGISTORY_URL}:${CIRCLE_SHA1}"
           docker push ${REGISTORY_URL}:${CIRCLE_SHA1} &
           docker push ${REGISTORY_URL}:build-env &
           wait
@@ -409,6 +420,9 @@ commands:
           cat trigger.json
           curl -u ${CIRCLE_TOKEN}: -X POST --header "Content-Type: application/json" -d @trigger.json https://circleci.com/api/v2/project/<< pipeline.project.type >>/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/pipeline
 
+#################################
+# Jobs
+#################################
 jobs:
   fe_install_deps:
     executor:
@@ -507,13 +521,18 @@ jobs:
     steps:
     - trigger_deploy_workflow
 
+#################################
+# Workflows
+#################################
 workflows:
+  # Workflow: main
   main:
     when: << pipeline.parameters.run_main >>
     jobs:
     - trigger_build_workflow:
         context: CIRCLE
 
+  # Workflow: build (fe-web)
   fe_build:
     when: << pipeline.parameters.run_fe_build >>
     jobs:
@@ -538,13 +557,8 @@ workflows:
         - build
         - build_image
         context: CIRCLE
-    # - notify:
-    #     requires:
-    #     - lint
-    #     - build
-    #     - build_image
-    #     context: SLACK_INTEGRATION
 
+  # Workflow: build (bff-ap)
   bff_build:
     when: << pipeline.parameters.run_bff_build >>
     jobs:
@@ -562,13 +576,15 @@ workflows:
         requires:
         - bff_install_deps
         context: DOCKER_HUB
-    # - notify:
-    #     requires:
-    #     - lint
-    #     - build
-    #     - build_image
-    #     context: SLACK_INTEGRATION
+    - trigger_deploy_workflow:
+        e: apl_bff_default
+        requires:
+        - lint
+        - build
+        - build_image
+        context: CIRCLE
 
+  # Workflow: build (be-ap)
   be_build:
     when: << pipeline.parameters.run_be_build >>
     jobs:
@@ -586,13 +602,15 @@ workflows:
         requires:
         - be_install_deps
         context: DOCKER_HUB
-    # - notify:
-    #     requires:
-    #     - lint
-    #     - build
-    #     - build_image
-    #     context: SLACK_INTEGRATION
+    - trigger_deploy_workflow:
+        e: apl_be_default
+        requires:
+        - lint
+        - build
+        - build_image
+        context: CIRCLE
 
+  # Workflow: deploy (fe-web)
   fe_deploy:
     when: << pipeline.parameters.run_fe_deploy >>
     jobs:
@@ -604,24 +622,42 @@ workflows:
         context: EKS
         requires:
         - k8s_build_prod
+    - notify:
+        requires:
+        - k8s_deploy_prod
+        context: SLACK_INTEGRATION
 
-  # bff_deploy:
-  #   when: << pipeline.parameters.run_bff_deploy >>
-  #   jobs:
-  #   - install_k8s_tools
-  #   - k8s_build_prod_and_deploy:
-  #       e: infra_bff_default
-  #       requires:
-  #       - install_k8s_tools
-  #       context: DOCKER_HUB
+  # Workflow: deploy (bff-ap)
+  bff_deploy:
+    when: << pipeline.parameters.run_bff_deploy >>
+    jobs:
+    - k8s_build_prod:
+        e: infra_bff_default
+        context: DOCKER_HUB
+    - k8s_deploy_prod:
+        e: infra_bff_default
+        context: EKS
+        requires:
+        - k8s_build_prod
+    - notify:
+        requires:
+        - k8s_deploy_prod
+        context: SLACK_INTEGRATION
 
-  # be_deploy:
-  #   when: << pipeline.parameters.run_be_deploy >>
-  #   jobs:
-  #   - install_k8s_tools
-  #   - k8s_build_prod_and_deploy:
-  #       e: infra_be_default
-  #       requires:
-  #       - install_k8s_tools
-  #       context: DOCKER_HUB
+  # Workflow: deploy (be-ap)
+  be_deploy:
+    when: << pipeline.parameters.run_be_deploy >>
+    jobs:
+    - k8s_build_prod:
+        e: infra_be_default
+        context: DOCKER_HUB
+    - k8s_deploy_prod:
+        e: infra_be_default
+        context: EKS
+        requires:
+        - k8s_build_prod
+    - notify:
+        requires:
+        - k8s_deploy_prod
+        context: SLACK_INTEGRATION
 
