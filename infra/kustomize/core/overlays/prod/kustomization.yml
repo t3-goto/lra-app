@@ -8,6 +8,6 @@ resources:
 - ../../base/app/overlays/prod
 - ../../base/ext/overlays/prod
 - ../../base/istio/overlays/prod
-- ../../base/sys/overlays/prod
+# - ../../base/sys/overlays/prod
 - ../../base/vendor/overlays/prod
 
