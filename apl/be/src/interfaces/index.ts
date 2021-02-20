@@ -18,3 +18,5 @@ export * from './get-user-by-username-response';
 export * from './delete-user-request';
 export * from './delete-user-response';
 export * from './user';
+export * from './health-check-request';
+export * from './health-check-response';
