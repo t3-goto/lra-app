@@ -499,6 +499,14 @@ jobs:
     steps:
     - k8s_deploy_prod
 
+  trigger_deploy_workflow:
+    parameters:
+      e:
+        type: executor
+    executor: << parameters.e >>
+    steps:
+    - trigger_deploy_workflow
+
 workflows:
   main:
     when: << pipeline.parameters.run_main >>
