@@ -1,3 +1,6 @@
+#################################
+# CircleCI (CICD)
+#################################
 version: 2.1
 orbs:
   slack: circleci/slack@4.2.1
@@ -96,74 +99,6 @@ commands:
           git remote add origin https://github.com/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}.git
           echo ${SOURCE_DIR} >.git/info/sparse-checkout
           git pull origin ${CIRCLE_BRANCH}
-
-  # install_deps:
-  #   description: 'Install dependencies.'
-  #   parameters:
-  #     system:
-  #       type: enum
-  #       enum: ["fe-web", "be-ffp", "be-ap"]
-  #   steps:
-  #   - when:
-  #       condition:
-  #         equal: [<< parameter.system >>, "fe-web"]
-  #       steps:
-  #       - restore_cache:
-  #           keys:
-  #           - v1-dependencies-fe-web-{{ .Branch }}-{{ checksum "yarn.lock"}}
-  #           - v1-dependencies-fe-web-{{ .Branch }}
-  #           - v1-dependencies-fe-web-
-  #       - run:
-  #           name: Yarn install
-  #           command: yarn install
-  #       - save_cache:
-  #           paths:
-  #           - node_modules
-  #           key: v1-dependencies-fe-web-{{ checksum "yarn.lock"}}
-  #       - persist_to_workspace:
-  #           root: ./
-  #           paths:
-  #           - node_modules/*
-  #   - when:
-  #       condition:
-  #         equal: [<< parameter.system >>, "bff-ap"]
-  #       steps:
-  #       - restore_cache:
-  #           keys:
-  #           - v1-dependencies-bff-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
-  #           - v1-dependencies-bff-ap-{{ .Branch }}
-  #           - v1-dependencies-bff-ap-
-  #       - run:
-  #           name: Yarn install
-  #           command: yarn install
-  #       - save_cache:
-  #           paths:
-  #           - node_modules
-  #           key: v1-dependencies-bff-ap-{{ checksum "yarn.lock"}}
-  #       - persist_to_workspace:
-  #           root: ./
-  #           paths:
-  #           - node_modules/*
-  #   - when:
-  #       condition:
-  #         equal: [<< parameter.system >>, "be-ap"]
-  #       steps:
-  #       - restore_cache:
-  #           keys:
-  #           - v1-dependencies-be-ap-{{ .Branch }}-{{ checksum "yarn.lock"}}
-  #           - v1-dependencies-be-ap-{{ .Branch }}
-  #           - v1-dependencies-be-ap-
-  #       - run:
-  #           name: Yarn install
-  #           command: yarn install
-  #       - save_cache:
-  #           paths:
-  #           - node_modules
-  #           key: v1-dependencies-be-ap-{{ checksum "yarn.lock"}}
-  #       - persist_to_workspace:
-  #           root: ./
-  #           paths:
-  #           - node_modules/*
 
   fe_install_deps:
     description: 'Install dependencies for fe-web.'
@@ -430,8 +365,6 @@ jobs:
     steps:
     - sparse_checkout
     - fe_install_deps
-    # - install_deps:
-    #     system: "fe-web"
 
   bff_install_deps:
     executor:
@@ -439,8 +372,6 @@ jobs:
     steps:
     - sparse_checkout
     - bff_install_deps
-    # - install_deps:
-    #     system: "bff-ap"
 
   be_install_deps:
     executor:
@@ -448,8 +379,6 @@ jobs:
     steps:
     - sparse_checkout
     - be_install_deps
-    # - install_deps:
-    #     system: "be-ap"
 
   lint:
     parameters:
