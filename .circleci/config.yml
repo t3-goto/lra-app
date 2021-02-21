@@ -210,12 +210,14 @@ commands:
           # Build build-env in parallel
           docker build -t ${REGISTORY_URL}:build-env --target build-env --cache-from ${REGISTORY_URL}:build-env --build-arg BUILDKIT_INLINE_CACHE=1  . -f ./docker/Dockerfile &
           wait
+          docker tag ${REGISTORY_URL}:${CIRCLE_SHA1} ${REGISTORY_URL}:latest
     - run:
         name: Docker push
         command: |
           # Push all in parallel
           echo "IMAGE_INFO: ${REGISTORY_URL}:${CIRCLE_SHA1}"
           docker push ${REGISTORY_URL}:${CIRCLE_SHA1} &
+          docker push ${REGISTORY_URL}:latest &
           docker push ${REGISTORY_URL}:build-env &
           wait
 

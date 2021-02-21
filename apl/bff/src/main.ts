@@ -80,6 +80,6 @@ async function bootstrap() {
   const logger = app.get(DefaultLogger);
   logger.setType('BOOT');
   await app.listen(configService.getNumber('HTTP_SV_PORT'));
-  logger.info('Http sever is getting started.');
+  logger.info('Http sever is running.');
 }
 bootstrap();
