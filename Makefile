@@ -1,5 +1,5 @@
 up-local:
-	cd ./infra/local/docker && docker-compose up -d db-server cache-server
+	cd ./infra/local/docker && docker-compose up -d db cache
 
 down-local:
 	cd ./infra/local/docker && docker-compose down

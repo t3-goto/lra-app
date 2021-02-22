@@ -111,7 +111,7 @@ data:
     }
   config.json: |
     {
-      "BFF_BASE_URL": "https://lratg.com/api/v1"
+      "BFF_BASE_URL": "https://www.lratg-dev.com/api/v1"
     }
 ---
 #################################

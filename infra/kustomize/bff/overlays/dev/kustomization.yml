@@ -24,7 +24,7 @@ patchesJson6902:
   patch: |-
     - op: replace
       path: /spec/hosts/0
-      value: "lratg.com"
+      value: "www.lratg-dev.com"
     - op: replace
       path: /spec/http/0/route/0/destination/host
       value: "bff-ap-svc.app-a.svc.cluster.local"

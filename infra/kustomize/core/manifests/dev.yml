@@ -398,11 +398,11 @@ metadata:
 spec:
   limits:
   - default:
-      cpu: 200m
-      memory: 200Mi
+      cpu: 150m
+      memory: 150Mi
     defaultRequest:
-      cpu: 100m
-      memory: 100Mi
+      cpu: 10m
+      memory: 10Mi
     type: Container
 ---
 apiVersion: v1
@@ -446,8 +446,8 @@ spec:
             cpu: 100m
             memory: 100Mi
           requests:
-            cpu: 100m
-            memory: 100Mi
+            cpu: 10m
+            memory: 10Mi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -768,7 +768,7 @@ spec:
     istio: ingressgateway
   servers:
   - hosts:
-    - lratg.com
+    - www.lratg-dev.com
     port:
       name: http
       number: 80
@@ -776,7 +776,7 @@ spec:
     tls:
       httpsRedirect: true
   - hosts:
-    - lratg.com
+    - www.lratg-dev.com
     port:
       name: https
       number: 443
