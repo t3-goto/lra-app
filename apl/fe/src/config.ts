@@ -1,3 +1,12 @@
+export type Config = {
+  BFF_BASE_URL: string;
+  [prop: string]: any;
+};
+
+export const config: Config = {
+  BFF_BASE_URL: '',
+};
+
 const wrap = <T>(task: Promise<Response>): Promise<T> => {
   return new Promise((resolve, reject) => {
     task
@@ -26,15 +35,6 @@ const fetcher = <T = any>(
   init?: RequestInit
 ): Promise<T> => {
   return wrap<T>(fetch(input, init));
-};
-
-export type Config = {
-  BFF_BASE_URL: string;
-  [prop: string]: any;
-};
-
-export const config: Config = {
-  BFF_BASE_URL: '',
 };
 
 export const load = () => {
