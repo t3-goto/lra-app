@@ -279,7 +279,20 @@ spec:
           service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:ap-northeast-1:787350286285:certificate/979b41a4-88f4-4d51-944c-42d453a88fcf
           service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 443,15443
       name: istio-ingressgateway
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
   profile: default
+  values:
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
