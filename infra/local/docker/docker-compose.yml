@@ -1,6 +1,26 @@
 version: '3'
 
 services:
+    db:
+        image: mysql:5
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: lradb
+            MYSQL_USER: lra
+            MYSQL_PASSWORD: lra
+            TZ: Asia/Tokyo
+        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+        volumes:
+            - ../db/data:/var/lib/mysql
+            - ../db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+            - ../db/sql:/docker-entrypoint-initdb.d
+        ports:
+            - "3306:3306"
+    cache:
+        image: "redis:latest"
+        ports:
+            - "6379:6379"
     # fe-web:
     #     build:
     #         dockerfile: ./docker/Dockerfile
@@ -96,23 +116,3 @@ services:
     #         JWT_SECRET: ${JWT_SECRET}
     #         ACCESS_KEY_GNAVI: ${ACCESS_KEY_GNAVI}
     #         ACCESS_KEY_GOOGLE: ${ACCESS_KEY_GOOGLE}
-    db:
-        image: mysql:5
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: lradb
-            MYSQL_USER: lra
-            MYSQL_PASSWORD: lra
-            TZ: Asia/Tokyo
-        command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
-        volumes:
-            - ../db/data:/var/lib/mysql
-            - ../db/conf/my.cnf:/etc/mysql/conf.d/my.cnf
-            - ../db/sql:/docker-entrypoint-initdb.d
-        ports:
-            - "3306:3306"
-    cache:
-        image: "redis:latest"
-        ports:
-            - "6379:6379"
