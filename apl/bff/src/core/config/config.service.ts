@@ -113,7 +113,8 @@ export class ConfigService {
       migrationsRun: true,
       logging: this.nodeEnv === 'development',
       namingStrategy: new SnakeNamingStrategy(),
-      synchronize: this.nodeEnv === 'development' ? true : false,
+      // synchronize: this.nodeEnv === 'development' ? true : false,
+      synchronize: false,
     };
   }
 
