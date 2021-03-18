@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ext-a
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cache-svc
+  name: cache-svc
+  namespace: ext-a
+spec:
+  ports:
+  - name: cache-port
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: cache
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: ext-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - image: redis:latest
+        imagePullPolicy: IfNotPresent
+        name: cache
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi

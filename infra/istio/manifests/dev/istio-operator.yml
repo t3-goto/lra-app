@@ -1,0 +1,31 @@
+#################################
+# IstioOperator (default)
+#################################
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: istiocontrolplane
+spec:
+  profile: default
+  components:
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+    ingressGateways:
+    - name: istio-ingressgateway
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+  values:
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi

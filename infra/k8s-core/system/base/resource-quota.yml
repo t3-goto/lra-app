@@ -1,0 +1,14 @@
+#################################
+# ResourceQuota (system)
+#################################
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota
+  namespace: dummy
+spec:
+  hard:
+    requests.cpu: "0.5"
+    requests.memory: "1Gi"
+    limits.cpu: "0.5"
+    limits.memory: "1Gi"

@@ -1,0 +1,143 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ext-a
+---
+apiVersion: v1
+data:
+  MYSQL_DATABASE: lradb
+  TZ: Asia/Tokyo
+kind: ConfigMap
+metadata:
+  name: db-config
+  namespace: ext-a
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: cache-svc
+  name: cache-svc
+  namespace: ext-a
+spec:
+  ports:
+  - name: cache-port
+    port: 6379
+    protocol: TCP
+    targetPort: 6379
+  selector:
+    app: cache
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: db-svc
+  name: db-svc
+  namespace: ext-a
+spec:
+  ports:
+  - name: db-port
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: db
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: ext-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - image: redis:latest
+        imagePullPolicy: IfNotPresent
+        name: cache
+        ports:
+        - containerPort: 6379
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: ext-a
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: db-config
+        - secretRef:
+            name: db-secret
+        image: mysql:5
+        imagePullPolicy: IfNotPresent
+        name: db
+        ports:
+        - containerPort: 3306
+        resources:
+          limits:
+            cpu: 150m
+            memory: 300Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: local-db-data-v
+        - mountPath: /docker-entrypoint-initdb.d
+          name: local-db-sql-v
+        - mountPath: /etc/mysql/conf.d/my.cnf
+          name: local-db-conf-v
+      volumes:
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/data
+        name: local-db-data-v
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/sql
+        name: local-db-sql-v
+      - hostPath:
+          path: /run/desktop/mnt/host/c/work/app/lra-pj/lra-app/infra/local/db/conf/my.cnf
+        name: local-db-conf-v
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: db-secret
+  namespace: ext-a
+spec:
+  encryptedData:
+    MYSQL_PASSWORD: AgCWfu9NLG+vU0rBuYNO22aFyWiMzPztsQ43V/6bScwZffatbYMuOg6YMK8rppFj3IH67hOsyTFuo5V65TV4vts3hoH+nD+WtF6VQCe3nd14ysf+ycAUXm9iTdL4LWsuTDQqpCrPjoAhjhgaZA5gLlJzn/AfqMlMTKcozLbsdtFaKpMHN3+sSM21WXoS6G5L6hNLj3vHRTdmL59YX6F3UXvEnRs4A17HcM+7wmNANUwa/ha15rndhTr0UrOKgel8IOD5Kl1UHnCRqUlgsLCmF7BVAWkiL8x+xjsRR3NqMssh2zSrfZLBoyKWJVyZPycwYixscE61fvOeLbSXnJ0lmymPPcCT5gyoDst8wUQ1htnIjwXWIEvG8fWgnQSVda7C/sgtReteiwzmqVly5W6jvSOZ6B63Jfe/ml8rwCOGS/RBpPhDwQmYz3B+ocTmt0jRKlcRyF0tyrlzPR0SOgnm234HB5w/BpqNc3QnSfZGSHx0jJbezXrRzXEkHvA+Je0sT4vC1MKENqcOquo7dx5Szuju3bZtoEq7lKDX1vSmUe8QaHFZWk36DCJY0ra9W17FPkPKgIoKUjZ8dgRrQRk4eMuqq5WU6nAAnEtmbzR5ipyu5AWgtJvRt78fCHoBHtWw0qsLV5wbxwxnBa6acd6XgE7eloqcTv7sqnMWBAh0lGVsJNEgF2/Wvp99zFYBM8QOmaucSag=
+    MYSQL_ROOT_PASSWORD: AgAlM355zDk7TN/W7sxV6hEUyS8wADs9JghzMtaecvgc6lENXwJ9IzlZZ/+eK6V8faF7iHOZW0eehR40oLq00yR2PHAj913Jr8pKId5cy+EgY/Lswqm6Kpzdoj4V/+MXrOgqRwHTXiV45x2Hdzza8oYC1rrQGOVopqh2apmOe2Qm6gX+zkgaeFN4Y0RgGTlflEsSXNHCxTrHMqQgsFo6ghWJhpSwsTF4yhiTK4oc9UN+gVILaZKTkNUoAuJHJf2rjdfhWyWT89bGoYt1VZPb1G5edWY5RTNPFDIjsD19LTs9L6QeuRLQQqtul7FqG+WS4zrdjJZ8xNcTwjbFKRo//abNWC/alRdW+rqTaXgxURVsNg0VMIH+rb/hqZf/rw265kK7Ul/GGj/vK8KHdrCSlMxnKo1TUo9zIQLA6Vme+lv07rPysAQr2Uh1+MAiV1yty8aADIUosj5iOFqXxUXrwTW6XeVV7Rxqa17h2IppljH9OCz4J5avFFYpxb1p8qvIpHlxaYqs0Q2yoQKHkawnpN7HwAyq0MyAJAVQrnk4/HubfeDqyzjtf1j4HOq2TNkE2IH4v0wqpyK+zx3Xvo0W8aUlbkybfQnRvEdFhrLYGXX0eOIAf0PAA5Oj48ckQG3JpiDHCIaEzGRH0SYwAoQluXqxBgj42rss4F2s6yJ/fIbgUtX0+QPBLdLpRtoysVLMrvlF5A6V
+    MYSQL_USER: AgA1YvZULVSXqbOi8FyQmiiNjjZQ9dixUiCYoGuBM7ym+Xn8XxVTjK9adF1HviQkmSkaCyEEunHfyRyCzbW4IGdxqZE8/YlbP8RC8rk8jigE8QvvFh/oZURALLI/D85lZEd/jNhQ6IS9qjm0zjeIdvwOw1fu42ucgzJ3Lp+uYyTNwgnra2nYGYz0T4L4KpS6WZOdzGqG2UgvIrQg06PExnROlHnNK+lTN7LgYkm64+XwwsDHUMVE1Z5JN9WUzW0XB9yPvVVe50XiNvwbpPo31nbq12Ji/TiVe8As9yq/GW3fQKQix82UEDpi4UbxfApsufyuFZOwJIjNJZZcjfFfKRMMJ7D8yLhGsfXW3GqDRfgH6UJEaiuwSheG4muyGwl6sQMs/7hVHVvJPJTQAg12jqPZWOwrc5HJl3oBZKdNOnRyiotnpisLUfC/t6Y8ynivHzYn/Jc9p3rL2xIvdlCkW1NkNgHWLsXFXtJ0xCf8A4SMdVjyygIwTyefroMJfhJGxZpTNbCS6FD/rng9sQc1X0mogxPW+ws6a80/dvHwrikaC81trzepLyRx08t6EdxPq6YEXOvHcHMF7AlLTnjMaIxpSHvRe4HFJ9VB/xHJu3iQIkjxe7USo4Jh/UN81GRMsgVo/7cHVl8wjbp07u34ncJiGeJai0IjbhrPZWFQVIASjhZ85V8dHFJ6sHnbqemlxfIyrAQ=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: db-secret
+      namespace: ext-a
+    type: Opaque

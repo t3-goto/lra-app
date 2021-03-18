@@ -1,0 +1,3 @@
+bucket = "tfstates-lra"
+key    = "master/terraform.tfstate"
+region = "ap-northeast-1"

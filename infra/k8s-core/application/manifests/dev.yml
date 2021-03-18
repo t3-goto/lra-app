@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: app-a
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: app-a
+spec:
+  limits:
+  - default:
+      cpu: 150m
+      memory: 150Mi
+    defaultRequest:
+      cpu: 10m
+      memory: 10Mi
+    type: Container
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-from-other-namespaces
+  namespace: app-a
+spec:
+  ingress:
+  - from:
+    - podSelector: {}
+  podSelector:
+    matchLabels: null
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: expose-external
+  namespace: app-a
+spec:
+  ingress:
+  - from: []
+  podSelector:
+    matchLabels:
+      app: expose

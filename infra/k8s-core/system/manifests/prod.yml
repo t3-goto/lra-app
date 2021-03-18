@@ -1,0 +1,91 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sys-a
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota
+  namespace: sys-a
+spec:
+  hard:
+    limits.cpu: "0.5"
+    limits.memory: 1Gi
+    requests.cpu: "0.5"
+    requests.memory: 1Gi
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: liberator
+  namespace: sys-a
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: nodes
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - list
+  - delete
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: nodes
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: nodes
+subjects:
+- kind: ServiceAccount
+  name: liberator
+  namespace: sys-a
+---
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limits
+  namespace: sys-a
+spec:
+  limits:
+  - default:
+      cpu: 200m
+      memory: 200Mi
+    defaultRequest:
+      cpu: 100m
+      memory: 100Mi
+    type: Container
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: liberator
+  namespace: sys-a
+spec:
+  selector:
+    matchLabels:
+      app: liberator
+  template:
+    metadata:
+      labels:
+        app: liberator
+      name: liberator
+    spec:
+      containers:
+      - image: t3goto/liberator:0.1
+        imagePullPolicy: IfNotPresent
+        name: liberator
+        resources:
+          limits:
+            cpu: 100m
+            memory: 75Mi
+          requests:
+            cpu: 100m
+            memory: 75Mi
+      serviceAccountName: liberator

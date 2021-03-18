@@ -1,0 +1,14 @@
+#################################
+# ResourceQuota (application)
+#################################
+# apiVersion: v1
+# kind: ResourceQuota
+# metadata:
+#   name: quota
+#   namespace: dummy
+# spec:
+#   hard:
+#     requests.cpu: "32"
+#     requests.memory: "64Gi"
+#     limits.cpu: "32"
+#     limits.memory: "64Gi"

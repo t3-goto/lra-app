@@ -7,53 +7,59 @@ down-local:
 seed-local:
 	cd ./infra/local/db/scripts && ./init-mysql.sh
 
-kustomize-build-dev-apl:
-	cd ./infra/kustomize && kustomize build ./fe/overlays/dev > ./fe/manifests/dev.yml && kustomize build ./be/overlays/dev > ./be/manifests/dev.yml && kustomize build ./bff/overlays/dev > ./bff/manifests/dev.yml
+k8s-build-apl-dev:
+	cd ./infra/k8s-apl && ./fe/scripts/build.sh dev && ./be/scripts/build.sh dev && ./bff/scripts/build.sh dev
 
-kustomize-build-prod-apl:
-	cd ./infra/kustomize && kustomize build ./fe/overlays/prod > ./fe/manifests/prod.yml && kustomize build ./be/overlays/prod > ./be/manifests/prod.yml && kustomize build ./bff/overlays/prod > ./bff/manifests/prod.yml
+k8s-build-apl-prod:
+	cd ./infra/k8s-apl && ./fe/scripts/build.sh prod && ./be/scripts/build.sh prod && ./bff/scripts/build.sh prod
 
-kustomize-build-dev-core:
-	cd ./infra/kustomize/core && kustomize build ./overlays/dev > ./manifests/dev.yml
+up-apl-dev:
+	cd ./infra/skaffold && skaffold run -p dev
 
-kustomize-build-prod-core:
-	cd ./infra/kustomize/core && kustomize build ./overlays/prod > ./manifests/prod.yml
+up-apl-prod:
+	cd ./infra/k8s-apl && ./fe/scripts/apply.sh prod && ./be/scripts/apply.sh prod && ./bff/scripts/apply.sh prod
 
-up-dev-core:
-	cd ./infra/kustomize/core && kubectl apply -f ./manifests/dev.yml
+up-apl-dev-watch:
+	cd ./infra/skaffold && skaffold dev -p dev
 
-up-prod-core:
-	cd ./infra/kustomize/core && kubectl apply -f ./manifests/prod.yml
+down-apl-dev:
+	cd ./infra/skaffold && skaffold delete -p dev
 
-down-dev-core:
-	cd ./infra/kustomize/core && kubectl delete -f ./manifests/dev.yml
+down-apl-prod:
+	cd ./infra/k8s-apl && ./fe/scripts/delete.sh prod && ./be/scripts/delete.sh prod && ./bff/scripts/delete.sh prod
 
-down-prod-core:
-	cd ./infra/kustomize/core && kubectl delete -f ./manifests/prod.yml
+build-apl-dev:
+	cd ./infra/skaffold && skaffold build -p dev
 
-up-dev:
-	cd ./cicd && skaffold run -p dev
+up-istio-prod:
+	cd ./infra/istio && ./scripts/setup.sh prod
 
-up-prod:
-	cd ./infra/kustomize && kubectl apply -f ./fe/manifests/prod.yml && kubectl apply -f ./be/manifests/prod.yml && kubectl apply -f ./bff/manifests/prod.yml
+up-istio-dev:
+	cd ./infra/istio && ./scripts/setup.sh dev
 
-up-dev-watch:
-	cd ./cicd && skaffold dev -p dev
+down-istio:
+	cd ./infra/istio && ./scripts/down.sh
 
-down-dev:
-	cd ./cicd && skaffold delete -p dev
+up-sealed-secrets:
+	cd ./infra/sealed-secrets && ./scripts/setup.sh
 
-down-prod:
-	cd ./infra/kustomize && kubectl delete -f ./fe/manifests/prod.yml && kubectl delete -f ./be/manifests/prod.yml && kubectl delete -f ./bff/manifests/prod.yml
+up-metrics-server:
+	cd ./infra/metrics-server && ./scripts/setup.sh
 
-build-dev:
-	cd ./cicd && skaffold build -p dev
+k8s-build-core-dev:
+	cd ./infra/k8s-core && ./application/scripts/build.sh dev && ./externals/scripts/build.sh dev
 
-up-istio-operator:
-	istioctl operator init
+k8s-build-core-prod:
+	cd ./infra/k8s-core && ./application/scripts/build.sh prod && ./externals/scripts/build.sh prod
 
-down-istio-operator:
-	istioctl operator remove
+up-core-dev:
+	cd ./infra/k8s-core && ./application/scripts/apply.sh dev && ./externals/scripts/apply.sh dev
 
-up-sealed-secret:
-	cd ./infra/sealed-secrets && ./scripts/init.sh
+up-core-prod:
+	cd ./infra/k8s-core && ./application/scripts/apply.sh prod && ./externals/scripts/apply.sh prod
+
+down-core-dev:
+	cd ./infra/k8s-core && ./application/scripts/delete.sh dev && ./externals/scripts/delete.sh dev
+
+down-core-prod:
+	cd ./infra/k8s-core && ./application/scripts/delete.sh prod && ./externals/scripts/delete.sh prod

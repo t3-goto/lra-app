@@ -1,0 +1,7 @@
+#################################
+# Namespace (system)
+#################################
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sys-a

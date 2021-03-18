@@ -1,0 +1,166 @@
+apiVersion: v1
+data:
+  DB_DATABASE: lradb
+  DB_HOST: db-svc.ext-a.svc.cluster.local
+  DB_PORT: "3306"
+  DB_TYPE: mysql
+  GRPC_CL_GEOCODING_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_GEOCODING_PAKAGE: rpc
+  GRPC_CL_GEOCODING_PORT: "9011"
+  GRPC_CL_GEOCODING_PROTOS: geocoding.proto
+  GRPC_CL_RESTAURANTS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_RESTAURANTS_PAKAGE: rpc
+  GRPC_CL_RESTAURANTS_PORT: "9011"
+  GRPC_CL_RESTAURANTS_PROTOS: restaurants.proto
+  GRPC_CL_USERS_HOST: be-ap-svc.app-a.svc.cluster.local
+  GRPC_CL_USERS_PAKAGE: rpc
+  GRPC_CL_USERS_PORT: "9011"
+  GRPC_CL_USERS_PROTOS: users.proto
+  GRPC_SV_HOST: 0.0.0.0
+  GRPC_SV_PAKAGES: rpc,grpc.health.v1
+  GRPC_SV_PORT: "9011"
+  GRPC_SV_PROTOS: geocoding.proto,restaurants.proto,users.proto,health.proto
+  HTTP_MAX_REDIRECTS: "5"
+  HTTP_TIMEOUT: "5000"
+  HTTP_URL_GNAVI: https://api.gnavi.co.jp/RestSearchAPI/v3/
+  HTTP_URL_GOOGLE_GEOCODING: https://maps.googleapis.com/maps/api/geocode/json
+  JWT_EXPIRES_IN: "3600"
+  NODE_ENV: production
+  REDIS_HOST: cache-svc.ext-a.svc.cluster.local
+  REDIS_PORT: "6379"
+  REDIS_TTL: "1000"
+kind: ConfigMap
+metadata:
+  name: be-ap-config
+  namespace: app-a
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: be-ap-svc
+  name: be-ap-svc
+  namespace: app-a
+spec:
+  ports:
+  - name: be-ap-port
+    port: 9011
+    protocol: TCP
+    targetPort: 9011
+  selector:
+    app: be-ap
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: be-ap
+  namespace: app-a
+spec:
+  minReadySeconds: 0
+  progressDeadlineSeconds: 600
+  replicas: 1
+  selector:
+    matchLabels:
+      app: be-ap
+  strategy:
+    rollingUpdate:
+      maxSurge: 50%
+      maxUnavailable: 50%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: be-ap
+      name: be-ap
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: be-ap-config
+        - secretRef:
+            name: be-ap-secret
+        image: t3goto/be-ap:latest
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          exec:
+            command:
+            - ls
+            - /usr/local/bin/node
+          failureThreshold: 10
+          initialDelaySeconds: 0
+          periodSeconds: 5
+          successThreshold: 1
+          timeoutSeconds: 1
+        name: be-ap
+        ports:
+        - containerPort: 9011
+        readinessProbe:
+          exec:
+            command:
+            - /bin/grpc_health_probe
+            - -addr=:9011
+          failureThreshold: 10
+          initialDelaySeconds: 0
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 150m
+            memory: 150Mi
+          requests:
+            cpu: 10m
+            memory: 10Mi
+        startupProbe:
+          exec:
+            command:
+            - /bin/grpc_health_probe
+            - -addr=:9011
+          failureThreshold: 100
+          initialDelaySeconds: 0
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 1
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: be-ap-secret
+  namespace: app-a
+spec:
+  encryptedData:
+    ACCESS_KEY_GNAVI: AgCSRcC4I/tXUzCA5RA9K39ZSJSP+wae5UqgBLoHX3VwQobO322+T5mUDsrnJN6TwvIaj4Fei62gHU4Ly3RSuH8Epkjk2s/dXMt+qB5SGWOCz+EA1eZgnReP8To1ofxpc+kp5eGiwivVeKVtD8EluqVwDTBSEAE61pjNsC53N6TCNuPL1BgbT6+5flc+uYPmWSsehioBwsHIE9xLM5NG4ceqwl3hi+TKmuBZWDneckGNlqmjwSKyZa8JAVc2ULHmrzMOCRd9gK1OZO2PL96xVXwNKHnC9H5Q0zks6DX4+YxF+sIyIl+tHBOy1u2d/iuIAKpsl8o92mmD3p0BlCOkAGddDDFlqAnKypI4cf1nBt3vJfGio4Kg8IxMbdan8pl60WZ9S9ms3++vdlSbUwERuWn+8vtSEVujvl5mjO/KQLCa3g2M7C+VsLeXVhRrVBfSEkBZLPv5/0p9K488j+GlmCqMpBHwrr9DD9tAcs2qb3P1vmpVPuuJt3R0Lq69cPym8sso/fLnFCo/ejHehdUr2+Q/lDTdQOa/MobxNFqezFxIcbLlQ+dgURGLd1+UEWOtI4PO+DSEzeFDMFj8YcC9/S3oZymzUEnY2R2RG6/aWaDXzeGehFWLiI/GIK8ZHO9/jGe5GCS5Zw1mUxbfYOLBLKTOr/IhAALMMRNzDl5Kg/G9w+xMDGOqO2GL8mVeVM1HzJgCYLc2jEYvF4JPSHdj3OlqiTsstOpX6vGkKubSYGlUMA==
+    ACCESS_KEY_GOOGLE: AgB6ik2zf/0qawtn9vE7LJR6xbGuQDOcooALQDqEuOpWCLfcRaIjf298/zbfQhjb6PE8MotgCn4o8w2N85Gc/VZ6Js0VICv+1VYEDxI6Vvj+3A+iF8Xpo9GayHWAA6Mpk7//LcpHQZ4fos/SiE+4f+W6DUe3K5gVv9aI+QpONbsWgVbWtrPSSNaI+xxXn6x+6l+soCJbZcA6oEHSNpSasH5ZvDYa8Lnjo/GUaMB2hrixucX0b6iss+K2LtusVAzY4WVFKMPl9SFMU9P6OHsTdihAQVDMKywI201LS+Ar3PE7/Tc12fm8NAjuxE2H2v4/yx+88kGyC03vLnJBm+rjKDsQy7cEND4oVubJx34IbTzwosVKYUzEdzH6peWetqdcltgqaIROmnl9YpArYt5QJHyMZaNKFt3Ql25nvcF2SJk61zqMzxWiIQT4dJ0YIog4C76U3bUE97TXeQiXs1f0/4toDVFzDMrM9e4u0Vml5miced+npiK2RbqSucmz0O19vN/dnJbgq76ecm55dgy1N7k7X08IO9i4u3xIb3tKOeE4x5TyzgRS+S1IwyFMxziKRkglN6LiBuJttXE1o1EdIj1KQpwDsj+u38qnX+x5BGUrmPYS2e708JPAIj/FWKb5rNuTaJf2S+oYvraUTK8YUzrDPXCVu1sMYkkorsF1ttFA6XsfImkEdvyafHTURa1OeFuYCpMQZpDBHdDIi8fHqZ9jmw3h0fPhCkmf+5fgBSdvl2v7a2xWOS8=
+    DB_PASSWORD: AgB2UGopmJ+gNUqm3NbhtFGq8I74hdqWRTuTjOFVLoFFyJAvNzU6EM/oJlNmXmdV2YsYwgd0PWxrDvx3kEyuu4VWKU6SP6LNPbyq9T6/3B/tNSI+PbQrPi6rb90ePg/TtJKHv22qiubJiOERkXh2qLxc9OrygITJLZNluSZpVNnkgaHLkMSWs81OYFku+1S7FuA9OwaLrLsluN8UXbtDMoYcoXiun1brHvwyBaB55f5T09GcAAGN/KqD02MHn+wY6k67Ef+yjo0B1aPXNhu0NwygauL3gCuE2kiOLpv7a70AnzgF6X8inaXc2yG3R2Wbg96G6aCa6ScCJlaMAQ4R0eLtubgHvprAr4DasRhGRhNq3k0R6YU3NDaywhb1xhCa3yMwedUflGEgyZZVimv6sLhSoMa/nbPODmp5sW9jgeuvgyMaLgfE6fmatjnYszWKuBm5yHvITAZWVycsGt0ATuUVHa/BFZ1dODLpL3oWP2iyPwXtaHCjBftQxx0sXsECQ+QDnaGcOCBo93zE9z63qg9ebPX9p5IlP1MwrngJunXHJRAyPSSNsD1xyVyDxqd7ygPApo98nM+MxR8w4S7qC9swMCDk/ep2LatAo5RyVS0kUcRvxhyvKmrTdX4haPC2tbJqvOxTC2eAVnM9gbnVdg/S7DHgOqK/Y3eaa9DGAyGrfboV0kWpAVZwaWvKoeGVUKbp1kc=
+    DB_USERNAME: AgCbZjNFz9KG6cTtLrOkLhinxBxUN6NxvQOlM0zhx/E0BEPlWr7pmnwQm3D56fCYo9wexNuZUWbIKr4lnSU53iU5BxIQMybkT8det4iTyFAWbjaShyd99l8YEOaF5+iEJXzwKBv3Jal+7nre7tiwKR8mDmWr4LcrrzS1qRYxLUJik4FSnmitObptTdjnMQJRvBTQYjCqbt6UZLQtxttZoq5IKQKy1O4tppWRafLIRNWE+HaFGkwGnCLzMweD3wn+xvRidcDhe9uWFAU0Wvq0oJJZfKjyNuVd9G7ucjRdz9ugPLjkwpF5dxKLywrKrnfJe65MrnsuTUdBpr7iMNKmZWq0LgNkYC1LUeuGBVf04HopiPRqjnErFPumJkHbY3TUxG2m2tiXfbuxYgYvAC93MCJqVsi5if0xPNsB+IgDpl7WT4saJX5PtcO6tTGl6JpGJS0QiuRF8mEAeC/fP2eEsr8y345eNzj1TASWLnbDgefA/aabShzvxi9b35xTe+rtv+xpW16VJW35d0IIKToUMi0sHI3a5eErk7I5RZun5v6ZLmamO5aKl072blHXNZbrnc6U6O+CoUl0+OlNw+orLHgt3k++dL1vDYpD+RnlxQrljhYwUQkkXWQr6uwhtkxGRKefVpFss9zDyMpKhox7rBvKdZMKSEOlCYxV9eBtl9Bu+IRaihY411fAMcDPvHsl5vdDr64=
+    JWT_SECRET: AgBHB3Tb4fvFSNgaezYeY+W61ODZ+FBgNNo9mkGPlGPbzgK3BZrfyPKTySt8zOkKx3leAaDm1UXFYfCZTlgX/F/DbO3PvxAzqmEpNGv/eQuNTDkA32LN1MjggXwQJVAj+y2Vh7xFJYeJ08iIibI+/jIE+ihMIcq4HtwB5UMCnvYJmF8G0Fo5NnlRBCa2+3WzNfk+wRQHwP3p35zRw3B1rmiDjwu3n7KE/JfnZq/hi7CFtwSTvcWUnv067k7/9IVQvS9TDh0v5ntdGJcgENI40ASUuA7Nrc8urdlTXh44rc2TZKUUQ+v2ZoLKfovi/ZCpR13WWFIO3qJQJh3bCtd1aQVRVIIa/dEuLb3mndWnt70zKGXx2I0s9lM7GNzxlmnRDTR1gRZyL66WEPVs96KS/wjWrOprmLGKYpPRdzGd4wEptEM3QAM2C3UuhpBEl5kAuDnVEFl8WuLvksEG4dXSuHxwbVUZvvaJbInw8Fi14Dzpigp/c4fMWbXXDZJsdn2CFh6aa/WmlQgKCIaRvyIKxbCmgkAggFY+XfByyneU6wk/gk/m7OvXa2TMiPcJMRveMneLrGX5mNPdnY25N/lY6l+jWMuKIsKlDDbKAWg6t1CPzcdb8U1wyoK/ux8m2Rvr72Sm1IN30wCh5DxykN2Nw2H/nLao70OXQSuhkGKdTYQOy7K+FwalRXE4HAqarPfoMSSAjx51dkC570uMJAQxmBg1
+  template:
+    metadata:
+      creationTimestamp: null
+      name: be-ap-secret
+      namespace: app-a
+    type: Opaque
+---
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: be-ap-dr
+  namespace: app-a
+spec:
+  host: be-ap-svc.app-a.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: be-ap-vs-mesh
+  namespace: app-a
+spec:
+  hosts:
+  - be-ap-svc.app-a.svc.cluster.local
+  http:
+  - route:
+    - destination:
+        host: be-ap-svc.app-a.svc.cluster.local
+        port:
+          number: 9011

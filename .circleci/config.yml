@@ -64,21 +64,21 @@ executors:
     - image: t3goto/eks-deployer:1.0
     environment:
       SYSTEM: fe-web
-      MANIFESTS_DIR: infra/kustomize/fe
+      MANIFESTS_DIR: infra/k8s-apl/fe
 
   infra_bff_default:
     docker:
     - image: t3goto/eks-deployer:1.0
     environment:
       SYSTEM: bff-ap
-      MANIFESTS_DIR: infra/kustomize/bff
+      MANIFESTS_DIR: infra/k8s-apl/bff
 
   infra_be_default:
     docker:
     - image: t3goto/eks-deployer:1.0
     environment:
       SYSTEM: be-ap
-      MANIFESTS_DIR: infra/kustomize/be
+      MANIFESTS_DIR: infra/k8s-apl/be
 
 #################################
 # Commands
@@ -289,7 +289,7 @@ commands:
     - persist_to_workspace:
         root: ./
         paths:
-        - infra/kustomize
+        - infra/k8s-apl
 
   k8s_deploy_prod:
     description: 'Kustomize deploy'
