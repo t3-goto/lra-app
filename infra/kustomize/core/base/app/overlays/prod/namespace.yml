@@ -1,9 +1,0 @@
-#################################
-# Namespace（application）
-#################################
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: app-a
-  labels:
-    istio-injection: enabled

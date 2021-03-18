@@ -1,0 +1,64 @@
+#################################
+# IstioOperator (default profile)
+#################################
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: istiocontrolplane
+spec:
+  profile: default
+  components:
+    pilot:
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+    ingressGateways:
+    - name: istio-ingressgateway
+      k8s:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        service:
+          ports:
+          - name: status-port
+            port: 15020 # TODO:Implement Status Port, ALB
+            protocol: TCP
+            targetPort: 15020 # TODO:Implement Status Port, ALB
+            nodePort: 30020 # TODO:Implement Status Port, ALB
+          - name: http2
+            port: 80
+            protocol: TCP
+            # targetPort: 8080
+            targetPort: 80
+            nodePort: 30080
+          - name: https
+            port: 443
+            protocol: TCP
+            # targetPort: 8443
+            targetPort: 443
+            nodePort: 30443
+          - name: tcp-istiod
+            port: 15012
+            protocol: TCP
+            targetPort: 15012
+            nodePort: 30012
+          - name: tls
+            port: 15443
+            protocol: TCP
+            targetPort: 15443
+            nodePort: 31443
+  values:
+    gateways:
+      istio-ingressgateway:
+        type: NodePort
+        runAsRoot: true
+    global:
+      proxy:
+        resources:
+          requests:
+            cpu: 10m
+            memory: 10Mi

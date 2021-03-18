@@ -1,8 +1,0 @@
-#################################
-# Kustomization (base)
-#################################
-resources:
-- ./metrics-server/components.yml
-
-generatorOptions:
-  disableNameSuffixHash: true

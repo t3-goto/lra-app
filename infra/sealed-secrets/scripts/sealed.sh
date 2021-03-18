@@ -1,11 +1,14 @@
 #!/bin/bash
 
+# This scritpt doen't work at windows os for kubeseal unsported.
+
 # Set Env.
-CERT_DIR=$(
+BASE_DIR=$(
   cd $(dirname $0)
-  cd ../cert
+  cd ..
   pwd
 )
+CERT_DIR=${BASE_DIR}/cert
 CERT_FILE=${CERT_DIR}/cert.pem
 SECRET_DIR=$(
   cd $(dirname $1)
