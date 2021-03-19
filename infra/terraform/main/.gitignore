@@ -3,14 +3,4 @@
 *.tfstate
 *.tfstate.*
 
-crash.log
-
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
-
-var_files/ignore/*
-!var_files/ignore/.gitkeep
-
 .envrc
