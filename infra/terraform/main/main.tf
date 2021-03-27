@@ -102,10 +102,10 @@ module "ec2_operator" {
   instance_type = var.ec2.operator.instance_type
   root_volume = var.ec2.operator.root_volume
   security_group_ids = [aws_security_group.ec2_default_security_group.id]
-  associate_public_ip_address = true # TODO:Change to SSM.
-  allocate_eip = true # TODO:Change to SSM.
+  associate_public_ip_address = true
+  allocate_eip = true
   key_name = var.ec2_key_name
-  subnets = module.vpc.public_subnets # TODO:Change to SSM.
+  subnets = module.vpc.public_subnets
   tag = var.tag
   user_data = <<-USERDATA
     #!/bin/bash
@@ -225,7 +225,8 @@ module "ec2_operator_security_group_rules" {
   source = "./modules/sg/rules"
   security_group_id = module.ec2_operator.sg.id
   ingress = {
-    ssh_any = { from = 22, to = 22, cidrs = ["0.0.0.0/0"], desc = "Allow SSH Protocol Traffic from Any" }
+    # ssh_any = { from = 22, to = 22, cidrs = ["0.0.0.0/0"], desc = "Allow SSH Protocol Traffic from Any" } # Unuse for SSM.
+    ssh_vpc = { from = 22, to = 22, cidrs = [var.vpc.cidr_block], desc = "Allow SSH Protocol Traffic ffrom VPC CIDR Blocks" }
   }
 }
 
@@ -273,8 +274,6 @@ module "rds_mysql_security_group_rules" {
   source = "./modules/sg/rules"
   security_group_id = module.rds_mysql.sg.id
   ingress = {
-    # mysql_public = { from = 3306, to = 3306, cidrs = module.vpc.public_subnets[*].cidr_block, desc = "Allow MySQL Port Traffic from Public Subnets CIDR Blocks" }
-    # mysql_private = { from = 3306, to = 3306, cidrs = module.vpc.private_subnets[*].cidr_block, desc = "Allow MySQL Port Traffic from Private Subnets CIDR Blocks" }
     mysql_vpc = { from = 3306, to = 3306, cidrs = [var.vpc.cidr_block], desc = "Allow MySQL Port Traffic ffrom VPC CIDR Blocks" }
   }
   egress = {
@@ -285,7 +284,10 @@ module "rds_mysql_security_group_rules" {
 #################################
 # SSM
 #################################
-# TODO: Add SSM for Operator
+module "ssm" {
+  source = "./modules/ssm"
+  name = var.ssm.name
+}
 
 #################################
 # Lambda

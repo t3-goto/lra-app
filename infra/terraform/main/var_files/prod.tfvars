@@ -63,7 +63,7 @@ eks = {
     storage = 50
     size = {
       min = 1
-      max = 2
+      max = 1
       desired = 1
     }
   }
@@ -106,4 +106,11 @@ rds_mysql = {
   instance_class = "db.t3.micro"
   backup_window = "18:00-19:00"
   maintenance_window = "Mon:17:00-Mon:18:00"
+}
+
+#################################
+# SSM
+#################################
+ssm = {
+  name = "SSM-SessionManagerRunShell"
 }

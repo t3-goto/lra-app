@@ -97,3 +97,12 @@ variable rds_mysql {
     maintenance_window = string
   })
 }
+
+#################################
+# SSM
+#################################
+variable ssm {
+  type = object({
+    name = string
+  })
+}
