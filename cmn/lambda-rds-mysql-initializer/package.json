@@ -1,0 +1,13 @@
+{
+  "name": "lambda-rds-mysql-initializer",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node index.test.js"
+  },
+  "devDependencies": {},
+  "dependencies": {
+    "axios": "^0.21.1"
+  }
+}

@@ -106,3 +106,16 @@ variable ssm {
     name = string
   })
 }
+
+#################################
+# Lambda
+#################################
+variable lambda {
+  type = map(object({
+    name = string
+    repository_name = string
+    image_tag = string
+    memory_size = number
+    timeout = number
+  }))
+}

@@ -1,0 +1,19 @@
+#
+# .envrc
+#
+.envrc
+
+#
+# Node files
+#
+node_modules/
+# .env
+
+#
+# OS generated files
+#
+.DS_Store
+Thumbs.db
+
+# Generated source-code
+coverage/
