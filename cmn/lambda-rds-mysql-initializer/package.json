@@ -1,5 +1,5 @@
 {
-  "name": "notify-log-app",
+  "name": "lambda-rds-mysql-initializer",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",

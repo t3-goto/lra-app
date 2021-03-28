@@ -1,7 +1,5 @@
 # webpack
-webpack.base.config.js
-webpack.dev.config.js
-webpack.prod.config.js
+webpack.config.js
 
 # dist
 dist/
