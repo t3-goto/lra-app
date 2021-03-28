@@ -1,15 +1,35 @@
-################################
+#################################
 # Runtime Stage
 #################################
 FROM amazon/aws-lambda-nodejs:12
 
-WORKDIR /app
+EXPOSE 8080
 
-EXPOSE 8000
+RUN yum -y install yum-utils && \
+  yum install -y git-all && \
+  yum install -y https://dev.mysql.com/get/mysql80-community-release-el7-3.noarch.rpm && \
+  yum-config-manager --disable mysql80-community && \
+  yum-config-manager --enable mysql57-community && \
+  yum install -y mysql-community-client
 
-COPY . ./
-RUN npm install
+ARG SOURCE_URL
+ARG SOURCE_DIR
+ARG SOURCE_BRANCH
+ARG MYSQL_HOST
+ARG MYSQL_USER
+ARG MYSQL_PASS
+ARG MYSQL_INIT_SCRIPT
 
-CMD [ "/app/index.handler" ]
+ENV SOURCE_URL=$SOURCE_URL \
+  SOURCE_DIR=$SOURCE_DIR \
+  SOURCE_BRANCH=$SOURCE_BRANCH \
+  MYSQL_HOST=$MYSQL_HOST \
+  MYSQL_USER=$MYSQL_USER \
+  MYSQL_PASS=$MYSQL_PASS \
+  MYSQL_INIT_SCRIPT=$MYSQL_INIT_SCRIPT
+
+COPY ./dist/index.js /var/task/
+
+CMD [ "/var/task/index.handler" ]
 
 
