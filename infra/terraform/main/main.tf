@@ -281,6 +281,15 @@ module "rds_mysql_security_group_rules" {
   }
 }
 
+# Lambda Security Group Rules
+module "lambda_rds_mysql_initializer_security_group_rules" {
+  source = "./modules/sg/rules"
+  security_group_id = module.lambda_rds_mysql_initializer.sg.id
+  egress = {
+    all = { from = 0, to = 0, cidrs = ["0.0.0.0/0"], protocol = "-1", desc = "Allow All Outbound Traffic" }
+  }
+}
+
 #################################
 # SSM
 #################################
@@ -302,11 +311,14 @@ module "ecr_lambda_rds_mysql_initializer" {
 # Lambda
 #################################
 module "lambda_rds_mysql_initializer" {
-  source = "./modules/lambda"
+  source = "./modules/lambda/vpc"
   name = var.lambda.lambda_rds_mysql_initializer.name
   repository_url = module.ecr_lambda_rds_mysql_initializer.repository_url
   image_tag = var.lambda.lambda_rds_mysql_initializer.image_tag
   memory_size = var.lambda.lambda_rds_mysql_initializer.memory_size
   timeout = var.lambda.lambda_rds_mysql_initializer.timeout
+  vpc_id = module.vpc.vpc_id
+  subnets = module.vpc.private_subnets
+  stage = var.stage
   tag = var.tag
 }

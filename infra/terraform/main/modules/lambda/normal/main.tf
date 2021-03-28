@@ -33,7 +33,6 @@ resource "aws_lambda_function" "lambda" {
   lifecycle {
     ignore_changes = [image_uri]
   }
-
   tags = {
     Name = var.name
     Project = var.tag.project

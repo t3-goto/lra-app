@@ -61,6 +61,30 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
+#################################
+# Nat Gateway
+#################################
+resource "aws_eip" "ngw" {
+  vpc = true
+  depends_on = [
+    aws_internet_gateway.igw
+  ]
+}
+
+resource "aws_nat_gateway" "ngw" {
+  allocation_id = aws_eip.ngw.id
+  subnet_id = aws_subnet.public[0].id
+  depends_on = [
+    aws_internet_gateway.igw
+  ]
+
+  tags = {
+    Name = "${var.name}_ngw"
+    Project = var.tag.project
+    Purpose = var.tag.purpose
+  }
+}
+
 
 #################################
 # Route Table
@@ -110,4 +134,10 @@ resource "aws_route" "igw_public" {
   route_table_id = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id = aws_internet_gateway.igw.id
+}
+
+resource "aws_route" "ngw_private" {
+  route_table_id = aws_route_table.private.id
+  destination_cidr_block = "0.0.0.0/0"
+  nat_gateway_id = aws_nat_gateway.ngw.id
 }

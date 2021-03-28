@@ -1,5 +1,6 @@
--------------------------------- lradb.user --------------------------------
+-------------------------------- drop table --------------------------------
 DROP TABLE IF EXISTS lradb.user;
+------------------------------- create table -------------------------------
 create table IF not exists lradb.user (
   user_id INT(20) AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(256) NOT NULL UNIQUE,
