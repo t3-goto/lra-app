@@ -114,3 +114,16 @@ rds_mysql = {
 ssm = {
   name = "SSM-SessionManagerRunShell"
 }
+
+#################################
+# Lambda
+#################################
+lambda = {
+  lambda_rds_mysql_initializer = {
+    name = "lambda-rds-mysql-initializer"
+    repository_name = "lambda-rds-mysql-initializer"
+    image_tag = "latest"
+    memory_size = 128
+    timeout = 60
+  }
+}

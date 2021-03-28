@@ -290,6 +290,23 @@ module "ssm" {
 }
 
 #################################
+# ECR
+#################################
+module "ecr_lambda_rds_mysql_initializer" {
+  source = "./modules/ecr"
+  repository_name = var.lambda.lambda_rds_mysql_initializer.repository_name
+}
+
+
+#################################
 # Lambda
 #################################
-# TODO: Add Lambda for Operation
+module "lambda_rds_mysql_initializer" {
+  source = "./modules/lambda"
+  name = var.lambda.lambda_rds_mysql_initializer.name
+  repository_url = module.ecr_lambda_rds_mysql_initializer.repository_url
+  image_tag = var.lambda.lambda_rds_mysql_initializer.image_tag
+  memory_size = var.lambda.lambda_rds_mysql_initializer.memory_size
+  timeout = var.lambda.lambda_rds_mysql_initializer.timeout
+  tag = var.tag
+}

@@ -2,4 +2,4 @@
 
 ## Architecture
 
-![architecture](architecture.svg)
+![architecture](arch.svg)
