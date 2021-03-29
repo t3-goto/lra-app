@@ -28,6 +28,9 @@ ENV SOURCE_URL=$SOURCE_URL \
   MYSQL_PASS=$MYSQL_PASS \
   MYSQL_INIT_SCRIPT=$MYSQL_INIT_SCRIPT
 
+COPY ./scripts/init.sh /var/task/
+RUN chmod +x /var/task/init.sh
+
 COPY ./dist/index.js /var/task/
 
 CMD [ "/var/task/index.handler" ]
