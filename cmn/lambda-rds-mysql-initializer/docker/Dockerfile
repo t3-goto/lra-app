@@ -15,6 +15,7 @@ RUN yum -y install yum-utils && \
 ARG SOURCE_URL
 ARG SOURCE_DIR
 ARG SOURCE_BRANCH
+ARG SOURCE_PULL_SCRIPT
 ARG MYSQL_HOST
 ARG MYSQL_USER
 ARG MYSQL_PASS
@@ -23,13 +24,17 @@ ARG MYSQL_INIT_SCRIPT
 ENV SOURCE_URL=$SOURCE_URL \
   SOURCE_DIR=$SOURCE_DIR \
   SOURCE_BRANCH=$SOURCE_BRANCH \
+  SOURCE_PULL_SCRIPT=$SOURCE_PULL_SCRIPT \
   MYSQL_HOST=$MYSQL_HOST \
   MYSQL_USER=$MYSQL_USER \
   MYSQL_PASS=$MYSQL_PASS \
   MYSQL_INIT_SCRIPT=$MYSQL_INIT_SCRIPT
 
-COPY ./scripts/init.sh /var/task/
-RUN chmod +x /var/task/init.sh
+COPY ./scripts/mysql-init.sh /var/task/
+RUN chmod +x /var/task/mysql-init.sh
+
+COPY ./scripts/git-pull.sh /var/task/
+RUN chmod +x /var/task/git-pull.sh
 
 COPY ./dist/index.js /var/task/
 

@@ -10,9 +10,13 @@ TERRAFORM_DIR=$(
 VAR_FILES_DIR=${TERRAFORM_DIR}/var_files
 VAR_FILE=${VAR_FILES_DIR}/${EXEC_ENV}.tfvars
 K8S_INIT_SCRIPT=${TERRAFORM_DIR}/scripts/k8s_init.sh
+RDS_INIT_SCRIPT=${TERRAFORM_DIR}/scripts/rds_init.sh
 
 # terraform apply.
 cd ${TERRAFORM_DIR} && terraform apply -var-file=${VAR_FILE} -auto-approve
 
 # k8s init.
 eval $(echo ${K8S_INIT_SCRIPT})
+
+# rds init.
+eval $(echo ${RDS_INIT_SCRIPT})
