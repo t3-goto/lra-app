@@ -13,13 +13,15 @@ fi
 # Set variables.
 SOURCE_URL="https://github.com/t3-goto/lra-app"
 SOURCE_DIR="dba/mysql"
-MYSQL_INIT_SCRIPT="${SOURCE_DIR}/scripts/init.sh"
 
 AWS_ACCOUNT_ID="787350286285"
 AWS_REGION="ap-northeast-1"
+
 MYSQL_HOST="lradb.vpc.internal"
 MYSQL_USER="lradb"
 MYSQL_PASS="lradb111"
+MYSQL_INIT_SCRIPT="init.sh"
+
 REPOSITORY_NAME=lambda-rds-mysql-initializer
 BASE_DIR=$(
   cd $(dirname $0)
