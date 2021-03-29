@@ -75,21 +75,23 @@ module "route53_cname_internal" {
   }
 }
 
-module "route53_cname_public" {
-  source = "./modules/route53/cname"
-  zone_id = module.route53_zone_public.id
-  ttl_sec = 60
-  configs = {
-    operator = {
-      cname_name = "operator"
-      records = [module.ec2_operator.dns_entry.public["01"]]
-    }
-  }
-}
+# Change to Private Operator Instance
+# module "route53_cname_public" {
+#   source = "./modules/route53/cname"
+#   zone_id = module.route53_zone_public.id
+#   ttl_sec = 60
+#   configs = {
+#     operator = {
+#       cname_name = "operator"
+#       records = [module.ec2_operator.dns_entry.public["01"]]
+#     }
+#   }
+# }
 
 #################################
 # EC2
 #################################
+# Change to Private Operator Instance
 module "ec2_operator" {
   source = "./modules/ec2/ec2"
   vpc_id = module.vpc.vpc_id
@@ -102,10 +104,13 @@ module "ec2_operator" {
   instance_type = var.ec2.operator.instance_type
   root_volume = var.ec2.operator.root_volume
   security_group_ids = [aws_security_group.ec2_default_security_group.id]
-  associate_public_ip_address = true
-  allocate_eip = true
+  # associate_public_ip_address = true
+  associate_public_ip_address = false
+  # allocate_eip = true
+  allocate_eip = false
   key_name = var.ec2_key_name
-  subnets = module.vpc.public_subnets
+  # subnets = module.vpc.public_subnets
+  subnets = module.vpc.private_subnets
   tag = var.tag
   user_data = <<-USERDATA
     #!/bin/bash
